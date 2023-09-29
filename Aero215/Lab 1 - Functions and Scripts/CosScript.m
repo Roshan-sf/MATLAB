@@ -1,0 +1,23 @@
+%Roshan Jaiswal-Ferri
+%Aero 215
+
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%Assigning Input Variables 
+% IMPORTANT: The interior angle is expected in degrees not radians
+
+SideA = 3;
+SideB = 4; 
+intAngAB = 90;
+
+%Calling LawOfCosines Function
+
+[SideC] = LawOfCosines(SideA, SideB, intAngAB);
+
+%Creating a Variable 'X' to combine all the numbers into one scentance for
+%display
+
+X = ['Side A:',num2str(SideA),', Side B:',num2str(SideB),', Side C:',num2str(SideB),', Interior Angle:',num2str(intAngAB)];
+disp(X)
