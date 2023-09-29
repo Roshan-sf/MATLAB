@@ -31,6 +31,7 @@ disp([num2str(i), num2str(j), num2str(k)])
 while g = 0;
    if array_loop(x,:) == i;
     
+       
 
    else
 
