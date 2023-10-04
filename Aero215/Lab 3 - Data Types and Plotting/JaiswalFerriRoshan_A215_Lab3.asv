@@ -17,7 +17,7 @@ k = 0;%Represents the lowest number in row 3
 row1Col = 0;%Represents the column number which holds the lowest number in row 1
 row2Col = 0;%Represents the column number which holds the lowest number in row 2
 row3Col = 0;%Represents the column number which holds the lowest number in row 3
-a = 0;%is a 3x1 matrix containing all 3 minimum values from each row
+
 
 
 for row = 1:3 %two for loops creating a 3x4 matrix
@@ -29,7 +29,7 @@ end
 
 disp(array_loop)
 
-a = min(array_loop,[],2); %the number 2 searches whole row, if switched with a 1 it searches each column
+a = min(array_loop,[],2); %1 searches each column, 2 searches whole row
 %disp(a)
 
  i = a(1,1); %sets i to min value from row 1
@@ -148,8 +148,8 @@ figure; %Figure creates a popup wondow, which we can put a graph on
 plot(xValues, yValues,'r',LineWidth=4) %'* showes the plot points with no line. two sashes (--) is a dashed line
 xlabel('Angles [rad] from 0 to 2pi'); %xlabel
 ylabel('Sin(x)') %ylabel
-title('Graph of Sin(x)') %title
-grid on;%adds gridlines
+title('Graph of Sin(x)')
+grid on;
 grid minor; %Adds more smaller grid lines
 
 
