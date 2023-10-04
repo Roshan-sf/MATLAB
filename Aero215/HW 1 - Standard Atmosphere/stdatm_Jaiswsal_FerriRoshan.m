@@ -1,0 +1,53 @@
+function [T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h)
+%UNTITLED3 Summary of this function goes here
+%   Detailed explanation goes here
+
+%Variables:
+%T1 is temp initial
+
+
+if h < 11000
+    a = -.0065;
+    T1 = 288.16;
+    H1 = 0;
+    Gradient = 1;
+elseif h => 11000 && h < 25000
+    T1 = 216.66;
+    H1 = 11000;
+    Gradient = 0;
+elseif h => 25000 && h < 47000
+    T1 = 216.66;
+    H1 = 25000;
+    Gradient = 1;
+elseif h => 47000 && h < 53000
+    T1 = 282.66;
+    H1 = 47000:
+    Gradient = 0;
+elseif h => 53000 && h < 79000
+    T1 = 282.66;
+    H1 = 53000;
+    Gradient = 1;
+elseif h => 79000 && h < 90000
+    T1 = 165.66;
+    H1 = 79000;
+    Gradient = 0;
+elseif h => 90000 && h <= 100000
+    T1 = 165.66;
+    H1 = 90000;
+    Gradient = 1;
+elseif h > 100000
+    disp('Please enter an altitude smaller than 100,000 meters')
+else 
+    disp('You broke the function')
+end
+
+
+
+
+
+
+
+
+
+
+end
