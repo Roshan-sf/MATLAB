@@ -13,7 +13,7 @@ clc;            %Clears Command Window
 
 h = 1;
 [T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h);
-disp(['Temp in Kelvin: ',num2str(T),', Pressure in kPa: ',num2str(P),', Density in kg/m^3: ',num2str(rho)]);
+disp(['Temp in Kelvin:',T,' Pressure in kPa:' P, rho]);
 
 
 
