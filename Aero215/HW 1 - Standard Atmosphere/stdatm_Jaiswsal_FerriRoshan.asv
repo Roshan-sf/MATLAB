@@ -11,7 +11,7 @@ function [T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h)
 
 layer = 0;
 g = 9.81; % is g
-r = 287.058; %gas constant
+r = 287.058; 
 P1 = 101.325; %Pressure at sea level in kPa
 rho1 = 1.2250; %density in kg/m^3
 T1 = 288.16; %Initial temperature at sea level
@@ -19,13 +19,13 @@ H1 = 11000; %end of first gradient layer
 H2 = 25000; %end of first isothermic layer
 H3 = 47000; %end of second gradient layer
 H4 = 53000; %end of second isothermic layer
-H5 = 79000; %end of third gradient layer
-H6 = 90000; %end of third isothermic layer
-H7 = 100000; %end of fourth gradient layer
-a1 = -.0065; %lapse rate for first gradient layer
-a2 = .003; %lapse rate for second gradient layer
-a3 = -.0045; %lapse rate for third gradient layer
-a4 = .004; %lapse rate for fourth gradient layer
+H5 = 79000; %end of third gradient
+H6 = 90000;
+H7 = 100000;
+a1 = -.0065;
+a2 = .003;
+a3 = -.0045;
+a4 = .004;
 
  if h <= 11000 && h >= 0
         layer = 1;
