@@ -16,8 +16,8 @@ clc;            %Clears Command Window
 %rho = output density (kg/m^3)
 
 
-h = 25001;
-[T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h);
+h = 24384;
+[T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h); %calling the function
 disp(['Temp in Kelvin: ',num2str(T),', Pressure in kPa: ',num2str(P),', Density in kg/m^3: ',num2str(rho)]);
 
 
@@ -26,7 +26,7 @@ disp(['Temp in Kelvin: ',num2str(T),', Pressure in kPa: ',num2str(P),', Density 
 altVector = linspace(1,100000,10000); %Creating a vector to store altitude values
 
 for i = 1:length(altVector) %Using flow control to store the values of T, P, and rho at different altitides in vectors
-    [T(i), P(i), rho(i)] = stdatm_Jaiswsal_FerriRoshan(altVector(i));
+    [T(i), P(i), rho(i)] = stdatm_Jaiswsal_FerriRoshan(altVector(i)); %calling function and using the vector of altitudes to fill the other vectors of T, P, and rho
 end
 
 figure; %creating a figure with three graphs of Temp, Pres, and Density vs altitude
