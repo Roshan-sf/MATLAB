@@ -51,28 +51,3 @@ ylabel('Altitude (x1,000km)')
 title('Density vs altitude')
 grid on;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
