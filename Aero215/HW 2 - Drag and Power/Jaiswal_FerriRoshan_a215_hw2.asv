@@ -1,0 +1,21 @@
+%Roshan Jaiswal-Ferri
+%Aero 215 HW 2: 10/19/23
+
+%%
+
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Part 1
+
+inputs.WS = 8.27; %in lbf/ft^2
+inputs.AR = 5.63; %unitless
+inputs.CD0 = .00275; %unitless
+inputs.e = .78; %unitless
+inputs.CLM = 1.4; %unitless
+inputs.S = 127; %ft^2
+
+v_max = 70; %i
+
+[V, D, P] = hw2_dragPower_Jaiswal_FerriRoshan(v_max, inputs);

@@ -16,7 +16,7 @@ clc;            %Clears Command Window
 %rho = output density (kg/m^3)
 
 
-h = 24384;
+h = 2286;
 [T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h); %calling the function
 disp(['Temp in Kelvin: ',num2str(T),', Pressure in kPa: ',num2str(P),', Density in kg/m^3: ',num2str(rho)]);
 
@@ -50,4 +50,3 @@ xlabel('Density (kg/m^3 )');
 ylabel('Altitude (x1,000km)')
 title('Density vs altitude')
 grid on;
-
