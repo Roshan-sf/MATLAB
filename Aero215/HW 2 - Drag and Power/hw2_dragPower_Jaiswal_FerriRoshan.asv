@@ -4,15 +4,26 @@ function [V, D, P] = hw2_dragPower_Jaiswal_FerriRoshan(v_max, aircraft)
 rho = .0023769; %rhoSealevel in slugs/ft^3
 R = 287.058; %Gas constant
 v_maxft = v_max*1.68781; %1.68781 is the conversion ratio for knots to ft/s
-weight = aircraft.WS*aircraft.S; %Calculating weight in lbf
+W = aircraft.WS*aircraft.S; %Calculating weight in lbf
 
-D = ((aircraft.CD0)*(aircraft.S)*(.5)*(rho)*(v_maxft))+((weight^2)/((.5)*(rho)*(v_maxft^2)*(e))
+%Breaking out structures to variabeles so equations are not so long
+WS = aircraft.WS; %in lbf/ft^2
+AR = aircraft.AR;
+CD0 = aircraft.CD0;
+e = aircraft.e;
+CLM = aircraft.CLM;
+S = aircraft.S; %ft^2
 
 
+V_stall = sqrt((W)/((CLM)*(.5)*(rho)*(S))); %in ft/s
 
 
+V = linspace(V_stall,v_maxft,100);
 
+for i = 1:length(V)
+    D(i) = ((CD0)*(S)*(.5)*(rho)*(V(i)^2)+((W^2)/((.5)*(rho)*(V(i))*(pi)*(AR)*(S)*(e))));
+    P(i) = (D(i)*V(i))/
 
-
+    
 
 end
