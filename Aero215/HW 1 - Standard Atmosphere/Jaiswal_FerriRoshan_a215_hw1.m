@@ -16,7 +16,7 @@ clc;            %Clears Command Window
 %rho = output density (kg/m^3)
 
 
-h = 2286;
+h = 3048;
 [T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h); %calling the function
 disp(['Temp in Kelvin: ',num2str(T),', Pressure in kPa: ',num2str(P),', Density in kg/m^3: ',num2str(rho)]);
 
