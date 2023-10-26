@@ -1,4 +1,4 @@
-function [V, D, P] = hw2_dragPower_Jaiswal_FerriRoshan(input2, input, rho1)
+function [V, D, P, W] = hw2_dragPower_Jaiswal_FerriRoshan(input2, input, rho1)
 
 %Variables
 R = 287.058; %Gas constant
@@ -16,7 +16,6 @@ v_maxft = input.VM*1.68781; %1.68781 is the conversion ratio for knots to ft/s
 
 V_stall = sqrt((W)/((CLM)*(.5)*(rho)*(S))); %in ft/s
 
-disp([num2str(W), num2str(rho1)])
 %disp(['vstall:', num2str(V_stall)]) was used for debugging purposes
 
 V = linspace(V_stall,v_maxft,1000);

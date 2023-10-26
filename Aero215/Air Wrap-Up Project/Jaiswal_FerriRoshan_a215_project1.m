@@ -48,9 +48,9 @@ CP.PW = 170; %avg weight per passenger in lbf
 
 %Max Weight Results
 
-[V, D, ~] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV10, rho);
+[V, D, ~, W] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV10, rho);
 
-[V2, D2, ~] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV12, rho);
+[V2, D2, ~, W2] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV12, rho);
 
 
 %Min Weight Results
@@ -58,9 +58,9 @@ CP.PW = 170; %avg weight per passenger in lbf
 RV10.MF = 0; %fuel load in lbf
 RV12.MF = 0; %fuel load in lbf
 
-[V3, D3, ~] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV10, rho);
+[V3, D3, ~, W3] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV10, rho);
 
-[V4, D4, ~] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV12, rho);
+[V4, D4, ~, W4] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV12, rho);
 
 %Plotting Results
 
@@ -103,17 +103,21 @@ v2 = V2(p2); %speed at minimum drag for max weight rv12
 v3 = V3(p3); %speed at minimum drag for min weight rv10
 v4 = V4(p4); %speed at minimum drag for min weight rv12
 %Display them
-disp('Minimum Weight:')
-disp(['  Minimum Drag For RV10: ', num2str(m3), ' lbf @', num2str(v3),' kts'])
-disp(['  Stall Speed For RV10: ', num2str(V3(1)), ' kts'])
-disp(['  Minimum Drag For RV12: ', num2str(m4), ' lbf @', num2str(v4),' kts'])
-disp(['  Stall Speed For RV12: ', num2str(V4(1)), ' kts'])
+disp('Minimum Weights:')
+disp(['  Minimum Weight for RV10: ',num2str(W3), ' lbf'])
+disp(['     Minimum Drag For RV10: ', num2str(m3), ' lbf @', num2str(v3),' kts'])
+disp(['     Stall Speed For RV10: ', num2str(V3(1)), ' kts'])
+disp(['  Minimum Weight for RV12: ',num2str(W4), ' lbf'])
+disp(['     Minimum Drag For RV12: ', num2str(m4), ' lbf @', num2str(v4),' kts'])
+disp(['     Stall Speed For RV12: ', num2str(V4(1)), ' kts'])
 disp(' ')
-disp('Maximum Weight:')
-disp(['  Minimum Drag For RV10: ', num2str(m1), ' lbf @', num2str(v),' kts'])
-disp(['  Stall Speed For RV10: ', num2str(V(1)), ' kts'])
-disp(['  Minimum Drag For RV12: ', num2str(m2), ' lbf @', num2str(v2),' kts'])
-disp(['  Stall Speed For RV12: ', num2str(V2(1)), ' kts'])
+disp('Maximum Weights:')
+disp(['  Maximum Weight for RV10: ',num2str(W), ' lbf'])
+disp(['     Minimum Drag For RV10: ', num2str(m1), ' lbf @', num2str(v),' kts'])
+disp(['     Stall Speed For RV10: ', num2str(V(1)), ' kts'])
+disp(['  Maximum Weight for RV12: ',num2str(W2), ' lbf'])
+disp(['     Minimum Drag For RV12: ', num2str(m2), ' lbf @', num2str(v2),' kts'])
+disp(['     Stall Speed For RV12: ', num2str(V2(1)), ' kts'])
 disp(' ')
 disp(' ')
 
@@ -125,8 +129,10 @@ Aircraft = {'RV10 Min Weight';'RV12 Min Weight';'RV10 Max Weight';'RV12 Max Weig
 Optimal_Velocity_kts = [v3;v4;v;v2];
 Drag_Force_lbf = [m3;m4;m1;m2];
 Stall_Speed_kts = [V3(1);V4(1);V(1);V2(1)];
+Weight_lbf = [W3;W4;W;W2];
+Alt_m = [0;0;0;0];
 
-T = table(Aircraft,Optimal_Velocity_kts,Drag_Force_lbf,Stall_Speed_kts);
+T = table(Aircraft,Optimal_Velocity_kts,Drag_Force_lbf,Stall_Speed_kts,Weight_lbf,Alt_m);
 
 disp(T)
 disp('')
@@ -140,12 +146,12 @@ RV12.MF = 59.5; %fuel load in lbf
 h = RV10.CA*c;
 [~, ~, rho] = stdatm_Jaiswsal_FerriRoshan(h); 
 
-[V5, D5, ~] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV10, rho);
+[V5, D5, ~, W5] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV10, rho);
 
 h = RV12.CA*c;
 [~, ~, rho] = stdatm_Jaiswsal_FerriRoshan(h);
 
-[V6, D6, ~] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV12, rho);
+[V6, D6, ~, W6] = hw2_dragPower_Jaiswal_FerriRoshan(CP, RV12, rho);
 
 %This is setting variable m to the minumum value in each drag vector
 m5 = min(D5); %Minimum drag at cruise alt with half fuel full passenger rv10
@@ -161,13 +167,17 @@ Aircraft = {'RV10 Min Weight';'RV12 Min Weight';'RV10 Max Weight';'RV12 Max Weig
 Optimal_Velocity_kts = [v3;v4;v;v2;v5;v6];
 Drag_Force_lbf = [m3;m4;m1;m2;m5;m6];
 Stall_Speed_kts = [V3(1);V4(1);V(1);V2(1);V5(1);V6(1)];
+Weight_lbf = [W3;W4;W;W2;W5;W6];
+Alt_m = [0;0;0;0;RV10.CA*c;RV12.CA*c];
 
-N = table(Aircraft,Optimal_Velocity_kts,Drag_Force_lbf,Stall_Speed_kts);
+N = table(Aircraft,Optimal_Velocity_kts,Drag_Force_lbf,Stall_Speed_kts,Weight_lbf,Alt_m);
 
 disp(' ')
 disp(N)
 disp('')
 disp('For each aircraft the optimal speed increases to achieve the lowest drag')
+disp(' ')
+disp(' ')
 
 figure;
 plot(V5, D5,'red') 
@@ -179,29 +189,54 @@ title('Drag Force vs Velocity @Cruise Alt')
 grid on;
 legend('RV10', 'RV12', location = 'best')
 
-%% Part 3: 
+%% Part 3: (idk if working or not)
 
 %assuming SLF L=W and T=D that means that, L = 2465 lbf for rv10 and
 %1139.5 lbf for rv12 this also means at min drag that T = 195.21 lbf for
 %rv10 and T = 101.75 lbf for rv12 each at their respective optimal velocity
 
-PSFC = CP.PSFC*((6.01)/(3600*500)); %converting from gal/hr hsp to lbm/s lbf
+PSFC = CP.PSFC*((6.01)/(3600*550)); %converting from gal/hr/hsp to 1/ft
+
+disp('Aircraft Range:')
 
 %For RV10
-L = 2465; %lbf
 
-R = ((v5)/(PSFC))*((L)/(V5(1)))*log((%insert total weight not fuel)/(1));
+%#ft = 1 / ft   *  L  /  D   * ln(wi/wf)
+R = ((1)/(PSFC))*((W5)/(m5))*log((W)/(W3));
+NM = R/6076.12; %Convert from feet to nautical mile
 
+vft = v5/1.68781; %knots to ft/s
+t = R/vft; %Max flight time in seconds dividing R (in feet) by spvft (ft/s)
+thr = t/3600; %convert seconds to hours
 
-disp(R)
+disp(' ')
+disp([' RV10 Range: ', num2str(NM), ' NM'])
+disp([' RV10 Flight Time: ', num2str(thr), ' hrs'])
 
+%For RV12
 
+%#ft = 1 / ft   *  L  /  D   * ln(wi/wf)
+R2 = ((1)/(PSFC))*((W6)/(m6))*log((W2)/(W4));
+NM2 = R2/6076.12; %Convert from feet to nautical mile
 
+vft2 = v6/1.68781; %knots to ft/s
+t2 = R2/vft2; %Max flight time in seconds dividing R (in feet) by spvft (ft/s)
+thr2 = t2/3600; %convert seconds to hours
 
+disp(' ')
+disp([' RV12 Range: ', num2str(NM2), ' NM'])
+disp([' RV12 Flight Time: ', num2str(thr2), ' hrs'])
 
+%% Part 4:
 
+gal = (0.07)*thr; %convert gal/hr/hp to gal/hp
+gal2 = gal*(550); %convert gal/hp to gal*seconds/ft*lb
+gal3 = gal2*(R)*(360); %Convert gal*seconds/ft*lb to gal*seconds
+gal4 = gal3/t; %converts gal*seconds to gal
+cost = gal4*5.04; %cost of fuel in usd
 
-
+disp(' ')
+disp(num2str(cost))
 
 
 
