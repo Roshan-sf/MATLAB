@@ -190,10 +190,10 @@ PSFC = CP.PSFC*((6.01)/(3600*500)); %converting from gal/hr hsp to lbm/s lbf
 %For RV10
 L = 2465; %lbf
 
-R = ((v5)/(PSFC))*((L)/(V5(1)))*log((%insert total weight not fuel)/(1));
+R = (v5/PSFC)*
 
 
-disp(R)
+
 
 
 
