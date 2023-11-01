@@ -227,30 +227,14 @@ disp([' RV12 Flight Time: ', num2str(thr2), ' hrs'])
 
 %% Part 4: Caclulating Fuel Costs
 
-RV10.MF = 360;
-RV12.MF = 119;
+C1 = ((RV10.MF)/(CP.GD))*(CD.G); %Total Cost RV10
 
-C1 = ((RV10.MF)/(CP.GD))*(CP.G); %Total Cost RV10
+C2 = ((RV12.MF)/(CP.GD))*(CD.G); %Total Cost RV12
 
-C2 = ((RV12.MF)/(CP.GD))*(CP.G); %Total Cost RV12
+PC1 = 
 
-PC1 = (C1/RV10.PS); %Cost per Passenger
 
-PC2 = (C2/RV12.PS); %Cost per Passenger
 
-PNC1 = (PC1/NM); %Cost per passenger per nm
 
-PNC2 = (PC2/NM2); %Cost per passenger per nm
 
-aircraft2 = ['RV10';'RV12'];
-Total_cost = [C1;C2];
-Cost_Passenger = [PC1;PC2];
-Cost_Passenger_NM = [PNC1;PNC2];
-
-disp(' ')
-disp(' ')
-disp([table(aircraft2,Total_cost,Cost_Passenger,Cost_Passenger_NM)]);
-
-disp('It looks like there is a pretty similar cost for flying in each airplane,')
-disp('and that the higher costs from the RV10 come from its farther range.')
 
