@@ -1,0 +1,39 @@
+%Roshan Jaiswal-Ferri
+%Aero 215 Lab 4: 10/31/23
+
+%%
+
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Part 1 Defining Variables
+
+H = [3,2,1];
+N = [9,8,7];
+
+M = [H;N]; %creates a matrix ; means go down a row , is next column
+
+R = [(M(1,2)*M(2,3))-(M(1,3)*M(2,2)), -(M(1,1)*M(2,3))-(M(1,3)*M(2,1)), (M(1,1)*M(2,2))-(M(1,2)*M(2,1))]; %Do a cross product
+
+disp(R)
+disp([cri])
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
