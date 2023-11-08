@@ -17,19 +17,12 @@ mu = 398600; %in km^3/S^2
 
 [a,e,nu,i,RAAN,w] = hw3_orbitalCOEs_Jaiswal_ferriRoshan(R,V,mu);
 
-%% Converting Rad to Deg
-nu = rad2deg(nu);
-RAAN = rad2deg(RAAN);
-i = rad2deg(i);
-w = rad2deg(w);
-
-%% Displaying Results
-disp(['Semi-Major Axis: ', num2str(a), ' km'])
-disp(['Eccentricity: ', num2str(e), ' unitless'])
-disp(['True Anomaly: ', num2str(nu), ' deg'])
-disp(['Inclination: ', num2str(i), ' deg'])
-disp(['RAAN: ', num2str(RAAN), ' deg'])
-disp(['Argument of Periapsis: ', num2str(w), ' deg'])
+disp(['semi-major axis: ', num2str(a)])
+disp(['eccentricity: ', num2str(e)])
+disp(['True Anomaly: ', num2str(nu)])
+disp(['Inclination: ', num2str(i)])
+disp(['RAAN: ', num2str(RAAN)])
+disp(['Argument of perignum2str(w))
 
 
 
