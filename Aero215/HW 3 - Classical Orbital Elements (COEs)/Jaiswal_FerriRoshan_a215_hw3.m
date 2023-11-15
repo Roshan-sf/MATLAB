@@ -15,7 +15,7 @@ mu = 398600; %in km^3/S^2
 
 %% Part2: Calling Function
 
-[a,e,nu,i,RAAN,w] = hw3_orbitalCOEs_Jaiswal_ferriRoshan(R,V,mu);
+[a,e,nu,i,RAAN,w,p] = hw3_orbitalCOEs_Jaiswal_ferriRoshan(R,V,mu);
 
 %% Converting Rad to Deg
 nu = rad2deg(nu);
