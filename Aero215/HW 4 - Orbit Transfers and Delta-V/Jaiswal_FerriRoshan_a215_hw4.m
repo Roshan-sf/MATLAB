@@ -9,8 +9,8 @@ clc;            %Clears Command Window
 
 %% Defining Variables
 
-R = [6161.56, 454.07, -2537.72]; %𝐾̂ [𝑘𝑚]
-V = [0.376, 7.391, 2.224]; %𝐾̂ [𝑘𝑚/𝑠]
+R = [6161.56, 454.07, -2537.72]; %km
+V = [0.376, 7.391, 2.224]; %km/s
 mu = 398600; %in km^3/S^2
 
 %% Part 1: Calculating COEs for satelite
@@ -39,8 +39,8 @@ disp(' ')
 %% Part 2: Geostationary Orbit
 
 %New Vectors:
-R_geo = [42157, 0, 0]; %𝐾̂ [𝑘𝑚]
-V_geo = [0, 3.07, 0]; %𝐾̂ [𝑘𝑚/𝑠]
+R_geo = [42157, 0, 0]; %km
+V_geo = [0, 3.07, 0]; %km/s
 
 [a1,e1,nu1,i1,RAAN1,w1,p1] = hw3_orbitalCOEs_Jaiswal_ferriRoshan(R_geo,V_geo,mu);
 
@@ -63,7 +63,7 @@ disp(['     Period: ', num2str(p1), ' hours'])
 disp(' ')
 disp(' ')
 
-%% Part 3: Four burn transfer
+%% Part 3: Four Burn Transfer
 %sqrt(mu/norm(R)) = velocity to be at for a circular orbit R circular =
 %a*(1+e);
 
@@ -105,7 +105,7 @@ disp(['     Total Delta V: ', num2str(deltaVCirc + deltaVinc + deltaVh1 + deltaV
 disp(' ')
 disp(' ')
 
-%% Part 4: 
+%% Part 4: Three Burn Transfer
 
 %Burn 1: Circularizing orbit (e of 0)
 
