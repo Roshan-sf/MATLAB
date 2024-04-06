@@ -50,7 +50,7 @@ for i = 1:100000 %looping 100000 times and substituting each value in from their
     r1(1,i) = 3*(u^3)-(u^2)-1;
 end
 
-disp(['R1: ', num2str(r1)]); %idk if we were supposed to print the 100000 long vectors but here they are
+disp(['R1: ', num2str(r1(1,1:9))]); %idk if we were supposed to print the 100000 long vectors but here they are
 g = toc; %End timer
 disp(['Time to Calculate R1 using for loop: ', num2str(g)])
 
