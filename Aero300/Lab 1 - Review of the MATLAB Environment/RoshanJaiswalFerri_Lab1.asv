@@ -1,6 +1,6 @@
 %Roshan Jaiswal-Ferri
 %Section - 03
-%Aero 300 Lab 1 - Review of the MATLAB Environment: 4/5/24
+%Aero 300 Lab 1 - Review of the MATLAB Environment: 4/5/24 (PRACTICE)
 
 %%
 
@@ -50,14 +50,14 @@ for i = 1:100000 %looping 100000 times and substituting each value in from their
     r1(1,i) = 3*(u^3)-(u^2)-1;
 end
 
+disp(['R1: ', num2str(r1(1,1:9))]); %idk if we were supposed to print the 100000 long vectors but here they are
 g = toc; %End timer
-%disp(['R1: ', num2str(r1(1,1:9))]); %idk if we were supposed to print the 100000 long vectors but here they are
 disp(['Time to Calculate R1 using for loop: ', num2str(g)])
 
 tic %Start new timer
 r2 = 3*x.^3-x.^2-1; %the period tells matlab that it is working with a matrix
+disp(['R2: ', num2str(r2)]);
 v = toc; %End timer
-%disp(['R2: ', num2str(r2)]);
 disp(['Time to Calculate R2 not using for loop: ', num2str(v)])
 
 %There are fewer lines of code for matlab to process when you are not using
@@ -78,6 +78,7 @@ disp(['Using matlabs mean function: ',num2str(mean(x))])
 
 %% PART 4: Calculating Pi
 
+format lon
 k = 0; %Assigning iteration to k
 Pisum = 0; %Creating Pisum
 a = zeros(1,20); %creating a vector of zeros to more efficiently store the first 20 calculations
@@ -115,3 +116,6 @@ grid on;
 title('Percent Error vs Iteration')
 xlabel('Iteration # (Log)')
 ylabel('Percent Error')
+
+%publish outputs only first then code as pdf, then merge into one
+
