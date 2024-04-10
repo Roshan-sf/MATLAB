@@ -1,0 +1,17 @@
+%Roshan Jaiswal-Ferri
+%Aero 300 Lec 2 - Nesting: 4/8/24
+
+%%
+
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% PART 1: Nesting
+
+format long
+
+y = nest(50, ones(51,1), 1.00001);
+disp(num2str(y))
+
+%(x^51-1)/(x-1)
