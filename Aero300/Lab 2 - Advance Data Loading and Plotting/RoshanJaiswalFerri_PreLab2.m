@@ -24,7 +24,7 @@ plot(theta, y)
 hold on
 plot(theta, g) %using the plot command to create two overlaying lines on single figure
 grid on;
-title('Graph of πSin(θ/2) & θ/2')
+title('plot(): Graph of πSin(θ/2) & θ/2')
 
 %% PART 2: contour()
 
@@ -34,16 +34,37 @@ y = linspace(0,4*pi);
 [X,Y] = meshgrid(x,y);
 Z = sin(Y)+cos(X);
 contour(X,Y,Z) %the contour function creates a topographic map based on x y coordinates with height z
+title('contour()')
 
 %% PART 3: surf()
 
 figure;
 surf(X,Y,Z) %using the same variables used for the contour command, surf creates an actual 3d graph of x y z data
+title('surf()')
 
 %% Part 4: streamline()
 
-%load wind
-%[startX,startY,startZ] = meshgrid(80,20:10:50,0:5:15);
+load wind %Using built in wind vector data for this example
+[startX,startY,startZ] = meshgrid(80,20:10:50,0:5:15); %Setting start points
+verts = stream3(x,y,z,u,v,w,startX,startY,startZ);
+figure
+lineobj = streamline(verts);
+view(3)
+title('streamline()')
+
+%figure
+%streamline(X,Y,Z,U,V,W,startX,startY,startZ) %Creates lines following 2D or 3D vector data
+
+%% Part 5: quiver()
+
+load('wind','x','y','u','v')
+X = x(11:22,11:22,1);
+Y = y(11:22,11:22,1);
+U = u(11:22,11:22,1);
+V = v(11:22,11:22,1);
 
 figure
-streamline(X,Y,Z,U,V,W,startX,startY,startZ)
+quiver(X,Y,U,V) %Creates a 2D vector plot of given data (Same wind data as earlier)
+title('quiver()')
+
+
