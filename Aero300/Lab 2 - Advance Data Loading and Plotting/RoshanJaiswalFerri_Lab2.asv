@@ -72,16 +72,21 @@ figure
 subplot(2,2,1)
 contourf(x,y,m)
 hold on
+xlabel('Whole Domain')
 
 subplot(2,2,2)
 contourf(x,y,m)
 xlim([0 1])
 ylim([0 1])
+xlabel('Wing Focus')
+
 
 subplot(2,2,3)
 contourf(x,y,m)
 xlim([-.2 .5])
 ylim([0 .5])
+xlabel('Leading E')
+
 
 subplot(2,2,4)
 contourf(x,y,m)
@@ -133,17 +138,27 @@ figure
 subplot(2,2,1)
 plot(f,d)
 hold on
+colorbar('eastoutside')
+clim([0 2])
+ylabel('density')
 
 subplot(2,2,2)
 contourf(x,y,p)
 xlim(0:1)
 ylim(0:1)
+colorbar('eastoutside')
+clim([0 2])
+ylabel('Pressure')
 
 subplot(2,2,3)
 plot(Vx)
+colorbar('eastoutside')
+clim([0 2])
 
 subplot(2,2,4)
 plot(Vy)
+colorbar('eastoutside')
+clim([0 2])
 
 %--------------Plot 6--------------
 
@@ -151,7 +166,9 @@ C = load("Data\Data\DENSITY_iteration.mat");
 
 q = input('Press 1 to skip Animation, or press return');
 
-if q ~= 1
+if q == 1
+    disp('Skipping...')
+else
     figure
     for k = 1:799
         h = C.C{1,k};
@@ -162,6 +179,69 @@ end
 
 %drawnow and surfaceplot and set function, keep track of iterations use for
 %loop?
+
+
+%% PART 2: File Manipulation
+
+T = readtable("Data\Data\convergence.dat"); %importing convergance data
+y = T.Properties.VariableNames; %reading header information
+
+edit temp.txt %creating the text file
+writecell(y,'temp.txt'); %writing the headers to the txt file
+
+%--------------Plot 7--------------
+
+figure
+subplot(1,2,1)
+plot(T,"Iteration","Continuity")
+hold on
+
+subplot(1,2,2)
+plot(T,"Iteration","Energy")
+
+u = input('Press 1 to delete temp.exe, or press return');
+
+if u == 1
+    disp('Deleting...')
+    delete("temp.txt")
+    disp('Done')
+end
+
+%% PART 3: Vector Plotting
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

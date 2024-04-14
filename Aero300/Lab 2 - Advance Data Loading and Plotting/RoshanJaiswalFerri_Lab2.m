@@ -72,25 +72,37 @@ figure
 subplot(2,2,1)
 contourf(x,y,m)
 hold on
+title('Whole Domain')
+xlabel('Chord Length')
+ylabel('Height')
 
 subplot(2,2,2)
 contourf(x,y,m)
 xlim([0 1])
 ylim([0 1])
+title('Wing Focus')
+xlabel('Chord Length')
+ylabel('Height')
 
 subplot(2,2,3)
 contourf(x,y,m)
 xlim([-.2 .5])
 ylim([0 .5])
+title('Leading Edge')
+xlabel('Chord Length')
+ylabel('Height')
 
 subplot(2,2,4)
 contourf(x,y,m)
 xlim([.5 1.2])
 ylim([0 .5])
+title('Trailing Edge')
+xlabel('Chord Length')
+ylabel('Height')
 
 colorbar('eastoutside')
 clim([0 2])
-
+ylabel('mach')
 
 %--------------Plot 4--------------
 
@@ -101,21 +113,33 @@ figure
 subplot(2,2,1)
 contourf(x,y,p)
 hold on
+title('Whole Domain')
+xlabel('Chord Length')
+ylabel('Height')
 
 subplot(2,2,2)
 contourf(x,y,p)
 xlim([0 1])
 ylim([0 1])
+title('Wing Focus')
+xlabel('Chord Length')
+ylabel('Height')
 
 subplot(2,2,3)
 contourf(x,y,p)
 xlim([-.2 .5])
 ylim([0 .5])
+title('Leading Edge')
+xlabel('Chord Length')
+ylabel('Height')
 
 subplot(2,2,4)
 contourf(x,y,p)
 xlim([.5 1.2])
 ylim([0 .5])
+title('Trailing Edge')
+xlabel('Chord Length')
+ylabel('Height')
 
 colorbar('eastoutside')
 clim([0 2])
@@ -133,17 +157,31 @@ figure
 subplot(2,2,1)
 plot(f,d)
 hold on
+colorbar('eastoutside')
+clim([0 2])
+title('Density')
 
 subplot(2,2,2)
 contourf(x,y,p)
 xlim(0:1)
 ylim(0:1)
+colorbar('eastoutside')
+clim([0 2])
+title('Pressure')
 
 subplot(2,2,3)
 plot(Vx)
+colorbar('eastoutside')
+clim([0 2])
+title('Vx')
+xlabel('Velocity')
 
 subplot(2,2,4)
 plot(Vy)
+colorbar('eastoutside')
+clim([0 2])
+title('Vy')
+xlabel('Velocity')
 
 %--------------Plot 6--------------
 
@@ -168,11 +206,31 @@ end
 
 %% PART 2: File Manipulation
 
-read
+T = readtable("Data\Data\convergence.dat"); %importing convergance data
+y = T.Properties.VariableNames; %reading header information
 
+edit temp.txt %creating the text file
+writecell(y,'temp.txt'); %writing the headers to the txt file
 
+%--------------Plot 7--------------
 
+figure
+subplot(1,2,1)
+plot(T,"Iteration","Continuity")
+hold on
 
+subplot(1,2,2)
+plot(T,"Iteration","Energy")
+
+u = input('Press 1 to delete temp.exe, or press return');
+
+if u == 1
+    disp('Deleting...')
+    delete("temp.txt")
+    disp('Done')
+end
+
+%% PART 3: Vector Plotting
 
 
 

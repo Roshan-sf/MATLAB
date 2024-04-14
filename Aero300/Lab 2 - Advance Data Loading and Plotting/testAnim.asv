@@ -17,25 +17,26 @@ T = readtable("Data\Data\convergence.dat");
 
 x = T.Properties;
 y = T.Properties.VariableNames;
+z = char(y);
 
-writematrix(y,temp.txt);
-
-edit
-
-
-
-
-
-
-
-
-
-
-
+% edit temp.txt
+% writecell(y,'temp.txt');
+% %save('temp.txt','z')
+% 
+% p = input('Press 1 to delete temp.exe, or press return');
+% 
+% if p == 1
+%     disp('Deleting...')
+%     delete("temp.txt")
+%     disp('Done')
+% end
 
 
 
 
+
+figure
+plot(T(:,))
 
 
 

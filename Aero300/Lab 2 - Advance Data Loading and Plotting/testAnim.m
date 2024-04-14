@@ -11,16 +11,10 @@ clc;            %Clears Command Window
 %% Testing
 
 
-T = readtable("Data\Data\convergence.dat");
+b = load("Data\Data\problem2_data.txt");
 
-%disp(T)
 
-x = T.Properties;
-y = T.Properties.VariableNames;
-
-edit temp.txt
-
-writecell(y,temp.txt);
+quiver(b,b,b,b)
 
 
 
@@ -35,6 +29,53 @@ writecell(y,temp.txt);
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+% 
+% T = readtable("Data\Data\convergence.dat");
+% 
+% %disp(T)
+% 
+% x = T.Properties;
+% y = T.Properties.VariableNames;
+% z = char(y);
+% 
+% % edit temp.txt
+% % writecell(y,'temp.txt');
+% % %save('temp.txt','z')
+% % 
+% % p = input('Press 1 to delete temp.exe, or press return');
+% % 
+% % if p == 1
+% %     disp('Deleting...')
+% %     delete("temp.txt")
+% %     disp('Done')
+% % end
+% 
+% 
+% 
+% 
+% 
+% figure
+% plot(T,"Iteration","Continuity")
 
 
 
