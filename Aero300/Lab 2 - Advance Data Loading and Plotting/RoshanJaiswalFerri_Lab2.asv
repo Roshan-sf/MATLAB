@@ -151,9 +151,7 @@ C = load("Data\Data\DENSITY_iteration.mat");
 
 q = input('Press 1 to skip Animation, or press return');
 
-if q == 1
-    disp('Skipping...')
-else
+if q ~= 1
     figure
     for k = 1:799
         h = C.C{1,k};
@@ -164,49 +162,6 @@ end
 
 %drawnow and surfaceplot and set function, keep track of iterations use for
 %loop?
-
-
-%% PART 2: File Manipulation
-
-read
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
