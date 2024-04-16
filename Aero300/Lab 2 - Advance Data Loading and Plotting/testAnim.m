@@ -11,10 +11,8 @@ clc;            %Clears Command Window
 %% Testing
 
 
-b = load("Data\Data\problem2_data.txt");
-
-
-quiver(b,b,b,b)
+Vx = load("Data\Data\vx.txt");
+Vy = load("Data\Data\vy.txt");
 
 
 
