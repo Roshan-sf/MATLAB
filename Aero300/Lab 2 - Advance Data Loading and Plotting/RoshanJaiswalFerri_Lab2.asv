@@ -236,16 +236,11 @@ end
 xD = linspace(-2*pi,2*pi,100);
 yD = linspace(-1,1,100);
 
-[XX,YY] = meshgrid(xD,yD);
+[XX,YY] = meshgrid(xD,xY);
 
-fx = XX;
-fy = sin(XX);
 
-startX = -1;
 
-figure
-streamline(XX,YY,fx,fy,startX,30,'r')
-quiver(XX,YY,fx,y)
+
 
 
 
