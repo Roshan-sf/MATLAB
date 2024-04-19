@@ -58,6 +58,10 @@ ylabel('Height')
 xlim([0 1])
 legend('4-Digit Equation', 'CFD', 'N0012-il Data')
 
+%There are slight differences between the the airfoils because the CFD
+%model was slightly edited from its original form
+
+
 %--------------Plot 3--------------
 
 
@@ -103,7 +107,6 @@ ylabel('Height')
 
 colorbar('eastoutside')
 clim([0 2])
-ylabel('mach')
 
 % --------------Plot 4--------------
 
@@ -112,14 +115,19 @@ p = load("Data\Data\pressure.txt");
 figure('name', 'Pressure')
 
 subplot(2,2,1)
-contourf(x,y,p)
+surf(x,y,p)%contourf(x,y,p)
+shading interp
+view(2)
 hold on
 title('Whole Domain')
 xlabel('Chord Length')
 ylabel('Height')
+ylim([0 1.75])
 
 subplot(2,2,2)
-contourf(x,y,p)
+surf(x,y,p)%contourf(x,y,p)
+shading interp
+view(2)
 xlim([0 1])
 ylim([0 1])
 title('Wing Focus')
@@ -127,7 +135,9 @@ xlabel('Chord Length')
 ylabel('Height')
 
 subplot(2,2,3)
-contourf(x,y,p)
+surf(x,y,p)%contourf(x,y,p)
+shading interp
+view(2)
 xlim([-.2 .5])
 ylim([0 .5])
 title('Leading Edge')
@@ -135,7 +145,9 @@ xlabel('Chord Length')
 ylabel('Height')
 
 subplot(2,2,4)
-contourf(x,y,p)
+surf(x,y,p)%contourf(x,y,p)
+shading interp
+view(2)
 xlim([.5 1.2])
 ylim([0 .5])
 title('Trailing Edge')
@@ -144,7 +156,6 @@ ylabel('Height')
 
 colorbar('eastoutside')
 clim([0 2])
-ylabel('degrees')
 
 % --------------Plot 5--------------
 
@@ -156,48 +167,73 @@ f = linspace(1,length(d),length(d));
 
 figure
 subplot(2,2,1)
-contourf(x,y,d)
+surf(x,y,d)
+shading interp
+view(2)
 hold on
 colorbar('eastoutside')
-clim([0 2])
 title('Density')
+ylabel('Height')
+xlim([-.5 1.5])
+ylim([0 1.75])
 
 subplot(2,2,2)
-contourf(x,y,p)
+surf(x,y,p)
+shading interp
+view(2)
 colorbar('eastoutside')
 clim([0 2])
 title('Pressure')
+ylabel('Height')
+xlim([-.5 1.5])
+ylim([0 1.75])
 
 subplot(2,2,3)
-contourf(x,y,Vx)
+surf(x,y,Vx)
+shading interp
+view(2)
 colorbar('eastoutside')
 clim([0 2])
 title('Vx')
+ylabel('Height')
 xlabel('Velocity')
+xlim([-.5 1.5])
+ylim([0 1.75])
 
 subplot(2,2,4)
-contourf(x,y,Vy)
+surf(x,y,Vy)
+shading interp
+view(2)
 colorbar('eastoutside')
 clim([0 2])
 title('Vy')
+ylabel('Height')
 xlabel('Velocity')
+xlim([-.5 1.5])
+ylim([0 1.75])
+
+%You can clearly see on both the density and the pressure plots
+%that there is a 'hot spot' on the leading edge of the airfoil, and that
+%relative velocity also follows density and pressure.
 
 %--------------Plot 6--------------
 
 C = load("Data\Data\DENSITY_iteration.mat");
 
-q = input('Press 1 to skip Animation, or press return'); %asking for user input
+%q = input('Press 1 to skip Animation, or press return'); %asking for user input
 
-if q == 1 
-    disp('Skipping...')
-else
-    figure
-    for k = 1:799 %Moving thru iterations
-        h = C.C{1,k}; %Reading data from proper cell
-        surf(h) %creating surf plot
-        drawnow %redrawing in figure
-    end
-end
+% if q == 1 
+%     disp('Skipping...')
+% else
+%     figure
+%     for k = 1:799 %Moving thru iterations
+%         h = C.C{1,k}; %Reading data from proper cell
+%         surf(h) %creating surf plot
+%         drawnow %redrawing in figure
+%     end
+% end
+
+figure('name','Place Holder For Animation')
 
 %% PART 2: File Manipulation
 
@@ -218,13 +254,13 @@ subplot(1,2,2)
 plot(T,"Iteration","Energy")
 
 
-u = input('Press 1 to delete temp.exe, or press return');
-
-if u == 1 %Deleting 
-    disp('Deleting...') 
-    delete("temp.txt")
-    disp('Done')
-end
+% u = input('Press 1 to delete temp.exe, or press return');
+% 
+% if u == 1 %Deleting 
+%     disp('Deleting...') 
+%     delete("temp.txt")
+%     disp('Done')
+% end
 
 %% PART 3: Vector Plotting
 
@@ -232,25 +268,25 @@ xD = linspace(-2*pi,2*pi,30); %Creating domains
 yD = linspace(-1,1,30);
 sLine = 30; %Amount of streamlines
 
-w = input('Would you like a streamline plot, quiver plot, or both?','s');
-
-s1 = 'streamline';
-s2 = 'quiver';
-s3 = 'both';
-
-if strcmp(w,s1) == 1 %strcmp compares strings to see if they are =
-    type = 's';
-elseif strcmp(w,s2) == 1
-    type = 'q';
-elseif strcmp(w,s3) == 1
-    type = 'b';
-else
-    disp('Invalid Input')
-    disp('Please type "streamline", "quiver", or "both".')
-    type = 'f';
-end
-
-vPlotter(type,xD,yD,sLine) %Calling function plots 
+% w = input('Would you like a streamline plot, quiver plot, or both?','s');
+% 
+% s1 = 'streamline';
+% s2 = 'quiver';
+% s3 = 'both';
+% 
+% if strcmp(w,s1) == 1 %strcmp compares strings to see if they are =
+%     type = 's';
+% elseif strcmp(w,s2) == 1
+%     type = 'q';
+% elseif strcmp(w,s3) == 1
+%     type = 'b';
+% else
+%     disp('Invalid Input')
+%     disp('Please type "streamline", "quiver", or "both".')
+%     type = 'f';
+% end
+% 
+% vPlotter(type,xD,yD,sLine) %Calling function plots 
 
 type = 's';
 vPlotter(type,xD,yD,sLine) %Calling the function 3 times instead of input
@@ -271,15 +307,15 @@ sStartX2 = ones(1,sLine)*-1;
 sStartY = linspace(-1,1,sLine); %Creating starting y vector
 
     if type == 's' %Literally just a bunch of if statements graphing required plot
-        figure
+        figure('Name','Streamlines')
         streamline(XX,YY,fx,fy,sStartX,sStartY);
         hold on
         streamline(XX,YY,fx,fy,sStartX2,sStartY)
     elseif type == 'q'
-        figure
+        figure('name','Quiver')
         quiver(XX,YY,fx,fy)
     elseif type == 'b'
-        figure
+        figure('name','Quiver & Streamline')
         quiver(XX,YY,fx,fy)
         hold on
         streamline(XX,YY,fx,fy,sStartX,sStartY);

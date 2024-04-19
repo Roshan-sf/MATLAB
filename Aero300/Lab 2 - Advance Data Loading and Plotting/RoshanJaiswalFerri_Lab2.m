@@ -107,7 +107,6 @@ ylabel('Height')
 
 colorbar('eastoutside')
 clim([0 2])
-ylabel('mach')
 
 % --------------Plot 4--------------
 
@@ -123,6 +122,7 @@ hold on
 title('Whole Domain')
 xlabel('Chord Length')
 ylabel('Height')
+ylim([0 1.75])
 
 subplot(2,2,2)
 surf(x,y,p)%contourf(x,y,p)
@@ -156,7 +156,6 @@ ylabel('Height')
 
 colorbar('eastoutside')
 clim([0 2])
-ylabel('degrees')
 
 % --------------Plot 5--------------
 
@@ -173,8 +172,10 @@ shading interp
 view(2)
 hold on
 colorbar('eastoutside')
-%clim([0 2])
 title('Density')
+ylabel('Height')
+xlim([-.5 1.5])
+ylim([0 1.75])
 
 subplot(2,2,2)
 surf(x,y,p)
@@ -183,6 +184,9 @@ view(2)
 colorbar('eastoutside')
 clim([0 2])
 title('Pressure')
+ylabel('Height')
+xlim([-.5 1.5])
+ylim([0 1.75])
 
 subplot(2,2,3)
 surf(x,y,Vx)
@@ -191,7 +195,10 @@ view(2)
 colorbar('eastoutside')
 clim([0 2])
 title('Vx')
+ylabel('Height')
 xlabel('Velocity')
+xlim([-.5 1.5])
+ylim([0 1.75])
 
 subplot(2,2,4)
 surf(x,y,Vy)
@@ -200,7 +207,10 @@ view(2)
 colorbar('eastoutside')
 clim([0 2])
 title('Vy')
+ylabel('Height')
 xlabel('Velocity')
+xlim([-.5 1.5])
+ylim([0 1.75])
 
 %You can clearly see on both the density and the pressure plots
 %that there is a 'hot spot' on the leading edge of the airfoil, and that
@@ -295,15 +305,15 @@ sStartX2 = ones(1,sLine)*-1;
 sStartY = linspace(-1,1,sLine); %Creating starting y vector
 
     if type == 's' %Literally just a bunch of if statements graphing required plot
-        figure
+        figure('Name','Streamlines')
         streamline(XX,YY,fx,fy,sStartX,sStartY);
         hold on
         streamline(XX,YY,fx,fy,sStartX2,sStartY)
     elseif type == 'q'
-        figure
+        figure('name','Quiver')
         quiver(XX,YY,fx,fy)
     elseif type == 'b'
-        figure
+        figure('name','Quiver & Streamline')
         quiver(XX,YY,fx,fy)
         hold on
         streamline(XX,YY,fx,fy,sStartX,sStartY);
