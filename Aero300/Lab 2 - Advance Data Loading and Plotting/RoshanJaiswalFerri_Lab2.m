@@ -256,6 +256,14 @@ end
 
 vPlotter(type,xD,yD,sLine)
 
+type = 's';
+vPlotter(type,xD,yD,sLine)
+type = 'q';
+vPlotter(type,xD,yD,sLine)
+type = 'b';
+vPlotter(type,xD,yD,sLine)
+
+
 %% Function
 
 function [] = vPlotter(type,xD,yD,sLine)
