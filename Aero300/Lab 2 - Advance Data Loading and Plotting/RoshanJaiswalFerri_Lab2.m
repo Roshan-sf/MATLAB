@@ -191,7 +191,6 @@ if q == 1
     disp('Skipping...')
 else
     figure
-    view(2)
     for k = 1:799
         h = C.C{1,k};
         surf(h)
@@ -233,27 +232,61 @@ end
 
 %% PART 3: Vector Plotting
 
-xD = linspace(-2*pi,2*pi,100);
-yD = linspace(-1,1,100);
+xD = linspace(-2*pi,2*pi,30);
+yD = linspace(-1,1,30);
+sLine = 30;
 
+w = input('Would you like a streamline plot, quiver plot, or both?','s');
+
+s1 = 'streamline';
+s2 = 'quiver';
+s3 = 'both';
+
+if strcmp(w,s1) == 1
+    type = 's';
+elseif strcmp(w,s2) == 1
+    type = 'q';
+elseif strcmp(w,s3) == 1
+    type = 'b';
+else
+    disp('Invalid Input')
+    disp('Please type "streamline", "quiver", or "both".')
+    type = 'f';
+end
+
+vPlotter(type,xD,yD,sLine)
+
+%% Function
+
+function [] = vPlotter(type,xD,yD,sLine)
 [XX,YY] = meshgrid(xD,yD);
-
 fx = XX;
 fy = sin(XX);
+sStartX = ones(1,sLine);
+sStartX2 = ones(1,sLine)*-1;
+sStartY = linspace(-1,1,sLine);
 
-startX = -1;
+    if type == 's'
+        figure
+        streamline(XX,YY,fx,fy,sStartX,sStartY);
+        hold on
+        streamline(XX,YY,fx,fy,sStartX2,sStartY)
+    elseif type == 'q'
+        figure
+        quiver(XX,YY,fx,fy)
+    elseif type == 'b'
+        figure
+        quiver(XX,YY,fx,fy)
+        hold on
+        streamline(XX,YY,fx,fy,sStartX,sStartY);
+        streamline(XX,YY,fx,fy,sStartX2,sStartY)
+    elseif type == 'f'
+        disp('You broke the code :(')
+    else
+        disp('idek how u got here lol')
+    end
 
-figure
-streamline(XX,YY,fx,fy,startX,30,'r')
-quiver(XX,YY,fx,y)
-
-
-
-
-
-
-
-
+end
 
 
 
