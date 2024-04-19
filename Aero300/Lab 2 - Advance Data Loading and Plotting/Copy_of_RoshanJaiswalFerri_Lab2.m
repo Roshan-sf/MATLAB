@@ -112,18 +112,14 @@ p = load("Data\Data\pressure.txt");
 figure('name', 'Pressure')
 
 subplot(2,2,1)
-surf(x,y,p)%contourf(x,y,p)
-shading interp
-view(2)
+contourf(x,y,p)
 hold on
 title('Whole Domain')
 xlabel('Chord Length')
 ylabel('Height')
 
 subplot(2,2,2)
-surf(x,y,p)%contourf(x,y,p)
-shading interp
-view(2)
+contourf(x,y,p)
 xlim([0 1])
 ylim([0 1])
 title('Wing Focus')
@@ -131,9 +127,7 @@ xlabel('Chord Length')
 ylabel('Height')
 
 subplot(2,2,3)
-surf(x,y,p)%contourf(x,y,p)
-shading interp
-view(2)
+contourf(x,y,p)
 xlim([-.2 .5])
 ylim([0 .5])
 title('Leading Edge')
@@ -141,9 +135,7 @@ xlabel('Chord Length')
 ylabel('Height')
 
 subplot(2,2,4)
-surf(x,y,p)%contourf(x,y,p)
-shading interp
-view(2)
+contourf(x,y,p)
 xlim([.5 1.2])
 ylim([0 .5])
 title('Trailing Edge')
@@ -164,41 +156,31 @@ f = linspace(1,length(d),length(d));
 
 figure
 subplot(2,2,1)
-surf(x,y,d)
-shading interp
-view(2)
+contourf(x,y,d)
 hold on
 colorbar('eastoutside')
 clim([0 2])
 title('Density')
 
 subplot(2,2,2)
-surf(x,y,p)
-shading interp
-view(2)
+contourf(x,y,p)
 colorbar('eastoutside')
 clim([0 2])
 title('Pressure')
 
 subplot(2,2,3)
-surf(x,y,Vx)
-shading interp
-view(2)
+contourf(x,y,Vx)
 colorbar('eastoutside')
 clim([0 2])
 title('Vx')
 xlabel('Velocity')
 
 subplot(2,2,4)
-surf(x,y,Vy)
-shading interp
-view(2)
+contourf(x,y,Vy)
 colorbar('eastoutside')
 clim([0 2])
 title('Vy')
 xlabel('Velocity')
-
-%You can clearly see the 
 
 %--------------Plot 6--------------
 
