@@ -22,20 +22,28 @@ tol = 1e-6;
 M = bracket(g,s,d,fx);
 
 
-[M1,e] = newton(d,M,fx,gx,tol);
+[M1] = newton(d,M,fx,gx,tol);
 
-function [roots_newton, error_newton] = newton(root_guess, roots, f, g, tol) % need to call g since newton uses it
+function [roots_newton] = newton(root_guess, roots, f, g, tol) % need to call g since newton uses it
 roots_newton = zeros(root_guess,1); % stores the roots found
 
-xO = 0;
+% a = x lower bound
+% b = x upper bound
+% xo = x midpoint
 
-for n = 1:root_guess
-    a = roots(n,1); % defines where to place the roots
-    b = roots(n,2);
+xO = 0;
+xoo = 0;
+d1 = 1;
+
+while d1 ~= root_guess + 1
+    a = roots(d1,1); % defines where to place the roots
+    b = roots(d1,2);
     iterations = zeros(root_guess,1);
+    if sign(f(a))*sign(f(b)) >= 0
+        error('f(a)f(b)<0 not satisfied!') % ceases execution
+    end
 
     xo = (a+b)/2;
-    xoo = 0;
     while abs(f(xoo))>tol % the newton formula
         xoo = xO; % whatever xO is, set equal to xoo for last iteration
         xO = xo - f(xo)/g(xo);

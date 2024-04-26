@@ -8,42 +8,173 @@ close all;      %Clears all
 clear all;      %Clears Workspace
 clc;            %Clears Command Window
 
-%% PART 1: Using Bracketing Method
-
+%% PART 1: Defining the Function
 
 fx = @(x) x^3+1.0142*x^2-19.3629*x+15.8398;
+gx = @(x) 3*x^2+2.0284*x-19.3629;
+hx = @(x) 6*x+2.0824; 
 
 d = 3; %Degree of polynomial
 s = 1; %Step size
 g = -6; %inital guess
+tol = 1e-6;
 
+%% PART 2: Using Bracketing Method
 
-M = roots(g,s,d,fx);
+M = bracket(g,s,d,fx);
+disp('Bracketing Method');
+disp(M);
+disp('')
 
-%% PART 2: 
+%% PART 3: Using Bisection Method
 
+timebi = 0;
+for i = 1:10000
+    tic
+    M1 = bisection(g,d,fx,tol);
+    timebi = timebi + toc;
+end
+avgtimebi = timebi/10000;
+disp('Bisection Method Result:');
+disp(['Avg time to calculate: ', num2str(avgtimebi),'s'])
+disp(M1);
+disp('')
 
+%% Part 4: Using Newton's Method
 
+timeN = 0;
+for i = 1:10000
+    tic
+    [M2] = newton(d,M,fx,gx,tol);
+    timeN = timeN + toc;
+end
+avgtimeN = timeN/10000;
+disp('Newtons Method Results:');
+disp(['Avg time to calculate: ', num2str(avgtimeN),'s'])
+disp(M2);
+disp('');
 
+%% Part 5: Using Halley's Method
 
+timeH = 0;
+for i = 1:10000
+    tic
+    [M3] = halley(d,M,fx,gx,hx,tol);
+    timeH = timeH + toc;
+end
+avgtimeH = timeH/10000;
+disp('Halleys Method Results:');
+disp(['Avg time to calculate: ', num2str(avgtimeH),'s'])
+disp(M3);
+disp('');
 
+%% Halley's Method Function
 
+%Halley Pseudocode:
+%almost the same as newtons method except now also use the 2nd derivitive,
+%it iterates until it reaches desired tolerance. It uses the derivitives to
+%find roots by following the slope
 
+function [M1] = halley(d, M, fx, gx, hx, tol) %error_newton
+    M1 = zeros(d,2); % stores the roots found
+    xO = 0;
+    for n = 1:d
+        a = M(n,1); % defines where to place the roots
+        b = M(n,2);
+        iterations = zeros(d,1);
+        xo = (a+b)/2;
+        xoo = 0;
+        while abs(fx(xoo))>tol %check tol
+            xoo = xO; %reset for iteration
+            xO = xo - (2*fx(xo)*gx(xo))/((2*gx(xo)^2) - fx(xo)*hx(xo)); %formula
+            xo = xO; 
+            iterations(n,1) = iterations(n,1) + 1;
+            %w = iterations(n,1);
+            %iteration_newton(n,w) = iterations(n,1);
+            %error_newton(n,w) = xO;
+        end
+        M1(n) = xO; %save roots
+        M1(n,2) = fx(xo);
+    end
+end
 
+%% Newton's Method Function
 
+%Newtons psuedocode:
+%
 
+function [M1] = newton(d, M, fx, gx, tol) %error_newton
+    M1 = zeros(d,2); % stores the roots found
+    xO = 0;
+    for n = 1:d
+        a = M(n,1); %finding roots
+        b = M(n,2);
+        iterations = zeros(d,1);
+        xo = (a+b)/2;
+        xoo = 0;
+        while abs(fx(xoo))>tol %checking tol
+            xoo = xO; %reset for iteration
+            xO = xo - fx(xo)/gx(xo); %Formula
+            xo = xO; 
+            iterations(n,1) = iterations(n,1) + 1;
+            %w = iterations(n,1);
+            %iteration_newton(n,w) = iterations(n,1);
+            %error_newton(n,w) = xO;
+        end
+        M1(n) = xO; %save roots
+        M1(n,2) = fx(xo);
+    end
+end
+
+%% Bisection Function
+
+%Bisection Pseudocode:
+%Step in big steps like the bracketing except when it finds a big step with
+%a root it then starts closing in by finding out which side the root is
+%closer to and then setting the respective endpoint to the midpoint and
+%then restarts until the root is found at desired tolerance.
+
+function [M] = bisection(g, d, fx, tol) %biteration, berror
+    format long
+    M = zeros(d,2);
+    a = g;
+    d1 = 1;
+    while d1 ~= d + 1
+        b = a + 1;
+        ax = fx(a);
+        bx = fx(b);
+        b2 = b;
+        a2 = a;
+        if ax*bx<0
+            c = (b2+a2)/2; %midpoint
+            while abs(fx(c)) > tol %checking tol
+                ax2 = fx(a2); %new bounds
+                bx2 = fx(b2);
+                c = (b2+a2)/2; %new midpoint
+                cx = fx(c);
+                if ax2*cx < 0 %Checking for root
+                    b2 = c;
+                elseif bx2*cx < 0
+                    a2 = c;
+                else
+                    disp('error')
+                end
+            end
+            M(d1,1) = c;
+            M(d1,2) = fx(c);
+            a = b;
+            d1 = d1 + 1;
+        else
+            a = b;
+        end
+    end
+end
 
 %% Bracketing Function
 
-function [M] = roots(g, s, d, fx) %g is initial guess, s is step, d is # roots, fx is function
+function [M] = bracket(g, s, d, fx) %g is initial guess, s is step, d is # roots, fx is function
     format long
-    
-    for row = 1:d %two for loops creating a 3x4 matrix
-        for col = 1:2
-            M(row,col) = 0;       
-        end
-    end
-    
+    M = zeros(d,2);  
     lBracket = g;
     d1 = 1;
     
@@ -54,10 +185,10 @@ function [M] = roots(g, s, d, fx) %g is initial guess, s is step, d is # roots, 
         done = 0;
         if h*l<0 %if it is <0 then ans is negative and there is root in bracket
             while done == 0 
-                hBracket2 = lBracket + 1e-6;
+                hBracket2 = lBracket + 1e-6; %Smaller stepping to proper tol
                 h = fx(hBracket2);
                 l = fx(lBracket);
-                if h*l<0
+                if h*l<0 %Checking for root
                     M(d1,1) = lBracket;
                     M(d1,2) = hBracket2;
                     lBracket = hBracket2;
@@ -84,8 +215,3 @@ function [M] = roots(g, s, d, fx) %g is initial guess, s is step, d is # roots, 
     end
 
 end
-
-
-
-
-
