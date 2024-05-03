@@ -145,7 +145,7 @@ function [isDom] = isDom(A)
 end
 
 %% FUNCTION: Rand Matrix
-% This is how i tested my code, it looks like it works with many matricies!
+
 function [M] = randM()
     y = randi([2 9]);
     %z = randi([2 9]);
@@ -157,9 +157,7 @@ end
 %% PSEUDOCODE
 
 %Guass-Siedel:
-% Start with initial guess of all zero loop through solving a system of
-% equations with the guesses one at a time. Continue until iteration limit
-% reached or it is within tolerance
+% 
 
 %JACOBI:
 % Start with an initial guess for each iteration it updates based on the prevuious
