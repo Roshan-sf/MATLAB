@@ -1,7 +1,7 @@
 % Davis Sok
 % Aero 300 LAB5 : 2024.05.08
 
-%close all;              % clears all
+close all;              % clears all
 clear all;              % clears workspace
 clc;                    % clears command line
 
@@ -21,12 +21,12 @@ clc;                    % clears command line
 % plot the wing.
 
 % Airfoil 1
-airfoil_1 = load('Lab5_Data\Lab5_Data\airfoil_1.txt');
+airfoil_1 = load('airfoil_1.txt');
 y_1 = airfoil_1(:,1); % call every row but only first column
 z_1 = airfoil_1(:,2); % call every row but only second column
 
 % Airfoil 2
-airfoil_2 = load('Lab5_Data\Lab5_Data\airfoil_2.txt');
+airfoil_2 = load('airfoil_2.txt');
 y_2 = airfoil_2(:,1);
 z_2 = airfoil_2(:,2);
 
@@ -86,13 +86,13 @@ title('5th Order Polynomial Approximation of Airfoil')
 % your figure and be sure to include a legend.
 
 % CL data
-cl_data = load('Lab5_Data\Lab5_Data\cl_data.txt');
+cl = load('Lab5_Data\Lab5_Data\cl_data.txt');
 deg_attack_cl = cl_data(:,1);
 rad_attack_cl = deg2rad(deg_attack_cl); % must convert data to radians
 lift_cl = cl_data(:,2);
 
 % CD data
-cd_data = load('Lab5_Data\Lab5_Data\cd_data.txt');
+cl = load('Lab5_Data\Lab5_Data\cl_data.txt');
 deg_attack_cd = cd_data(:,1);
 rad_attack_cd = deg2rad(deg_attack_cd);
 drag_cd = cd_data(:,2);

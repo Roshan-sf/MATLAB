@@ -1,6 +1,6 @@
 %Roshan Jaiswal-Ferri
 %Section - 03
-%Aero 300 Lab 5 - Interpolation and Linear Regression: 5/2/24
+%Aero 300 Lab 5 - Iterative Methods to Solve Matrix Equations: 4/26/24
 
 %% Workspace Prep
 
@@ -50,6 +50,26 @@ view([2 -1 1]) %correct view
 
 %% PART 2: Wind Tunnel Data — Regression 
 
+% Import the data from the files 'cl_data.txt'  and 'cd_data.txt'. The 
+% data is formatted as, first column – angle of attack in degrees, second 
+% column – lift/drag coefficient.
+
+% Plot the data from part a and label the figure. Remember the data in the 
+% files are data points. It is generally never appropriate to connect
+% measured data points with a line.
+
+% Use the polyfit() command to determine the zero angle of attack lift 
+% coefficient, 'cl', and the proportionality constant between angle of 
+% attack and lift coefficient. In this case, not all the data fits are 
+% line. Be sure to limit your regression line to use only points 
+% applicable to thin airfoil theory.
+
+% Use the polyfit() command to determine a quadratic fit to the angle of 
+% attack versus drag coefficient data.
+
+% Plot both regression lines on the same figure as the data points. Label 
+% your figure and be sure to include a legend.
+
 %CL data
 cl = load('Lab5_Data\Lab5_Data\cl_data.txt');
 dAcL = cl(:,1); %degree angle of attack CL 
@@ -62,7 +82,7 @@ dAcD = cd(:,1); %degree angle of attack CD
 rAcD = deg2rad(dAcD); %radian angle of attack CD
 cdd = cd(:,2); %CD drag
 
-%%%%Code used for finding regression for lift and drag%%%%
+%Code used for finding regression for lift and drag
 
 %Lift regression
 ycL = rAcL(1:15,1);
@@ -71,8 +91,6 @@ lift = polyfit(ycL,xcL,1); %Regression line
 
 %Drag regression
 drag = polyfit(rAcD,cdd,2);
-
-%%%%
 
 %lift eq
 x_l = -0.1:0.001:0.35;
@@ -91,7 +109,7 @@ grid on
 plot(rAcL,cll,'o','color','g')
 plot(x_l,y_l,'color','g')
 plot(x_d,y_d,'color','r')
-xlabel('Angle of Attack (rad)')
+xlabel('Angle of Attack in rad')
 ylabel('Coeff. (unitless)')
 legend('Coeff. Drag', 'Coeff. Lift', 'Coeff. Lift Regression', 'Coeff. Drag Regression', 'location', 'best')
 
