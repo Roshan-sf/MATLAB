@@ -1,7 +1,7 @@
 % Christian Martinez
 % Aero 300 Lab 7: 5/17/24
 
-close all;                   % clears all 
+%close all;                   % clears all 
 clear all;                   % clears workspace
 clc;                         % clears command line
 
