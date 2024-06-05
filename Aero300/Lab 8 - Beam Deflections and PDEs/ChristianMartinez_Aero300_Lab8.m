@@ -91,4 +91,4 @@ function [freq] = beamvibe(mode, n_pts, plots)
 end
 
 
-%count/2)/delta t
+%count/2)/delta t i = 4:length(2,:))
