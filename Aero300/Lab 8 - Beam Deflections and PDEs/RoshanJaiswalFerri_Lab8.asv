@@ -12,18 +12,18 @@ clc;            %Clears Command Window
 %% PART 1: 
 
 mode = 1;
-n_pts = 10;
-plots = 'yes';
+n_pts = 100;
+plots = 'no';
 
 [freq1] = beamvibe(mode, n_pts, plots);
-disp(['Frequency for mode 1: ', num2str(freq1), ' Hz']);
+disp(['Frequency for first mode: ', num2str(freq1), ' Hz']);
 
 mode = 2;
 n_pts = 100;
 plots = 'no';
 
 [freq2] = beamvibe(mode, n_pts, plots);
-disp(['Frequency for mode 2: ', num2str(freq2), ' Hz']);
+disp(['Frequency for mode: ', num2str(freq2), ' Hz']);
 
 for i = 3:20
     n_pts = 20;
@@ -57,14 +57,14 @@ function [freq] = beamvibe(mode, n_pts, plots)
     j = 1;
     for i = 2:n_pts-1
         if i == 2
-            W(i,j+1) = 0.5*Q * (W(i+2,j) - 4*W(i+1,j) + 6*W(i,j) - 4*W(i-1,j) - W(i,j)) + W(i,j);
+            W(i,j+1) = 0.5*Q * (W(i+2,j) - 4*W(i+1,j) + 6*W(i,j) - 4*W(i-1,j) -W(i,j)) + W(i,j);
         elseif i == n_pts-1
             W(i,j+1) = 0.5*Q * (-W(i,j) - 4*W(i+1,j) + 6*W(i,j) - 4*W(i-1,j) + W(i-2,j)) + W(i,j);
         else
             W(i,j+1) = 0.5*Q * (-W(i,j) - 4*W(i+1,j) + 6*W(i,j) - 4*W(i-1,j) + W(i-2,j)) + W(i,j);
         end
     end
-
+ 
     for j = 2:time_steps
         for i = 2:n_pts-1
             if i == 2
@@ -75,19 +75,22 @@ function [freq] = beamvibe(mode, n_pts, plots)
                 W(i,j+1) = Q * (W(i+2,j) - 4*W(i+1,j) + 6*W(i,j) - 4*W(i-1,j) + W(i-2,j)) + 2*W(i,j) - W(i,j-1);
             end
         end
-
+    end
         % Apply boundary conditions
         W(1,j+1) = 0; % Pin at the start
         W(n_pts,j+1) = 0; % Pin at the end
 
+        % Store the central point displacement for frequency analysis
+       
+        time(j) = j * dt;
+
         % Plot the beam if required
         if strcmp(plots, 'yes')
-            plot(x, W(:,j+1));
+            plot(x, W(:,j));
             ylim([-1, 1]);
             title(['Time: ', num2str(j * dt), ' seconds']);
             drawnow;
         end
-    end
 
     %Calculating frequency
     cross = 0;
@@ -107,7 +110,7 @@ function [freq] = beamvibe(mode, n_pts, plots)
     % Plot the displacement of the central point over time
     if strcmp(plots, 'yes')
         figure;
-        plot(time, W(ceil(n_pts/2), :));
+        plot(time, W_center);
         title('Displacement of the Central Point Over Time');
         xlabel('Time (seconds)');
         ylabel('Displacement');

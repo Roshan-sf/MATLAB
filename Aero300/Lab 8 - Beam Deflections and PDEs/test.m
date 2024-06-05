@@ -3,8 +3,8 @@ clear all;              % clears workspace
 clc;                    % clears command line
 
 mode = 1;
-n_pts = 100;
-plots = 'no';
+n_pts = 10;
+plots = 'yes';
 
 [freq1,W] = beamvibe(mode, n_pts, plots);
 disp(['Frequency for first mode: ', num2str(freq1), ' Hz']);
@@ -65,14 +65,16 @@ function [freq, W] = beamvibe(mode, n_pts, plots)
 
         % Store the central point displacement for frequency analysis
        
-        time(j) = j * dt;
-
         % Plot the beam if required
+        m = 0;
         if strcmp(plots, 'yes')
-            plot(x, W(:,j));
-            ylim([-1, 1]);
-            title(['Time: ', num2str(j * dt), ' seconds']);
-            drawnow;
+            while m < j
+                plot(x, W(:,j));
+                ylim([-1, 1]);
+                title(['Time: ', num2str(j * dt), ' seconds']);
+                drawnow;
+                m = m + 1;
+            end
         end
 
     %Calculating frequency
@@ -90,15 +92,15 @@ function [freq, W] = beamvibe(mode, n_pts, plots)
 
     freq = (cross)/(2 * abs(time1 - time2));
 
-    % Plot the displacement of the central point over time
-    if strcmp(plots, 'yes')
-        figure;
-        plot(time, W_center);
-        title('Displacement of the Central Point Over Time');
-        xlabel('Time (seconds)');
-        ylabel('Displacement');
-        grid on;
-    end
+    % % Plot the displacement of the central point over time
+    % if strcmp(plots, 'yes')
+    %     figure;
+    %     semilogx(time, W_center);
+    %     title('Displacement of the Central Point Over Time');
+    %     xlabel('Time (seconds)');
+    %     ylabel('Displacement');
+    %     grid on;
+    % end
 
 end
 
