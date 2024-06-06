@@ -12,8 +12,8 @@ clc;            %Clears Command Window
 %% PART 1: 
 
 mode = 1;
-n_pts = 10;
-plots = 'yes';
+n_pts = 100;
+plots = 'no';
 
 [freq1] = beamvibe(mode, n_pts, plots);
 disp(['Frequency for mode 1: ', num2str(freq1), ' Hz']);
@@ -26,7 +26,7 @@ plots = 'no';
 disp(['Frequency for mode 2: ', num2str(freq2), ' Hz']);
 
 for i = 3:20
-    n_pts = 20;
+    n_pts = 100;
     plots = 'no';
     [freq] = beamvibe(i, n_pts, plots);
     disp(['Frequency for mode ', num2str(i) ,': ', num2str(freq), ' Hz']);
