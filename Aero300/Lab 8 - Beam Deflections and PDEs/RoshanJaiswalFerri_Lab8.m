@@ -11,26 +11,40 @@ clc;            %Clears Command Window
 
 %% PART 1: 
 
-mode = 1;
-n_pts = 100;
-plots = 'no';
+anim = input('Animation? y/n', 's');
 
-[freq1] = beamvibe(mode, n_pts, plots);
-disp(['Frequency for mode 1: ', num2str(freq1), ' Hz']);
+if strcmp(anim,'y')
+    mode = 1;
+    n_pts = 100;
+    plots = 'yes';
+    
+    [freq1] = beamvibe(mode, n_pts, plots);
+    %disp(['Frequency for mode 1: ', num2str(freq1), ' Hz']);
+    
+    % mode = 2;
+    % n_pts = 100;
+    % plots = 'no';
+    % 
+    % [freq2] = beamvibe(mode, n_pts, plots);
+    % disp(['Frequency for mode 2: ', num2str(freq2), ' Hz']);
+end
 
-mode = 2;
-n_pts = 100;
-plots = 'no';
+freq = zeros(1,20);
+mode = linspace(1,20,20);
 
-[freq2] = beamvibe(mode, n_pts, plots);
-disp(['Frequency for mode 2: ', num2str(freq2), ' Hz']);
-
-for i = 3:20
+for i = 1:20
     n_pts = 100;
     plots = 'no';
-    [freq] = beamvibe(i, n_pts, plots);
-    disp(['Frequency for mode ', num2str(i) ,': ', num2str(freq), ' Hz']);
+    freq(1,i) = beamvibe(i, n_pts, plots);
+    disp(['Frequency for mode ', num2str(i) ,': ', num2str(freq(1,i)), ' Hz']);
 end
+
+figure('name', 'Mode vs Frequency')
+semilogy(mode,freq, '*', 'LineWidth', 5);
+xlabel('Mode')
+ylabel('Frequency (Hz)')
+title('Mode vs Frequency')
+grid on
 
 
 function [freq] = beamvibe(mode, n_pts, plots)
@@ -80,12 +94,16 @@ function [freq] = beamvibe(mode, n_pts, plots)
         W(1,j+1) = 0; % Pin at the start
         W(n_pts,j+1) = 0; % Pin at the end
 
-        % Plot the beam if required
+        %animation code, it will look a little fast, to fix set mod(j,1)
+        %and n pts to 20 or less (will give better animation but worse
+        %data)
         if strcmp(plots, 'yes')
-            plot(x, W(:,j+1));
-            ylim([-1, 1]);
-            title(['Time: ', num2str(j * dt), ' seconds']);
-            drawnow;
+            if mod(j,80) == 0
+                plot(x, W(:,j+1));
+                ylim([-1, 1]);
+                title(['Time: ', num2str(j * dt), ' seconds']);
+                drawnow;
+            end
         end
     end
 
