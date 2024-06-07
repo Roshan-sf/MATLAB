@@ -14,7 +14,7 @@ clc;            %Clears Command Window
 anim = input('Animation? y/n', 's');
 
 if strcmp(anim,'y')
-    mode = 1;
+    mode = input('Mode number? ');
     n_pts = 100;
     plots = 'yes';
     
