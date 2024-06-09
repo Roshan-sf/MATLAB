@@ -19,14 +19,6 @@ if strcmp(anim,'y')
     plots = 'yes';
     
     [freq1] = beamvibe(mode, n_pts, plots);
-    %disp(['Frequency for mode 1: ', num2str(freq1), ' Hz']);
-    
-    % mode = 2;
-    % n_pts = 100;
-    % plots = 'no';
-    % 
-    % [freq2] = beamvibe(mode, n_pts, plots);
-    % disp(['Frequency for mode 2: ', num2str(freq2), ' Hz']);
 end
 
 freq = zeros(1,20);
@@ -40,32 +32,26 @@ for i = 1:20
 end
 
 figure('name', 'Mode vs Frequency')
-semilogy(mode,freq, '*', 'LineWidth', 5);
-xlabel('Mode')
+semilogy(mode, freq, '.', 'Color', 'r', 'MarkerSize', 20);
+xlabel('Mode Number')
 ylabel('Frequency (Hz)')
 title('Mode vs Frequency')
 grid on
 
 
 function [freq] = beamvibe(mode, n_pts, plots)
-    % Constants and initial setup
-    L = pi; % Length of the beam
-    dx = L / (n_pts - 1); % Spatial step size
-    C = -9.3979e-6; % Given constant
-    Q = -0.2; % Given stability factor
-    dt = sqrt(Q * C * (dx^4)); % Initial time step
-    t_end = 0.1; % Simulation end time
-    time_steps = ceil(t_end / dt); % Number of time steps
+    L = pi; 
+    dx = L / (n_pts - 1); %Spatial step
+    C = -9.3979e-6; %constant
+    Q = -0.2; %Given stability
+    dt = sqrt(Q * C * (dx^4)); %time step
+    st = 0.1; %Sim time
+    ts = ceil(st / dt); %updated time step
+    W = zeros(n_pts, ts+1);
 
-    % Initialize W
-    W = zeros(n_pts, time_steps+1);
-
-    % Initial conditions
+    %Initial conditions
     x = linspace(0, L, n_pts);
-    W(:,1) = sin(mode * x); % Initial deflection
-
-    % Arrays to store the time history of central point for frequency analysis
-    time = linspace(0,t_end,time_steps+1);
+    W(:,1) = sin(mode * x);
 
     % Time stepping loop
     j = 1;
@@ -79,7 +65,7 @@ function [freq] = beamvibe(mode, n_pts, plots)
         end
     end
 
-    for j = 2:time_steps
+    for j = 2:ts
         for i = 2:n_pts-1
             if i == 2
                 W(i,j+1) = Q * (W(i+2,j) - 4*W(i+1,j) + 6*W(i,j) - 4*W(i-1,j) - W(i,j)) + 2*W(i,j) - W(i,j-1);
@@ -90,9 +76,9 @@ function [freq] = beamvibe(mode, n_pts, plots)
             end
         end
 
-        % Apply boundary conditions
-        W(1,j+1) = 0; % Pin at the start
-        W(n_pts,j+1) = 0; % Pin at the end
+        %BCs (Pins at either end)
+        W(1,j+1) = 0; 
+        W(n_pts,j+1) = 0; 
 
         %animation code, it will look a little fast, to fix set mod(j,1)
         %and n pts to 20 or less (will give better animation but worse
@@ -121,15 +107,5 @@ function [freq] = beamvibe(mode, n_pts, plots)
     end
 
     freq = (cross)/(2 * abs(time1 - time2));
-
-    % Plot the displacement of the central point over time
-    if strcmp(plots, 'yes')
-        figure;
-        plot(time, W(ceil(n_pts/2), :));
-        title('Displacement of the Central Point Over Time');
-        xlabel('Time (seconds)');
-        ylabel('Displacement');
-        grid on;
-    end
 
 end
