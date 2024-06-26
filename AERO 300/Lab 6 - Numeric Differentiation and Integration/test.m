@@ -1,6 +1,6 @@
-%(name)
-%Section - x
-%Numeric Differentiation and Integration:
+%Roshan Jaiswal-Ferri
+%Section - 03
+%Aero 300 Lab 6 - Numeric Differentiation and Integration: 5/16/24
 
 %% Workspace Prep
 
@@ -159,15 +159,20 @@ end
 
 function [int] = simpRule(t,f) %t is time, f is the function to integrate must be row vector
 
-    int = zeros(size(t)); %initializes the integral vector starting at 0
-
-    for i = 1:length(t)-1
-        h = t(1,i+1) - t(1,i);
-        if i == 1
-            int(1,i+1) = int(1,i)+(h/3)*(f(1,i+1)+4*f(1,i)+0); %plus zero if i is 1 because if you cannot have an array position < 0
-        else
-            int(1,i+1) = int(1,i)+(h/3)*(f(1,i+1)+(4*f(1,i))+f(1,i-1));
-        end
+    int = zeros(size(t)); % initializes the integral vector starting at 0
+    n = length(t) - 1; % number of intervals
+    
+    if mod(n, 2) == 1
+        warning('Simpson''s rule requires an even number of intervals, reducing the number of intervals by 1');
+        n = n - 1;
+    end
+    
+    h = (t(end) - t(1)) / n;
+    
+    int(1) = 0; % start with 0
+    
+    for i = 1:2:n-1
+        int((i+1)/2 + 1) = int((i+1)/2) + (h/3)*(f(i) + 4*f(i+1) + f(i+2));
     end
 
 end
