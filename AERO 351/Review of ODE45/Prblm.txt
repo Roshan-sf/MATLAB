@@ -1,0 +1,4 @@
+S/C us at 
+r = [3450 -1700 7750] km 
+v = [5.4 -5.4 1] km/s
+what is the trajectory for the next 24hrs

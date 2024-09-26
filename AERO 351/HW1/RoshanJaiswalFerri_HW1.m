@@ -14,8 +14,9 @@ clc;            %Clears Command Window
 day = 23;
 month = 9;
 year = 2024;
-ut = 12:00:00;
+ut = '12:00:00'; %enter time as a string in hh:mm:ss format (24hr time)
 
 
 
 JDtime = tojd(day,month,year,ut);
+disp(JDtime)
