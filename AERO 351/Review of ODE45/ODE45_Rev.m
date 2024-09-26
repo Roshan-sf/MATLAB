@@ -24,7 +24,7 @@ state = [rVect vVect]; %creating input variable
 
 %INPUTS MUST BE IN THAT ORDER UNTIL OPTIONS
 
-options = odeset('RelTol',1e-8,'AbsTol',1e-8); %ALWAYS CHANGE THESE
+options = odeset('RelTol',1e-8,'AbsTol',1e-8);%ALWAYS CHANGE THESE
 
 [timeNew,stateNew] = ode45(@twobodymotion,timespan,state,options,muEarth);
 
@@ -50,8 +50,8 @@ x = state(1);
 y = state(2);
 z = state(3);
 dx = state(4); %vel
-dy = state(4); %vel
-dz = state(4); %vel
+dy = state(5); %vel
+dz = state(6); %vel
 
 %mag of pos vector
 r = norm([x y z]);
@@ -63,13 +63,7 @@ ddz = -muEarth*z/r^3;
 
 dstate = [dx; dy; dz; ddx; ddy; ddz];
 
-
-
 end
-
-
-
-
 
 
 
