@@ -43,9 +43,6 @@ ylabel('Viscosity (Pa/S)')
 %collisions. On the other hand, from a macroscopic perspective, Viscocity
 %is largely not dependant on pressure.
 
-%Having a low temperature for viscosity in a wind tunnel would be important
-%for testing accuracy because air at high altitudes is also very cold, so
-%by lowering the temperature in the wind tunnel you are matching the
-%viscosity the air would have during a real world test. 
+
 
 

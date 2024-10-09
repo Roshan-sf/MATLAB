@@ -27,11 +27,11 @@ disp(' ')
 %% PART 2: Calculating Local Sidereal Time in Degrees
 
 disp('LST in Melbourne, AU, 12/21/2007, 10am UT')
-LST = sidereal(144.58,'e',12,21,2007,'10:00:00');
+LST = sidereal(144,58,'e',12,21,2007,'10:00:00');
 disp(num2str(LST))
 
 disp('LST in SLO, US, 7/4/2024, 12:30pm UT')
-LST = sidereal(120.653,'w',7,4,2024,'12:30:00');
+LST = sidereal(120.653,0,'w',7,4,2024,'12:30:00');
 disp(num2str(LST))
 disp(' ')
 
@@ -98,7 +98,7 @@ function dstate = twobodymotion(time,state,muEarth) %dstate is derivitve of stat
 
 end
 
-function [LST] = sidereal(long, dir, month, day, year, ut)
+function [LST] = sidereal(long, min, dir, month, day, year, ut)
     %Constants / Vars
     julianCentury = 36525; %days
     J2000 = 2451545;
@@ -107,6 +107,10 @@ function [LST] = sidereal(long, dir, month, day, year, ut)
     T0 = (J0-J2000)/julianCentury;
     GST = 100.4606184 + 36000.77004*T0 + 0.000387933*T0^2 - 2.58*10^-8*T0^3; %Greenwhich Siderial Time in degs
     GST = GST + 360.98564724*(deciTimeUT/24); %add UT time
+
+    if min
+        long = long + (min/60);
+    end
 
     if dir == 'e'
         LST = GST + long;
