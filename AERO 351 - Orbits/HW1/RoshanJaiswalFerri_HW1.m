@@ -14,10 +14,10 @@ clc;            %Clears Command Window
 day = 22;
 month = 9;
 year = 2024;
-ut = '4:00:00'; %enter time as a string in hh:mm:ss format (24hr time)
+ut = '8:00:00'; %enter time as a string in hh:mm:ss format (24hr time)
 
 JDtime = tojd(day,month,year,ut);
-JDtime2 = juliandate(2024,9,22,4,0,0);
+JDtime2 = juliandate(2024,9,22,8,0,0);
 
 disp('Julian Date of September 22, 2024:')
 disp(['My function: ', num2str(JDtime)])
@@ -52,6 +52,19 @@ state = [rVect vVect]; %creating input variable
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);%ALWAYS CHANGE THESE
 
 [timeNew,stateNew] = ode45(@twobodymotion,timespan,state,options,muEarth);
+
+endPosVec = [stateNew(end,1), stateNew(end,2), stateNew(end,3)];
+origin = [0, 0, 0];
+
+mag = norm(endPosVec);
+disp(['Magnitude of the distance (km): ', num2str(mag)]);
+
+
+finalVelVec = [stateNew(end,4), stateNew(end,5), stateNew(end,6)];
+
+finalVelMag = norm(finalVelVec);
+disp(['Magnitude of the final velocity (km/s): ', num2str(finalVelMag)]);
+
 
 figure('Name','2D Plot')
 plot(stateNew(:,1),stateNew(:,2)) %all rows in col 1 then all in col 2

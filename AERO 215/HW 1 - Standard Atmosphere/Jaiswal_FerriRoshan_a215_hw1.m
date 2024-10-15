@@ -33,20 +33,20 @@ figure; %creating a figure with three graphs of Temp, Pres, and Density vs altit
 subplot(1,3,1)
 plot(T, altVector) %'* showes the plot points with no line. two sashes (--) is a dashed line
 xlabel('Temperature (K)');
-ylabel('Altitude (x1,000km)')
+ylabel('Altitude (m*10^4)')
 title('Temperature vs Altitude')
 grid on;
 
 subplot(1,3,2)
 plot(P, altVector) 
 xlabel('Pressure (kPa)');
-ylabel('Altitude (x1,000km)')
+ylabel('Altitude (m*10^4)')
 title('Pressure vs altitude')
 grid on;
 
 subplot(1,3,3)
 plot(rho, altVector) 
 xlabel('Density (kg/m^3 )');
-ylabel('Altitude (x1,000km)')
+ylabel('Altitude (m*10^4)')
 title('Density vs altitude')
 grid on;
