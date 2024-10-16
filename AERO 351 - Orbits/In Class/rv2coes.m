@@ -1,4 +1,4 @@
-function [hM,a,e,nu,i,RAAN,w,p,t,energy] = rv2coes(R,V,mu)
+function [hM,a,e,nu,i,RAAN,w,p,t,en,Ra,Rp] = rv2coes(R,V,mu,r)
 
 %ALL IN RADIAN!!!!!!!!
 
@@ -80,8 +80,13 @@ end
 
 %% PART 10: Calculating Energy
 
-energy = (VM^2)/2 - mu/RM;
+energy = (VM^2)/2 - mu/RM; %km^2/s^2
+en = energy;
 
+%% PART 11: Calculating Apogee and Perigee Altitude
+
+Ra = a*(1+e)-r;
+Rp = a*(1-e)-r;
 
 
 end

@@ -14,10 +14,11 @@ clc;            %Clears Command Window
 R = [9031.5, -5316.9, -1647.2]; % km
 V = [-2.864, 5.1112, -5.0805]; % km/s
 mu = 398600; %in km^3/S^2
+r = 6378; %radius of earth in km
 
 %% Part2: Calling Function
 
-[h,a,e,nu,i,RAAN,w,p,t,energy] = rv2coes(R,V,mu);
+[h,a,e,nu,i,RAAN,w,p,t,en,Ra,Rp] = rv2coes(R,V,mu,r);
 
 %% Converting Rad to Deg
 nu = rad2deg(nu);
@@ -35,7 +36,9 @@ disp(['RAAN: ', num2str(RAAN), ' deg'])
 disp(['Argument of Periapsis: ', num2str(w), ' deg'])
 disp(['Period: ', num2str((p/3600)), ' hrs'])
 disp(['Time since perigee: ', num2str((t/3600)), ' hrs'])
-disp(['Specific Energy: ', num2str(energy), ' J/Kg'])
+disp(['Specific Energy: ', num2str(en), ' km^2/s^2'])
+disp(['Perigee alt: ', num2str(Ra), ' km'])
+disp(['Apogee alt: ', num2str(Rp), ' km'])
 
 
 
