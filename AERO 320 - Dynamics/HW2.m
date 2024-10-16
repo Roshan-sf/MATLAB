@@ -1,6 +1,6 @@
 %Roshan Jaiswal-Ferri
 %Section - 01
-%Aero 320 HW 2 - Rotation Matricies: 10/8/24
+%Aero 320 HW 3 - Spacecraft Problem: 10/15/24
 
 %% Workspace Prep
 
@@ -22,6 +22,10 @@ Xlvlh = cross(Ylvlh,Zlvlh);
 
 %Creating Matrix with new vectors
 
-Clvlh_eci = [Xlvlh, Ylvlh, Zlvlh];
+Clvlh_eci = [Xlvlh, Ylvlh, Zlvlh]';
 disp(Clvlh_eci)
+
+
+
+
 
