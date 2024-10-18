@@ -11,10 +11,7 @@ clc;            %Clears Command Window
 
 %% PART 1: Finding Rotation Matrix:
 
-% rV = [6783; 3391; 1953]; %Position Vector km
-% vV = [-3.5; 4.39; 4.44]; %Vel Vector km/s
-
-rV = [6738; 3391; 1953]; %Position Vector km
+rV = [6783; 3391; 1953]; %Position Vector km
 vV = [-3.5; 4.39; 4.44]; %Vel Vector km/s
 
 %Converting to F'LVLH
