@@ -62,8 +62,10 @@ disp(' ');
 disp('4e');
 disp(['chi^2 test (10hz): ', num2str(chiVal1)]);
 disp(['chi^2 test (100hz): ', num2str(chiVal2)]);
-disp(['chi^2 test (Filtered): ', num2str(chiVal3)]);
-disp(' ');
+disp(['chi^2 test (Filtered): ', num2str(chiVal1)]);
+
+
+
 
 %% PLOTS
 
@@ -75,11 +77,6 @@ xlabel('Time S')
 ylabel('Dist cm')
 legend('Unfiltered', 'Filtered', Location='best')
 title('Filtered vs Unfiltered')
-% Increase figure pixel resolution and font sizes (for publishing)
-Gx = gcf;
-Gx.Position(3:4) = Gx.Position(3:4)*5;
-Ax = gca;
-Ax.FontSize = Ax.FontSize *1.5;
 
 figure
 plot(FiveData(:,1),FiveData(:,2))
@@ -93,11 +90,8 @@ xlabel('Time S')
 ylabel('Dist cm')
 legend('0.9', '0.7', '0.5', '0.3', '0.1', Location='best')
 title('Different Alpha Values')
-% Increase figure pixel resolution and font sizes (for publishing)
-Gx = gcf;
-Gx.Position(3:4) = Gx.Position(3:4)*5;
-Ax = gca;
-Ax.FontSize = Ax.FontSize *1.5;
+
+
 
 %% PART 7: Finding Area
 
