@@ -30,6 +30,8 @@ options = odeset('RelTol',1e-8,'AbsTol',1e-8);%ALWAYS CHANGE THESE
 endPosVec = [stateNew(end,1), stateNew(end,2), stateNew(end,3)];
 origin = [0, 0, 0];
 
+disp('Results for 3.20:')
+
 mag = norm(endPosVec);
 disp(['Magnitude of the distance (km): ', num2str(mag)]);
 
@@ -42,29 +44,6 @@ disp(['Magnitude of the final velocity (km/s): ', num2str(finalVelMag)]);
 disp(num2str(endPosVec));
 disp(num2str(finalVelVec));
 disp(' ')
-
-
-% figure('Name','2D Plot')
-% plot(stateNew(:,1),stateNew(:,2)) %all rows in col 1 then all in col 2
-% xlabel('x Km')
-% ylabel('y Km')
-% %Mark start and end points
-% hold on
-% plot(stateNew(1,1), stateNew(1,2), 'ro', 'MarkerSize', 10, 'DisplayName', 'Start Point')
-% plot(stateNew(end,1), stateNew(end,2), 'go', 'MarkerSize', 10, 'DisplayName', 'End Point')
-% legend('Orbit Path', 'Start Point', 'End Point', Location='best')
-% 
-% 
-% figure('Name','3D Plot')
-% plot3(stateNew(:,1),stateNew(:,2),stateNew(:,3))
-% xlabel('x Km')
-% ylabel('y Km')
-% zlabel('z Km')
-% %Mark start and end points
-% hold on
-% plot3(stateNew(1,1), stateNew(1,2), stateNew(1,3), 'ro', 'MarkerSize', 10, 'DisplayName', 'Start Point')
-% plot3(stateNew(end,1), stateNew(end,2), stateNew(end,3), 'go', 'MarkerSize', 10, 'DisplayName', 'End Point')
-% legend('Orbit Path', 'Start Point', 'End Point', Location='best')
 
 %% PROBLEM 4.5:
 
@@ -82,6 +61,7 @@ i = rad2deg(i);
 w = rad2deg(w);
 
 % Displaying Results
+disp('Results for 4.5:')
 disp(['Specific Angular Momentum: ', num2str(h), ' km^2/s'])
 disp(['Eccentricity: ', num2str(e), ' unitless'])
 disp(['True Anomaly: ', num2str(nu), ' deg'])
@@ -103,6 +83,7 @@ r = 6378; %radius of earth in km
 i = rad2deg(i);
 
 % Displaying Results
+disp('Results for 4.7:')
 disp(['Inclination: ', num2str(i), ' deg'])
 
 %% Functions:

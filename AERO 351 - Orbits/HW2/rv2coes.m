@@ -67,7 +67,7 @@ else
     nu = (2*pi)-(acos(dot(eV,R)/(e*RM)));
 end
 
-%% PART 9: Time siince perigee passage
+%% PART 9: Time since perigee passage
 
 E = 2*atan(sqrt((1-e)/(1+e))*tan(nu/2));
 Me = E - e*sin(E);
