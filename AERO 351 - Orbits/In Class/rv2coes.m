@@ -1,4 +1,4 @@
-function [hM,a,e,nu,i,RAAN,w,p,t,en,Ra,Rp] = rv2coes(R,V,mu,r)
+function [hM,a,e,TA,i,RAAN,w,p,t,en,Ra,Rp] = rv2coes(R,V,mu,r)
 
 %ALL IN RADIAN!!!!!!!!
 
@@ -40,7 +40,7 @@ e = norm(eV);
 i = acos((dot(uk,h))/((hM)*(ukM))); %in rad not deg
 
 
-%% PART 6: RAAN in rad
+%% PART 6: RAAN in rad (ohm)
 
 n = cross(uk,h); %projection of momentum vector in orbital plane and node line?
 nM = norm(n);
@@ -51,7 +51,7 @@ else
     RAAN = (2*pi)-(acos((dot(ui,n))/((uiM)*(nM))));
 end
 
-%% PART 7: Argument of Periapsis in rad
+%% PART 7: Argument of Periapsis in rad (w)
 
 if eV(3) >= 0 %k component of eccentricity vector (height)
     w = acos(dot(n,eV)/(nM*e));
@@ -62,14 +62,14 @@ end
 %% PART 8: nu (or theta) true anomaly in rad
 
 if h2 >= 0 %dot product of R and V idk what it represents
-    nu = acos(dot(eV,R)/(e*RM));
+    TA = acos(dot(eV,R)/(e*RM));
 else
-    nu = (2*pi)-(acos(dot(eV,R)/(e*RM)));
+    TA = (2*pi)-(acos(dot(eV,R)/(e*RM)));
 end
 
-%% PART 9: Time siince perigee passage
+%% PART 9: Time since perigee passage
 
-E = 2*atan(sqrt((1-e)/(1+e))*tan(nu/2));
+E = 2*atan(sqrt((1-e)/(1+e))*tan(TA/2));
 Me = E - e*sin(E);
 n = (2*pi)/p;
 t = Me/n; %in seconds
