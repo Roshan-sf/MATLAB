@@ -8,7 +8,7 @@ format long;  % Allows for more accurate decimals
 close all;    % Clears all
 clear all;    % Clears Workspace
 clc;          % Clears Command Window
-addpath('C:\Users\rosha\Documents\MATLAB\RBSim FIles');
+%addpath('C:\Users\rosha\Documents\MATLAB\RBSim FIles');
 
 %% PART 1: Problem 1 Part A
 
