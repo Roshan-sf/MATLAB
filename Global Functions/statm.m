@@ -1,13 +1,10 @@
-function [T, P, rho] = stdatm_Jaiswsal_FerriRoshan(h)
-%UNTITLED3 Summary of this function goes here
-%   Detailed explanation goes here
-
-%Variables:
-%T0 is temp initial in K
-%H1 is height initial in m
-%a is lapse rate in gradient layers in K/m
-%r gas constant (j/kg*k)
-%g (9.81)
+function [T, P, rho] = statm(h)
+%Function for finding T P and rho up to 10km
+%   Input is in meters, ordered output:
+%   [T, P, rho] = statm(h)
+%   Temp in Kelvin
+%   Pressure in Pa
+%   Density in kg/m^3
 
 layer = 0;
 g = 9.81; % is g
