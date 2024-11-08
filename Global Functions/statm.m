@@ -3,7 +3,7 @@ function [T, P, rho] = statm(h)
 %   Input is in meters, ordered output:
 %   [T, P, rho] = statm(h)
 %   Temp in Kelvin
-%   Pressure in Pa
+%   Pressure in KPa
 %   Density in kg/m^3
 
 layer = 0;
@@ -39,11 +39,11 @@ a4 = .004; %lapse rate for fourth gradient layer
     elseif h > 90000 && h <= 100000
         layer = 7;
     elseif h > 100000
-        disp('Please enter an altitude smaller than 100,000 meters')
+        eroor('Please enter an altitude smaller than 100,000 meters')
     elseif h <= 0
-        disp('Please enter a number larger than 0')
+        error('Please enter a number larger than 0')
     else 
-        disp('You broke my code :( (or dont enter a letter it wants a number)')
+        error('You broke my code :( (or dont enter a letter it wants a number)')
  end
 
 if layer >= 1
@@ -146,64 +146,3 @@ if layer >= 7
     rho = rho1*(T/T1)^-((g/(r*a)+1));
 
 end
-
-
-
-    
-    % elseif h >= 11000 && h < 25000
-    %     layer = 2;
-    %     T1 = 216.66;
-    %     H1 = 11000;
-    %     Gradient = 0;
-    % elseif h >= 25000 && h < 47000
-    %     layer = 3;
-    %     T1 = 216.66;
-    %     H1 = 25000;
-    %     a = 0.003;
-    %     Gradient = 1;
-    % elseif h >= 47000 && h < 53000
-    %     layer = 4;
-    %     T1 = 282.66;
-    %     H1 = 47000;
-    %     Gradient = 0;
-    % elseif h >= 53000 && h < 79000
-    %     layer = 5;
-    %     T1 = 282.66;
-    %     H1 = 53000;
-    %     a = -0.0045;
-    %     Gradient = 1;
-    % elseif h >= 79000 && h < 90000
-    %     layer = 6;
-    %     T1 = 165.66;
-    %     H1 = 79000;
-    %     Gradient = 0;
-    % elseif h >= 90000 && h <= 100000
-    %     layer = 7;
-    %     T1 = 165.66;
-    %     H1 = 90000;
-    %     a = 0.004;
-    %     Gradient = 1;
-    % elseif h > 100000
-    %     disp('Please enter an altitude smaller than 100,000 meters')
-    % elseif h <= 0
-    %     disp('Please enter a number larger than 0')
-    % else 
-    %     disp('You broke my code :( (or dont enter a letter it wants a number)')
-    % end
-    % 
-
-
-
-    % 
-    % if Gradient == 1
-    %      T = T1 + a*(h-H1);       
-    %      P = P1*(T/Tx)^((-9.81)/(287.058*a));  
-    %      rho = rho1*(T/T1)^(-((9.81/287.058*a)+1));
-    % end
-    % 
-    % if Gradient == 0
-    %     T = T1;
-    %     P = P1*exp(-((9.81/(287.058*T1)*(h-H1))));
-    %     rho = rho1*exp(-((9.81/(287.058*T)*(h-H1))));
-    % end
-

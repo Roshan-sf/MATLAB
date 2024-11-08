@@ -33,8 +33,8 @@ M = linspace(0,3,200);
 P0 = 101325;
 T0 = 300;
 R0 = 1.225;
-Cp = 1.005; %of air @300k
-R = 287; %j/Kg-K
+Cp = 1.005; %of air @300k (in Kj)
+Rg = 287; %j/Kg-K
 
 for i = 1:length(M)
     [T(1,i), P(1,i), R(1,i)] = IsenCalc2(G, M(i), P0, T0, R0);
@@ -83,73 +83,140 @@ hold on
 plot(M2,(T1/T0),'*')
 plot(M2,(R1/R0),'*')
 title('Wind Tunnel Location v Ratio')
-xlabel('Wind Tunnel Location')
+xlabel('Wind Tunnel Location (Overlayed on Mach #)')
 ylabel('Ratio')
 legend('P/P0','T/T0','R/R0',Location="best")
 grid on
 xticks(M2S)  %Set ticks at each Mach number location
 xticklabels({'L1', 'L5', 'L4', 'L2', 'L3'})
 
-dS = Cp*log(T1(1,3)/T1(1,2))-R*log(P1(1,3)/P1(1,2));
-dS2 = Cp*log(T1(1,5)/T1(1,4))-R*log(P1(1,5)/P1(1,4));
+dS = Cp*log(T1(1,3)/T1(1,2))-Rg*log(P1(1,3)/P1(1,2));
+dS2 = Cp*log(T1(1,5)/T1(1,4))-Rg*log(P1(1,5)/P1(1,4));
 
 %% PART 3: ISF2
 
-[T, pt, rho] = statm(10000);
-
+[T3, p, rho] = statm(10000);
+Cp = 1005; %of air @300k (in j)
+p = p*1000;
 a = 299.5; %Speed of sound at 10 km in m/s
 
 v = linspace(1, 284, 400); %Speed from 1 m/s to 284 m/s
+rho(1:length(v)) = rho;
 M = v/a;
 
 q = 0.5*rho.*v.^2;
-p_static = pt-q;
-T_total = T*(1+(G-1)/2.*M.^2); %Total temperature (isentropic relation)
+p_static(1:length(v)) = p; %convrt kPa to Pa
+p_total = p_static;
+Pt = p_static+q;
+Ts(1:length(v)) = T3;
+T_total = Ts+(v.^2./(2*Cp));
+%T_total = T*(1+(G-1)/2.*M.^2); %Total temperature (isentropic relation)
 
 figure('Name','Bernoulli Calcutions');
-subplot(3,1,1);
+subplot(1,3,1);
 plot(M, p_static);
+hold on
+plot(M, Pt);
 xlabel('Mach Number');
-ylabel('Static Pressure (Pa)');
-title('Static Pressure vs Mach Number (Bernoulli)');
+ylabel('Pressure (Pa)');
+title('Pressure vs Mach # (Bernoulli)');
+legend('Static P', 'Total P')
+grid on
 
-subplot(3,1,2);
-plot(M, pt * ones(size(M)));
-xlabel('Mach Number');
-ylabel('Total Pressure (Pa)');
-title('Total Pressure vs Mach Number (Bernoulli)');
-
-subplot(3,1,3);
+subplot(1,3,2);
+plot(M, Ts)
+hold on
 plot(M, T_total);
 xlabel('Mach Number');
-ylabel('Total Temperature (K)');
-title('Total Temperature vs Mach Number (Bernoulli)');
+ylabel('Temperature (K)');
+title('Temparture vs Mach # (Bernoulli)');
+legend('Static T', 'Total T')
+grid on
+
+subplot(1,3,3);
+plot(M, rho);
+xlabel('Mach Number');
+ylabel('Density (kg/m^3)');
+title('\rho vs Mach # (Bernoulli)');
+grid on
 
 %Isentropic Calcs
-p_static_iso = pt./(1+(G-1)/2.*M.^2).^(G/(G-1));
-T_static_iso = T./(1+(G-1)/2.*M.^2);
+p_static_iso = p./(1+(G-1)/2.*M.^2).^(G/(G-1));
+T_static_iso = T3./(1+(G-1)/2.*M.^2);
 rho_static_iso = rho./(1+(G-1)/2.*M.^2).^(1/(G-1));
-T_total_iso = T_static_iso.*(1+(G-1)/2.*M.^2);
+%T_total_iso = T_static_iso.*(1+(G-1)/2.*M.^2);
 
 figure('Name','Isentropic Calculations');
-subplot(3,1,1);
+subplot(1,3,1);
 plot(M, p_static_iso);
+hold on
+plot(M, p_total);
 xlabel('Mach Number');
-ylabel('Static Pressure (Pa)');
-title('Static Pressure vs Mach Number (Isentropic)');
+ylabel('Pressure (Pa)');
+title('Pressure vs Mach # (Isentropic)');
+legend('Static P', 'Total P')
+grid on
 
-subplot(3,1,2);
-plot(M, pt * ones(size(M)));
+subplot(1,3,2);
+plot(M, T_static_iso);
+hold on
+plot(M, Ts)
 xlabel('Mach Number');
-ylabel('Total Pressure (Pa)');
-title('Total Pressure vs Mach Number (Isentropic)');
+ylabel('Total Temp (K)');
+title('Temperature vs Mach # (Isentropic)');
+legend('Static T', 'Total T')
+grid on
 
-subplot(3,1,3);
-plot(M, T_total_iso);
+subplot(1,3,3);
+plot(M,rho_static_iso)
 xlabel('Mach Number');
-ylabel('Total Temperature (K)');
-title('Total Temperature vs Mach Number (Isentropic)');
+ylabel('Density (kg/m^3)');
+title('\rho vs Mach # (Isentropic)');
+grid on
 
+%% PART 5: CM1
+
+Rho1 = 7.6; %kg/m^3
+rho1 = 7.6*0.003;
+mdot = 117.75; %kg/s
+t = linspace(1,223,1500);
+t0 = 0.75; %s
+
+for i = 1:length(t)
+    %dRho(1,i) = (-mdot/(pi*(0.05^2)*15*t(i)))*(t(i)-t0);
+    dRho(1,i) = (-mdot*log(abs(t(i))))/pi*(0.05^2)*15;
+end
+
+rhot = dRho+Rho1;
+[~, idx] = min(abs(rhot - rho1));
+closest_value = rhot(idx);
+disp(num2str(closest_value))
+
+figure('Name','Change in rho')
+plot(t,dRho)
+hold on
+plot(t,rhot)
+xlabel('Time (s)')
+ylabel('Change in \rho (kg/m^3)')
+title('Change in \rho')
+legend('\Delta\rho', '\rho')
+grid on
+
+%% PART 4: CM2
+
+x = 10;
+r = linspace(-x*tan(deg2rad(11.8)), x*tan(deg2rad(11.8)), 200);
+
+U = 1; %max speed is ratio of 1:1
+Um = 2*U;
+
+U = Um*exp((-50.*r.^2)./x^2);
+
+figure('Name','Velocity Profile at x=10d')
+plot(r,U)
+xlabel('Dist x Diameter')
+ylabel('Speed (m/s)')
+grid on
 
 %% Functions
 
