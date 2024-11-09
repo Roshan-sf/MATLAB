@@ -25,31 +25,20 @@ xlabel('Thrust Coeff Ct')
 ylabel('Efficiency \eta')
 legend('\eta', 'Ct')
 
-%% PART 2: Isentropic Flow (ISF1)
+%% PART 2: ISF1
 
 a = 343;
 G = 1.4;
 M = linspace(0,3,200);
-P0 = 101325;
-T0 = 300;
+P00 = 101325;
+T00 = 300;
 R0 = 1.225;
 Cp = 1.005; %of air @300k (in Kj)
 Rg = 287; %j/Kg-K
 
 for i = 1:length(M)
-    [T(1,i), P(1,i), R(1,i)] = IsenCalc2(G, M(i), P0, T0, R0);
+    [T(1,i), P(1,i), R(1,i)] = IsenCalc2(G, M(i), P00, T00, R0);
 end
-
-figure('Name','Isentropic Calculations')
-plot(M,(P./P0))
-hold on
-plot(M,(T./T0))
-plot(M,(R./R0))
-title('Isentropic Calculations of Air')
-xlabel('Mach #')
-ylabel('Ratio')
-legend('P/P0','T/T0','R/R0',Location="best")
-grid on
 
 Lab1D = load('S4G1D3RPM400.mat');
 T0 = mean(Lab1D.t);
@@ -59,6 +48,9 @@ P2 = mean(Lab1D.P(:,3));
 P3 = mean(Lab1D.P(:,4));
 P4 = mean(Lab1D.P(:,5));
 P5 = mean(Lab1D.P(:,6));
+
+PS = [P1,P2,P3,P4,P5];
+R0R = (P0./PS).^(1/G); %Rho/Rho0 avg over wind tunnel
 
 V1 = sqrt(abs((2*(P0-P1))/R0));
 V2 = sqrt(abs((2*(P0-P2))/R0));
@@ -71,12 +63,24 @@ M2(1,2) = V2/a;
 M2(1,3) = V3/a;
 M2(1,4) = V4/a;
 M2(1,5) = V5/a;
+M2S = sort(M2);
 
 for i = 1:length(M2)
     [T1(1,i), P1(1,i), R1(1,i)] = IsenCalc2(G, M2(i), P0, T0, R0);
 end
 
-M2S = sort(M2);
+figure('Name','Isentropic Calculations')
+plot(M,(P./P00))
+hold on
+plot(M,(T./T00))
+plot(M,(R./R0))
+plot(M2S,R0R, '*')
+title('Isentropic Calculations of Air')
+xlabel('Mach #')
+ylabel('Ratio')
+legend('P/P0','T/T0','R/R0','\rho_0/\rho',Location="best")
+grid on
+
 figure('Name','Ratio v Location')
 plot(M2,(P1/P0),'*')
 hold on
@@ -91,7 +95,12 @@ xticks(M2S)  %Set ticks at each Mach number location
 xticklabels({'L1', 'L5', 'L4', 'L2', 'L3'})
 
 dS = Cp*log(T1(1,3)/T1(1,2))-Rg*log(P1(1,3)/P1(1,2));
+dS = abs((dS/Cp)*100);
 dS2 = Cp*log(T1(1,5)/T1(1,4))-Rg*log(P1(1,5)/P1(1,4));
+dS2 = abs((dS2/Cp)*100);
+disp(['Change in Entropy over test section: ', num2str(dS)]);
+disp(['Change in Entropy over fan: ', num2str(dS2)]);
+disp(' ');
 
 %% PART 3: ISF2
 
@@ -190,16 +199,17 @@ end
 rhot = dRho+Rho1;
 [~, idx] = min(abs(rhot - rho1));
 closest_value = rhot(idx);
-disp(num2str(closest_value))
+closest_time = t(idx);
+disp(['Time when rho reaches 0.3%: ', num2str(closest_time), ' sec']);
 
 figure('Name','Change in rho')
-plot(t,dRho)
-hold on
+%plot(t,dRho)
+%hold on
 plot(t,rhot)
 xlabel('Time (s)')
-ylabel('Change in \rho (kg/m^3)')
-title('Change in \rho')
-legend('\Delta\rho', '\rho')
+ylabel('\rho (kg/m^3)')
+title('\rho vs Time')
+%legend('\Delta\rho', '\rho')
 grid on
 
 %% PART 4: CM2
