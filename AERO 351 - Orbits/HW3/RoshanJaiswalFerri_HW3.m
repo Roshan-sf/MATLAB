@@ -254,7 +254,7 @@ tspan = [0, 89*60] ;%s
 Tt = [89*60, 89*60+120];%Thrust time ins
 
 state = [R, V];
-[~,stateNew] = ode45(@twobodymotion2,tspan,state,options,mu);
+[~,stateNew] = ode45(@twobodymotion,tspan,state,options,mu);
 
 R1 = [stateNew(end,1), stateNew(end,2), stateNew(end,3)];
 V1 = [stateNew(end,4), stateNew(end,5), stateNew(end,6)];
@@ -283,7 +283,7 @@ disp(' ')
 %Plot & propogate new trajectory
 tspan = [0, 6*60*60];
 state2 = [R2, V2];
-[~,stateNew4] = ode45(@twobodymotion2,tspan,state2,options,mu);
+[~,stateNew4] = ode45(@twobodymotion,tspan,state2,options,mu);
 
 figure('Name', 'Continuous Thrust Trajectory');
 plot3(stateNew(:, 1), stateNew(:, 2), stateNew(:, 3), 'b', 'LineWidth', 1.5); % Coasting phase
@@ -297,111 +297,3 @@ grid on;
 legend('Coasting Phase', 'Thrust Orbit', 'Earth');
 title('Spacecraft Trajectory under Continuous Thrust');
 hold off;
-
-
-%% Functions:
-
-function [EtoP, PtoE] = ECI2PERI(omega,inc,RAAN)
-    EtoP = inv(rotz(omega))*inv(rotx(inc))*inv(rotz(RAAN));
-    PtoE = inv(EtoP);
-end
-
-function [V1,V2] = lambUVBi(R1,R2,dtime,Tm,mu,tol)
-    R1n = norm(R1);
-    R2n = norm(R2);
-    Z = 0;
-    C = 1/2;
-    S = 1/6;
-    Zu = 4*pi^2; %upper bound
-    Zl = -4*pi^2; %lower bound
-    dtl = 1; %change in time of loop (random guess)
-    deltaTheta = acos((dot(R1,R2)/(R1n*R2n)));
-    A = sin(deltaTheta)*sqrt((R1n*R2n)/(1-cos(deltaTheta)));
-    
-    while abs(dtl-dtime) > tol
-        Y = R1n+R2n+(A*((Z*S-1)/sqrt(C)));        
-        UV = sqrt(Y/C);
-        dtl = (((UV^3)*S)/sqrt(mu))+((A*sqrt(Y))/sqrt(mu));
-
-        if dtl < dtime
-            Zl = Z; %reset zlower
-        elseif dtl > dtime
-            Zu = Z; %reset zupper
-        end
-
-        Z = 0.5*(Zu+Zl); %update z to midpoint
-        [C,S] = stumpff(Z); %update stumpff c(z) s(z)
-
-        f = 1-(((UV^2)/R1n)*C);
-        g = dtl - (((UV^3)/sqrt(mu)) * S);
-        fd = (sqrt(mu)/(R1n*R2n))*UV*((Z*S)-1);
-        gd = 1-(((UV^2)/R2n)*C);
-        %<3: f*gd - fd*g = 1
-
-        %g = (1/mu)*(((Y/C)^(3/2))*S+(A*sqrt(Y)))-(1/mu)*((Y/C)^(3/2))*S;
-        %g = A*sqrt(Y/mu);
-
-        for i = 1:3
-            V1(i) = (1/g)*(R2(i)-f*R1(i));
-            V2(i) = (fd*R1(i))+(gd*V1(i));
-        end
-  
-    end
-end
-
-function [C, S] = stumpff(z)
-    if z > 0
-        S = (sqrt(z)-sin(sqrt(z)))/((sqrt(z))^3);
-        C = (1-cos(sqrt(z)))/z;
-    elseif z < 0
-        S = (sinh(sqrt(-z))-sqrt(-z))/((sqrt(-z))^-3);
-        C = (cosh(sqrt(-z))-1)/-z;
-    elseif z == 0
-        S = 1/6;
-        C = 1/2;
-    else
-        error('stumpff broke? (not a number?)')
-    end
-end
-
-function tstate = contThrust(time, state, T, Isp, mu, g0)
-
-    x = state(1);
-    y = state(2);
-    z = state(3);
-    dx = state(4);
-    dy = state(5);
-    dz = state(6);
-    m = state(7);
-    rMag = norm([x y z]);
-    vMag = norm([dx dy dz]);
-    ddx = -mu*x/rMag^3 +(T/m)*dx/vMag;
-    ddy = -mu*y/rMag^3 +(T/m)*dy/vMag;
-    ddz = -mu*z/rMag^3 +(T/m)*dz/vMag;
-    mdot = -T/(g0*Isp);
-    
-
-    tstate = [dx;dy;dz;ddx;ddy;ddz;mdot];
-
-end
-
-function dstate = twobodymotion2(time,state,muEarth) %dstate is derivitve of state
-
-    %define vars
-
-    x = state(1);
-    y = state(2);
-    z = state(3);
-
-    dx = state(4); %vel
-    dy = state(5); %vel
-    dz = state(6); %vel
-
-
-    r = norm([x y z]);
-
-    ddx = -muEarth*x/r^3;
-    ddy = -muEarth*y/r^3;
-    ddz = -muEarth*z/r^3;
-    dstate = [dx; dy; dz; ddx; ddy; ddz];
-end
