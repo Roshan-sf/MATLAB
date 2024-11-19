@@ -61,7 +61,7 @@ aM = ((mu*MeM)^(1/3))/MeM;
 aG = ((mu*MeG)^(1/3))/MeG;
 
 %Juilian Date
-JDtimeL1 = juliandate(2024,11,13,06,51,24);
+JDtimeL1 = juliandate(2024,11,13,06,51,24); % CHANGE THESE!!
 JDtimeL2 = juliandate(2024,11,13,11,16,53);
 JDtimeM = juliandate(2024,11,13,02,18,12);
 JDtimeG = juliandate(2024,11,13,11,24,12);
@@ -71,8 +71,11 @@ JDStart = juliandate(2024,11,14,0,0,0); %start nov-14-2024 at midnight
 
 %INPUT AND OUTPUT IN METERS!!!!!!
 [R,V] = keplerian2ijk(aL1*1000,eccL1,incL1,RAANL1,ArgPL1,nuL1);
+[R_test,V_test] = keplerian2ijk(aM*1000,eccM,incM,RAANM,ArgPM,nuM);
 R = R./1000;
 V = V./1000;
+R_test = R_test./1000;
+V_test = V_test./1000;
 %DEBUG: 
 % [~,a,e] = rv2coes(R,V,mu,Rearth);
 
@@ -82,9 +85,16 @@ PropTime = (JDStart-JDtimeL1)+(5*p); %seconds
 timespan = [0, PropTime];
 state = [R, V]; 
 %INPUTS MUST BE IN THAT ORDER UNTIL OPTIONS
-options = odeset('RelTol',1e-8,'AbsTol',1e-8);%ALWAYS CHANGE THESE
+options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 
 [timeNew,stateNew] = ode45(@twobodymotion,timespan,state,options,mu);
 
 RL1 = [stateNew(end,1),stateNew(end,2),stateNew(end,3)];
 VL1 = [stateNew(end,4),stateNew(end,5),stateNew(end,6)];
+
+VL1n = norm(VL1);
+Vn = norm(V_test);
+
+dV = 2*VL1n*sind(25);
+disp(dV)
+
