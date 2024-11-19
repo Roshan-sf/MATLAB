@@ -43,7 +43,7 @@ a = -((mu)/(2*ep)); %in km
 
 %% PART 3: Genreal equation calculation for period
 
-p = (2*pi)*sqrt((a^3)/(mu)); %period of orbit in seconds
+p = (2*pi)*sqrt((a^3)/(mu)); %period of orbit in seconds (ellipse & circ)
 
 %% PART 4: Calculating eccentricity
 eV = (1/mu)*((((VM^2)-((mu)/(RM)))*R)-(dot(R,V)*V)); %eccentricity vector is from origin to point of periapsis 

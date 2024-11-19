@@ -104,48 +104,68 @@ VL1 = [stateNew(end,4),stateNew(end,5),stateNew(end,6)];
 %% PART 4: First Transfer
 
 JDL2 = abs(JDtimeL1-JDtimeL2);
-dtL = 0+60; % ---DO NOT CHANGE--- Calculated most efficient transfer time 
-Ttrnsfr = PropTime+dtL+JDL2;
-tspan = [0,Ttrnsfr];
-[R2,V2] = keplerian2ijk(aL2*1000,eccL2,incL2,RAANL2,ArgPL2,nuL2);
-R2 = R2./1000;
-V2 = V2./1000;
-stateL2 = [R2, V2];
+x = 1;
+for i = 60:10:4*3600
+    dtL = i;
+    Ttrnsfr = PropTime+dtL+JDL2;
+    tspan = [0,Ttrnsfr];
+    [R2,V2] = keplerian2ijk(aL2*1000,eccL2,incL2,RAANL2,ArgPL2,nuL2);
+    R2 = R2./1000;
+    V2 = V2./1000;
+    stateL2 = [R2, V2];
+    
+    [timeNewL2,stateNewL2] = ode45(@twobodymotion,tspan,stateL2,options,mu);
+    RL2 = [stateNewL2(end,1),stateNewL2(end,2),stateNewL2(end,3)];
+    VL2 = [stateNewL2(end,4),stateNewL2(end,5),stateNewL2(end,6)];
+    
+    %parameters for lambert w/ uv function:
+    tol = 1e-8;
+    tm = 1; %<3: Short way around
+    
+    [V1,V2] = lambUVBi(RL1,RL2,dtL,tm,mu,tol);
+    
+    Vf1(x,1:3) = V1 - VL1;
+    Vf1n(x) = norm(Vf1(x,1:3));
 
-[timeNewL2,stateNewL2] = ode45(@twobodymotion,tspan,stateL2,options,mu);
-RL2 = [stateNewL2(end,1),stateNewL2(end,2),stateNewL2(end,3)];
-VL2 = [stateNewL2(end,4),stateNewL2(end,5),stateNewL2(end,6)];
+    Vf2(x,1:3) = VL2 - V2;
+    Vf2n(x) = norm(Vf2(x,1:3));
 
-%parameters for lambert w/ uv function:
-tol = 1e-8;
-tm = 1; %<3: Short way around
+    Vf(x) = Vf1n(x) + Vf2n(x);
 
-[V1,V2] = lambUVBi(RL1,RL2,dtL,tm,mu,tol);
+    t(x) = i;
 
-Vf1 = V1 - VL1;
-Vf1n = norm(Vf1);
 
-Vf2 = VL2 - V2;
-Vf2n = norm(Vf2);
+    x = x +1;
+end
+% disp([num2str(Vf)])
+% disp([num2str(norm(Vf))])
 
-Vf = Vf1n + Vf2n;
 
+figure
+plot(Vf)
+xlabel('Time')
+ylabel('\delta V km/s')
+title('Required \delta V vs Departure Time')
 
 %%
 
+figure('Name', 'Orbit Trajectory');
+plot3(stateNew(:, 1), stateNew(:, 2), stateNew(:, 3), 'b', 'LineWidth', 1.5); % Coasting phase
+hold on;
+plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+plot3(stateNewL2(:, 1), stateNewL2(:, 2), stateNewL2(:, 3), 'r', 'LineWidth', 1.5);
+plot3(stateNewL2(end,1),stateNewL2(end,2),stateNewL2(end,3), 'm*', 'MarkerSize', 10); % Earth at the origin
+plot3(stateNew(end,1),stateNew(end,2),stateNew(end,3), 'c*', 'MarkerSize', 10); % Earth at the origin
+xlabel('X (km)');
+ylabel('Y (km)');
+zlabel('Z (km)');
+grid on;
+%legend('Coasting Phase', 'Thrust Orbit', 'Earth');
+title('Spacecraft Trajectory under Continuous Thrust');
+hold off;
 
-% figure('Name', 'Orbit Trajectory');
-% plot3(stateNew(:, 1), stateNew(:, 2), stateNew(:, 3), 'b', 'LineWidth', 1.5); % Coasting phase
-% hold on;
-% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
-% plot3(stateNewL2(:, 1), stateNewL2(:, 2), stateNewL2(:, 3), 'r', 'LineWidth', 1.5);
-% plot3(stateNewL2(end,1),stateNewL2(end,2),stateNewL2(end,3), 'm*', 'MarkerSize', 10); % Earth at the origin
-% plot3(stateNew(end,1),stateNew(end,2),stateNew(end,3), 'c*', 'MarkerSize', 10); % Earth at the origin
-% xlabel('X (km)');
-% ylabel('Y (km)');
-% zlabel('Z (km)');
-% grid on;
-% %legend('Coasting Phase', 'Thrust Orbit', 'Earth');
-% title('Spacecraft Trajectory under Continuous Thrust');
-% hold off;
+%%
 
+%z = find(Vf == 1.897401728841076);
+
+[z, idx] = min(Vf);
