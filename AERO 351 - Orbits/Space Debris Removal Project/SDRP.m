@@ -13,6 +13,7 @@ clc;            %Clears Command Window
 
 mu = 398600;
 Rearth = 6378;
+tol = 1;
 
 %% PART 2: Reading TLE Data
 
@@ -103,49 +104,94 @@ VL1 = [stateNew(end,4),stateNew(end,5),stateNew(end,6)];
 
 %% PART 4: First Transfer
 
-JDL2 = abs(JDtimeL1-JDtimeL2);
-dtL = 0+60; % ---DO NOT CHANGE--- Calculated most efficient transfer time 
+[~,~,~,nuL12,~,~,~,p2,t,~,Ra] = rv2coes(RL1,VL1,mu,Rearth);
+
+tA = (p2/2)-t; %time to apogee
+
+state = [RL1, VL1];
+tspan = [0, tA];
+[timeNew,stateNew3] = ode45(@twobodymotion,tspan,state,options,mu);
+
+RL11 = [stateNew3(end,1),stateNew3(end,2),stateNew3(end,3)]; %R&V at apogee
+VL11 = [stateNew3(end,4),stateNew3(end,5),stateNew3(end,6)];
+
+rT = norm(stateNew3(end,1:3)); %R target
+
+%Circ Burn
+v = sqrt(mu/rT);
+dV = v-norm(VL11);
+
+uV = VL11/norm(VL11); %unit vector
+dVd = dV*uV; %delta V with direction
+VL111 = VL11+dVd; %new velocity vector after adding velocity
+
+[~,a,e,nuL12,~,~,w] = rv2coes(RL11,VL111,mu,Rearth); %e confirms we are circ!
+
+%INC + RAAN Change
+dR = abs(RAANL1-RAANL2);
+alpha = acosd(cosd(incL1)*cosd(incL2)+sind(incL1)*sind(incL2)*cosd(dR));
+dVincR = 2*norm(VL1)*sind((alpha/2));
+
+dVt = dVincR + dV; %delta V total
+
+for i = 1:360
+    [R2,V2] = keplerian2ijk(a*1000,e,incL2,RAANL2,ArgPL1,i);
+    R2 = R2./1000;
+    V2 = V2./1000;
+    diff = R2'-RL11;
+        if norm(diff) < tol
+            disp(['Found:', num2str(i)])
+            break
+        end
+    dDist(i) = norm(diff);
+end
+
+figure
+plot(dDist)
+
+Vdiff = V2' - VL111;
+norm(Vdiff)
+
+%------
+
+
+JDL2 = abs(JDtimeL1-JDtimeL2); 
+dtL = 5*p2;
 Ttrnsfr = PropTime+dtL+JDL2;
-tspan = [0,Ttrnsfr];
-[R2,V2] = keplerian2ijk(aL2*1000,eccL2,incL2,RAANL2,ArgPL2,nuL2);
-R2 = R2./1000;
-V2 = V2./1000;
-stateL2 = [R2, V2];
+tspan2 = [0,Ttrnsfr];
+tspan = [0, 0.9*p2];
+[R22,V22] = keplerian2ijk(aL2*1000,eccL2,incL2,RAANL2,ArgPL2,nuL2);
+R22 = R22./1000;
+V22 = V22./1000;
+stateL22 = [R22, V22];
+stateL2 = [RL11, VL111];
+
+[timeNewL22,stateNewL22] = ode45(@twobodymotion,tspan,stateL22,options,mu);
+RL22 = [stateNewL22(end,1),stateNewL22(end,2),stateNewL22(end,3)];
+VL22 = [stateNewL22(end,4),stateNewL22(end,5),stateNewL22(end,6)];
 
 [timeNewL2,stateNewL2] = ode45(@twobodymotion,tspan,stateL2,options,mu);
 RL2 = [stateNewL2(end,1),stateNewL2(end,2),stateNewL2(end,3)];
 VL2 = [stateNewL2(end,4),stateNewL2(end,5),stateNewL2(end,6)];
 
-%parameters for lambert w/ uv function:
-tol = 1e-8;
-tm = 1; %<3: Short way around
-
-[V1,V2] = lambUVBi(RL1,RL2,dtL,tm,mu,tol);
-
-Vf1 = V1 - VL1;
-Vf1n = norm(Vf1);
-
-Vf2 = VL2 - V2;
-Vf2n = norm(Vf2);
-
-Vf = Vf1n + Vf2n;
-
-
 %%
 
 
-% figure('Name', 'Orbit Trajectory');
-% plot3(stateNew(:, 1), stateNew(:, 2), stateNew(:, 3), 'b', 'LineWidth', 1.5); % Coasting phase
-% hold on;
-% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
-% plot3(stateNewL2(:, 1), stateNewL2(:, 2), stateNewL2(:, 3), 'r', 'LineWidth', 1.5);
-% plot3(stateNewL2(end,1),stateNewL2(end,2),stateNewL2(end,3), 'm*', 'MarkerSize', 10); % Earth at the origin
-% plot3(stateNew(end,1),stateNew(end,2),stateNew(end,3), 'c*', 'MarkerSize', 10); % Earth at the origin
-% xlabel('X (km)');
-% ylabel('Y (km)');
-% zlabel('Z (km)');
-% grid on;
-% %legend('Coasting Phase', 'Thrust Orbit', 'Earth');
-% title('Spacecraft Trajectory under Continuous Thrust');
-% hold off;
+figure('Name', 'Orbit Trajectory');
+plot3(stateNew(:, 1), stateNew(:, 2), stateNew(:, 3), 'b', 'LineWidth', 1.5); % Coasting phase
+hold on;
+plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+plot3(stateNewL2(:, 1), stateNewL2(:, 2), stateNewL2(:, 3), 'r', 'LineWidth', 1.5);
+plot3(stateNewL22(:, 1), stateNewL22(:, 2), stateNewL22(:, 3), 'g', 'LineWidth', 1.5);
+plot3(stateNewL2(end,1),stateNewL2(end,2),stateNewL2(end,3), 'r*', 'MarkerSize', 10); % Earth at the origin
+plot3(stateNew(end,1),stateNew(end,2),stateNew(end,3), 'w*', 'MarkerSize', 10); 
+plot3(stateNewL22(end,1),stateNewL22(end,2),stateNewL22(end,3), 'g*', 'MarkerSize', 10);
+plot3(stateNew3(end,1),stateNew3(end,2),stateNew3(end,3), 'y*', 'MarkerSize', 10);
+xlabel('X (km)');
+ylabel('Y (km)');
+zlabel('Z (km)');
+grid on;
+legend('Orbit 1', 'Earth', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee');
+title('Spacecraft Trajectory under Continuous Thrust');
+hold off;
 
