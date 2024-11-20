@@ -73,7 +73,7 @@ aM = Me2a(tleM.meanMotion,mu);
 aG = Me2a(tleG.meanMotion,mu);
 
 %Juilian Date
-JDtimeL1 = juliandate(2024,11,18,18,01,04); % CHANGE THESE!!
+JDtimeL1 = juliandate(2024,11,18,18,01,04); 
 JDtimeL2 = juliandate(2024,11,17,23,04,40);
 JDtimeM = juliandate(2024,11,13,02,18,12);
 JDtimeG = juliandate(2024,11,13,11,24,12);
@@ -92,6 +92,7 @@ V = V./1000;
 
 PropTime = (JDStart-JDtimeL1)+(5*p); %seconds
 timespan = [0, PropTime];
+JDCurrent = PropTime;
 state = [R, V]; 
 %INPUTS MUST BE IN THAT ORDER UNTIL OPTIONS
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
@@ -108,24 +109,28 @@ VL1 = [Orbit1(end,4),Orbit1(end,5),Orbit1(end,6)];
 
 tA = (p/2)-t; %time to apogee
 
+%propogation for apogee
 state = [RL1, VL1];
 tspan = [0, tA];
 [timeNew,Orbit1A] = ode45(@twobodymotion,tspan,state,options,mu);
 
-RL11 = [Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3)]; %R&V at apogee
-VL11 = [Orbit1A(end,4),Orbit1A(end,5),Orbit1A(end,6)];
+RL1A = [Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3)]; %R&V at apogee
+VL1A = [Orbit1A(end,4),Orbit1A(end,5),Orbit1A(end,6)];
 
 rT = norm(Orbit1A(end,1:3)); %R target
 
 %Circ Burn
 v = sqrt(mu/rT);
-dVc = v-norm(VL11); %delta v from circ burn
+dVc = v-norm(VL1A); %delta v from circ burn
 
-uV = VL11/norm(VL11); %unit vector
+uV = VL1A/norm(VL1A); %unit vector
 dVd = dVc*uV; %delta V with direction
-VL111 = VL11+dVd; %new velocity vector after adding velocity
+VL1C = VL1A+dVd; %new velocity vector after adding velocity
+RL1C = RL1A;
 
-[~,a,e,nuL12,~,~,w,p3] = rv2coes(RL11,VL111,mu,Rearth); %e confirms we are circ!
+hL1C = cross(RL1C,VL1C); %h of Leo 1 circ orbit
+
+[~,a,e,nuL12,~,~,w,p3] = rv2coes(RL1A,VL1C,mu,Rearth); %e confirms we are circ!
 
 %INC + RAAN Change
 dR = abs(RAANL1-RAANL2);
@@ -136,34 +141,52 @@ dVt = dVincR + dVc; %delta V total
 
 
 [R2,V2] = keplerian2ijk(a*1000,e,incL2,RAANL2,w,rad2deg(nuL12));
-R2 = R2./1000;
+R2 = R2./1000; %random RV of new orbit with inc + RAAN
 V2 = V2./1000;
 
-tspan12_2 = [0, p3];
-state12_2 = [R2, V2];
+hL12_2 = cross(R2,V2); %h of ht orbit
+
+nodeVect12 = cross(hL1C,hL12_2);
+nodeVect12U = nodeVect12/norm(nodeVect12); %node line unit vector
+RL12B = nodeVect12U*norm(RL1C); %position of inc raan burn (node line)
+V12u = cross(hL12_2,RL12B)/norm(cross(hL12_2,RL12B)); %unit vector vel
+VL12B = norm(VL1C)*V12u; %velocity at position of inc raan burn (after)
+
+%finding time of inc raan burn for correct propagation time
+theta = acos((dot(RL12B,RL1A))/... %in radians!!
+    (norm(RL1A)*norm(RL12B))); %Angle between apoapse & inc raan change 
+S = theta*norm(RL1A); %arclength
+tS = S/norm(VL1C); %in seconds (Time from circ burn till node line/inc burn)
+
+
+%% Propogation of Orbit 1 to 2
+
+% Propogation of second transfer orbit (inc raan change)
+tspan12_2 = [0, 0.5*p];
+state12_2 = [RL12B, VL12B];
 
 [timeNew12_2,Trans12_2] = ode45(@twobodymotion,tspan12_2,state12_2,options,mu);
 R12_2 = [Trans12_2(end,1),Trans12_2(end,2),Trans12_2(end,3)];
 V12_2 = [Trans12_2(end,4),Trans12_2(end,5),Trans12_2(end,6)];
-
-%------propogation-------
 
 
 JDL2 = abs(JDtimeL1-JDtimeL2); 
 dtL = 5*p;
 Ttrnsfr = PropTime+dtL+JDL2;
 tspan = [0,Ttrnsfr];
-tspan12 = [0, 1*p];
+tspan12 = [0, tS];
 [R22,V22] = keplerian2ijk(aL2*1000,eccL2,incL2,RAANL2,ArgPL2,nuL2);
 R22 = R22./1000;
 V22 = V22./1000;
 stateL22 = [R22, V22];
-stateL2 = [RL11, VL111];
+stateL2 = [RL1A, VL1C];
 
+%prop of leo orbit 2 (rocket body) -trying to match this-
 [timeNewL22,Orbit2] = ode45(@twobodymotion,tspan,stateL22,options,mu);
 RL22 = [Orbit2(end,1),Orbit2(end,2),Orbit2(end,3)];
 VL22 = [Orbit2(end,4),Orbit2(end,5),Orbit2(end,6)];
 
+%prop of circularized burn
 [timeNewL2,Trans12_1] = ode45(@twobodymotion,tspan12,stateL2,options,mu);
 RL2 = [Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3)];
 VL2 = [Trans12_1(end,4),Trans12_1(end,5),Trans12_1(end,6)];
@@ -220,12 +243,12 @@ plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10
 plot3(Orbit1(end,1),Orbit1(end,2),Orbit1(end,3), 'w*', 'MarkerSize', 10); 
 plot3(Orbit2(end,1),Orbit2(end,2),Orbit2(end,3), 'g*', 'MarkerSize', 10);
 plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'y*', 'MarkerSize', 10);
-plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'r', 'MarkerSize', 10);
+plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'c', 'LineWidth', 1.5);
 plot3(R2(1),R2(2),R2(3), 'w*', 'MarkerSize', 10);
 plot3(Orbit2A(end,1),Orbit2A(end,2),Orbit2A(end,3), 'c*', 'MarkerSize', 10);
 xlabel('X (km)');
 ylabel('Y (km)');
 zlabel('Z (km)');
 grid on;
-legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee');
+legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
 title('Spacecraft Trajectory under Continuous Thrust');
