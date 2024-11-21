@@ -243,9 +243,6 @@ VH1_2 = [HT1(end,4),HT1(end,5),HT1(end,6)];
 dVH1B2 = abs(norm(VH1_2)-norm(V2A));
 dVt = dVt + dVH1B2;
 
-VH1_2U = VH1_2/norm(VH1_2); %Vel unit vector
-dVH1_2 = VH1_2U*-dVH1B2;
-VH1_2 = VH1_2+dVH1_2; %new velocity after second hohmann burn
 
 
 %% ORBIT 2 Propogation For Rendezvous
