@@ -5,7 +5,7 @@
 %% Workspace Prep
 
 format long     %Allows for more accurate decimals
-close all;      %Clears all
+%close all;      %Clears all
 clear all;      %Clears Workspace
 clc;            %Clears Command Window
 
@@ -135,7 +135,7 @@ hL1C = cross(RL1C,VL1C); %h of Leo 1 circ orbit
 %INC + RAAN Change
 dR = abs(RAANL1-RAANL2);
 alpha = acosd(cosd(incL1)*cosd(incL2)+sind(incL1)*sind(incL2)*cosd(dR));
-dVincR = 2*norm(VL1)*sind((alpha/2));
+dVincR = 2*norm(VL1C)*sind((alpha/2)); %check VL1C if something breaks (and are desperate)
 
 dVt = dVincR + dVc; %delta V total
 
@@ -170,7 +170,7 @@ tspan12 = [0, tS];
 [R22,V22] = keplerian2ijk(aL2*1000,eccL2,incL2,RAANL2,ArgPL2,nuL2);
 R22 = R22./1000;
 V22 = V22./1000;
-stateL22 = [R22, V22];
+stateL2tle = [R22, V22];
 stateL2 = [RL1A, VL1C];
 
 % %prop of leo orbit 2 (rocket body) -trying to match this-
@@ -187,9 +187,9 @@ VL2JD = [Trans12_1(end,4),Trans12_1(end,5),Trans12_1(end,6)];
 
 %% Matching ecc Orbit 1 to 2 for HT
 
-[~,~,~,~,~,~,~,p2,t2,~,Ra2] = rv2coes(R22,V22,mu,Rearth);
+[~,~,~,~,~,~,~,pL2,t2,~,Ra2] = rv2coes(R22,V22,mu,Rearth);
 
-tA2 = (p2/2)-t2; %time to apogee orbit 2
+tA2 = (pL2/2)-t2; %time to apogee orbit 2
 
 state2 = [R22, V22];
 tspan2 = [0, tA2];
@@ -231,7 +231,7 @@ dVt = dVt + dVH1B1;
 [~,~,~,~,~,~,~,p3] = rv2coes(RH1_1,VH1_1,mu,Rearth);
 
 tH = p3/2; %time of ht orbit
-JDCurrent = JDCurrent + tH;
+JDCurrent = JDCurrent + tH; %Ends with us at apogee
 
 stateH = [RH1_1,VH1_1];
 tspanH = [0,tH];
@@ -243,87 +243,297 @@ VH1_2 = [HT1(end,4),HT1(end,5),HT1(end,6)];
 dVH1B2 = abs(norm(VH1_2)-norm(V2A));
 dVt = dVt + dVH1B2;
 
-VH1_2U = VH1_2/norm(VH1_2); %Vel unit vector
-dVH1_2 = VH1_2U*-dVH1B2;
-VH1_2 = VH1_2+dVH1_2; %new velocity after second hohmann burn
+%Final vel is V2A
+
+%% Propogate half orbit 2  of us to perigee for phase change
+
+JDCurrent = JDCurrent + pL2/2; %Updating jd to move from apo to peri
+
+tspanJD = [0, JDCurrent];
+%prop of leo orbit 2 (rocket body) ending when ht arrives
+[~,Orbit2] = ode45(@twobodymotion,tspanJD,stateL2tle,options,mu);
+RL2JD = [Orbit2(end,1),Orbit2(end,2),Orbit2(end,3)];
+VL2JD = [Orbit2(end,4),Orbit2(end,5),Orbit2(end,6)];
+
+state2A = [R2A,V2A];
+tspanUS = [0, 0.5*pL2];
+%prop of us moving from apogee to perigee
+[~,ORB2P] = ode45(@twobodymotion,tspanUS,state2A,options,mu);
+RORB2P = [ORB2P(end,1),ORB2P(end,2),ORB2P(end,3)];
+VORB2P = [ORB2P(end,4),ORB2P(end,5),ORB2P(end,6)];
 
 
 %% ORBIT 2 Propogation For Rendezvous
 
-tspanJD = [0, JDCurrent];
-%prop of leo orbit 2 (rocket body) ending when ht arrives
-[timeNewL22,Orbit2] = ode45(@twobodymotion,tspanJD,stateL22,options,mu);
-RL2JD = [Orbit2(end,1),Orbit2(end,2),Orbit2(end,3)];
-VL2JD = [Orbit2(end,4),Orbit2(end,5),Orbit2(end,6)];
-
 [~,~,~,nuL2JD,~,~,~,pL2] = rv2coes(RL2JD,VL2JD,mu,Rearth); %finding nu of rocket b
 nuL2JDd = rad2deg(nuL2JD); %rv2coes outputs rads
 
-[~,~,~,nuJD] = rv2coes(RH1_2,VH1_2,mu,Rearth); %finding nu of us
+[~,~,~,nuJD] = rv2coes(RORB2P,VORB2P,mu,Rearth); %finding nu of us
 nuJDd = rad2deg(nuJD);
 
-nuDiff = abs(nuJDd-nuL2JDd);
-tGap = (nuDiff/360)*pL2; %~22 minutes
-pPhase1 = pL2*(1+(tGap/pL2)); %period of phasing orbit
-%aPhase1 = ((mu*((pPhase1/2*pi)^2))/1)^(1/3);
-aPhase1 = (pPhase1^(2/3)*mu^(1/3))/(2^(2/3)*pi^(2/3));
-Rp = norm(RH1_2);
-Ra = 2*aPhase1-Rp;
-eccP = (Ra-Rp)/(Ra+Rp);
+%% New Calcs for phase change
 
-[RP,VP] = keplerian2ijk(aPhase1*1000,eccP,incL2,RAANL2,ArgPL2,360-nuJDd);
-RP = RP./1000;
-VP = VP./1000;
+%Orbit 1:
+Rp1 = norm(RORB2P); %km
+Ra1 = norm(R2A); %km
+theta1B = nuJDd; %deg
+theta1C = nuL2JDd; %deg
+ecc1 = eccL2;
+a1 = aL2;
+h2 = sqrt(mu*a1*(1-ecc1^2));
+T1 = pL2;
 
-tspanP = [0,pPhase1];
-stateP = [RP,VP];
+Rb1 = ((h2^2)/mu)/(1+ecc1*cosd(theta1B)); %current position of s/c B
+Vb1t = (mu/h2)*(1+ecc1*cosd(theta1B)); %V tangential
+Vb1r = (mu/h2)*ecc1*sind(theta1B); %V radial
+Vt1 = sqrt((Vb1t^2)+(Vb1r^2));
+FPAb1 = atand(Vb1r/Vb1t); %flight path angle in deg
+
+%For s/c B
+E = 2*atan(sqrt((1-ecc1)/(1+ecc1))*tand(theta1B/2)); %eccentric anomaly
+Me = E-ecc1*sin(E); %Mean anomaly
+ts = (Me*T1)/(2*pi); %time since periapsis
+
+%For s/c C
+E2 = 2*atan(sqrt((1-ecc1)/(1+ecc1))*tand(theta1C/2)); %eccentric anomaly
+Me2 = E2-ecc1*sin(E2); %Mean anomaly
+ts2 = (Me2*T1)/(2*pi); %time since periapsis
+
+%Orbit 2:
+dt = T1-(ts2-ts); %period of phase change transfer orbit
+a2 = (dt^(2/3)*mu^(1/3))/(2^(2/3)*pi^(2/3)); 
+Rp2 = norm(RORB2P); 
+Ra2 = 2*a2-Rp2; 
+ecc2 = (Rp2-Ra2)/(Ra2+Rp2); %<3: is elliptical
+h2 = sqrt(mu*a2*(1-ecc2^2));
+Vt2 = h2/Rp2; 
+
+%DeltaV EQ:
+%2nd Flight path angle is 0:
+dV = 2*sqrt((Vt1^2)+(Vt2^2)-2*Vt1*Vt2*cosd(0-FPAb1));
+
+
+%% Calculating delta v and propogating phase change
+
+% [RP,VP] = keplerian2ijk(a2*1000,ecc2,incL2,RAANL2,ArgPL2,nuJDd);
+% RP = RP./1000;
+% VP = VP./1000;
+
+%dV = VP - VORB2P'; %calculating the dV value
+VORB2PU = VORB2P/norm(VORB2P);
+dV2 = VORB2PU*(dV/2);
+
+dVt = dVt + norm(dV); %adding dV from both burns
+
+tspanP = [0,dt];
+stateP = [RORB2P,(VORB2P-dV2)];
 [~,Phase1] = ode45(@twobodymotion,tspanP,stateP,options,mu);
 RP1 = [Phase1(end,1),Phase1(end,2),Phase1(end,3)]; %R&V at end of phase
 VP1 = [Phase1(end,4),Phase1(end,5),Phase1(end,6)];
+
+%% Propogation
+JDCurrent = JDCurrent + dt;
+
+state2p = [RL2JD,VL2JD];
+tspan = [0,dt];
+[~,Orbit2C] = ode45(@twobodymotion,tspan,state2p,options,mu); %orbit 2 cont.
+RL2JDC = [Orbit2C(end,1),Orbit2C(end,2),Orbit2C(end,3)];
+VL2JDC = [Orbit2C(end,4),Orbit2C(end,5),Orbit2C(end,6)];
+%these will be the same after 5 periods so can be reused
+
 
 
 
 %%
 
-figure('Name', 'Orbit Trajectory');
-plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
-hold on;
-plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5);
-plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5);
-plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5);
-plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10);
-plot3(Orbit1(end,1),Orbit1(end,2),Orbit1(end,3), 'w*', 'MarkerSize', 10); 
-plot3(Orbit2(end,1),Orbit2(end,2),Orbit2(end,3), 'g*', 'MarkerSize', 10);
-plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'y*', 'MarkerSize', 10);
-plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'c', 'LineWidth', 1.5);
-plot3(Orbit2A(end,1),Orbit2A(end,2),Orbit2A(end,3), 'r*', 'MarkerSize', 10);
-plot3(RL1CP(1),RL1CP(2),RL1CP(3),'yo', 'MarkerSize',10)
-plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5);
-xlabel('X (km)');
-ylabel('Y (km)');
-zlabel('Z (km)');
-grid on;
-legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
-title('Spacecraft Trajectory under Continuous Thrust');
+% figure('Name', 'Orbit Trajectory');
+% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+% hold on;
+% plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5);
+% plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5);
+% plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5);
+% plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10);
+% plot3(Orbit1(end,1),Orbit1(end,2),Orbit1(end,3), 'w*', 'MarkerSize', 10); 
+% plot3(Orbit2(end,1),Orbit2(end,2),Orbit2(end,3), 'g*', 'MarkerSize', 10);
+% plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'y*', 'MarkerSize', 10);
+% plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'c', 'LineWidth', 1.5);
+% plot3(Orbit2A(end,1),Orbit2A(end,2),Orbit2A(end,3), 'r*', 'MarkerSize', 10);
+% plot3(RL1CP(1),RL1CP(2),RL1CP(3),'yo', 'MarkerSize',10)
+% plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5);
+% plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'y', 'LineWidth', 1.5);
+% xlabel('X (km)');
+% ylabel('Y (km)');
+% zlabel('Z (km)');
+% grid on;
+% legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+% title('Spacecraft Trajectory under Continuous Thrust');
+% 
+% figure('Name', 'Orbit Trajectory Transfers');
+% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+% hold on;
+% %plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5);
+% plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5);
+% %plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5);
+% plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10);
+% %plot3(Orbit1(end,1),Orbit1(end,2),Orbit1(end,3), 'w*', 'MarkerSize', 10); 
+% %plot3(Orbit2(end,1),Orbit2(end,2),Orbit2(end,3), 'g*', 'MarkerSize', 10);
+% %plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'y*', 'MarkerSize', 10);
+% plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'c', 'LineWidth', 1.5);
+% plot3(Orbit2A(end,1),Orbit2A(end,2),Orbit2A(end,3), 'r*', 'MarkerSize', 10);
+% plot3(RL1CP(1),RL1CP(2),RL1CP(3),'yo', 'MarkerSize',10)
+% plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5);
+% plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'y', 'LineWidth', 1.5);
+% plot3(ORB2P(:, 1), ORB2P(:, 2), ORB2P(:, 3), 'c', 'LineWidth', 1.5);
+% plot3(Phase1(end, 1), Phase1(end, 2), Phase1(end, 3), 'c*', 'LineWidth', 1.5);
+% plot3(Orbit2C(end, 1), Orbit2C(end, 2), Orbit2C(end, 3), 'co', 'LineWidth', 1.5);
+% xlabel('X (km)');
+% ylabel('Y (km)');
+% zlabel('Z (km)');
+% grid on;
+% legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+% title('Spacecraft Trajectory under Continuous Thrust');
+% 
+% 
+% figure('Name', 'Transfer Orbit Courier 1B to Courier 1B RB');
+% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+% hold on;
+% plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5); %Orbit 1
+% plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5); %Circ Orbit
+% plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5); %Orbit 2
+% plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10); %Inc Raan burn
+% plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'w*', 'MarkerSize', 10); %Circ Burn
+% plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
+% plot3(RL1CP(1),RL1CP(2),RL1CP(3),'m*', 'MarkerSize',10) %HT burn 1
+% plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
+% plot3(HT1(end, 1), HT1(end, 2), HT1(end, 3), 'm*', 'LineWidth', 1.5); %HT burn 2
+% plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'r', 'LineWidth', 1.5); %Phase change orbit
+% plot3(Phase1(end, 1), Phase1(end, 2), Phase1(end, 3), 'c*', 'LineWidth', 1.5); %Both Phase change burns & Rendezvous
+% xlabel('X (km)');
+% ylabel('Y (km)');
+% zlabel('Z (km)');
+% grid on;
+% legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+% title('Transfer Orbit Courier 1B to Courier 1B RB');
+% %make transfer orbit lines dashed!!
 
-figure('Name', 'Orbit Trajectory Transfers');
+%% LEO to MEO
+
+JDCurrent = JDCurrent + 5*pL2 + 0.5*pL2; %adding the 5.5 periods to time
+
+%Use R2A and V2A state vectors (orbit 2 at apogee)
+
+rT = norm(R2A); %R target
+
+%Circ Burn
+v = sqrt(mu/rT);
+dVc2 = v-norm(V2A); %delta v from circ burn
+
+uV = V2A/norm(V2A); %unit vector
+dVd = dVc2*uV; %delta V with direction
+VL2C = V2A+dVd; %new velocity vector after adding velocity
+RL2C = R2A;
+dVt = dVt + dVc2; %update total delta V
+
+hL2C = cross(RL2C,VL2C); %h of Leo 1 circ orbit
+
+[~,~,e] = rv2coes(RL2C,VL2C,mu,Rearth); %e confirms we are circ!
+
+
+[RM,VM] = keplerian2ijk(aM*1000,eccM,incM,RAANM,ArgPM,nuM);
+RM = RM./1000; %R&V at epoch of tle of meo object
+VM = VM./1000;
+
+stateM = [RM,VM];
+propTime2 = (JDStart-JDtimeM)+JDCurrent-(JDStart-JDtimeL1);
+tspan = [0,propTime2];
+
+[~,OrbitMS] = ode45(@twobodymotion,tspan,stateM,options,mu); %meo orbit start after 5.5 periods with leo 2 orbit
+RMS = [OrbitMS(end,1),OrbitMS(end,2),OrbitMS(end,3)];
+VMS = [OrbitMS(end,4),OrbitMS(end,5),OrbitMS(end,6)];
+
+hM = cross(RMS,VMS);
+
+nV = cross(hL2C,hM);
+nVU = nV/norm(nV); %unit vector node line between leo2 circ orbit and meo orb
+
+RM23B = norm(RL2C)*-nVU; %pos on leo2 circ orb to do inc+raan burn
+
+%INC + RAAN Change
+dR = abs(RAANL2-RAANM); %deg
+alpha = acosd(cosd(incL2)*cosd(incM)+sind(incL2)*sind(incM)*cosd(dR));
+dVincR = 2*norm(VL2C)*sind((alpha/2));
+
+dVt = dVt + dVincR; %delta V total
+
+V23u = cross(hM,RM23B)/norm(cross(hM,RM23B)); %unit vector vel
+VM23B = norm(VL2C)*V23u; %velocity at position of inc raan burn (after)
+
+%finding time of inc raan burn for correct propagation time
+theta2 = acos((dot(RM23B,RL2C))/... %in radians!! Law of dot products?
+    (norm(RL2C)*norm(RM23B))); %Angle between apoapse (circ burn) & inc raan change 
+S2 = theta2*norm(RL2C); %arclength
+tS2 = S2/norm(VL2C); %in seconds (Time from circ burn till node line/inc burn)
+JDCurrent = JDCurrent + tS2;
+
+%% Propogating Circ burn 2 and Inc+RAAN burn 2
+
+tspan = [0,tS2];
+stateC = [RL2C,VL2C];
+[~,OrbitC2] = ode45(@twobodymotion,tspan,stateC,options,mu); %circ burn of leo2
+% RMS = [OrbitC2(end,1),OrbitC2(end,2),OrbitC2(end,3)];
+% VMS = [OrbitC2(end,4),OrbitC2(end,5),OrbitC2(end,6)];
+
+tspan = [0,10*60];
+stateIR2 = [RM23B,VM23B];
+[~,OrbitIR2] = ode45(@twobodymotion,tspan,stateIR2,options,mu); %inc raan burn of leo2
+
+%% Hohmann Transfer 2
+
+%finding proper true anom:
+[RargP] = keplerian2ijk(aM*1000,eccM,incM,RAANM,ArgPM,0);
+RargP = RargP./1000;
+
+theta3 = acos((dot(RargP,nV))/... %in deg!! Law of dot products?
+    (norm(RargP)*norm(nV))); %Angle between node line and argument if periapsis (used to know when to hohmann burn in new orbit frame theta
+
+
+
+Rp = norm(RM23B);
+Ra = norm(RMS); %*-(RM23B/norm(RM23B)); %multiply by unit vector and neg to flip dir
+ecc = (Ra-Rp)/(Ra+Rp);
+a = Rp/(1-ecc); %probably correct
+[RH2_1,VH2_1] = keplerian2ijk(a*1000,ecc,incM,RAANM,ArgPM,rad2deg(theta3));
+RH2_1 = RH2_1./1000;
+VH2_1 = VH2_1./1000;
+[~,~,~,~,~,~,~,p4] = rv2coes(RH2_1,VH2_1,mu,Rearth);
+
+
+tspan = [0,0.5*p4];
+stateH2 = [RH2_1,VH2_1];
+[~,OrbitH2] = ode45(@twobodymotion,tspan,stateH2,options,mu); %inc raan burn of leo2
+
+
+
+
+
+
+
+
+
+figure('Name', 'Transfer Orbit Courier 1B RB to H2SAT');
 plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
 hold on;
-%plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5);
-plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5);
-%plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5);
-plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10);
-%plot3(Orbit1(end,1),Orbit1(end,2),Orbit1(end,3), 'w*', 'MarkerSize', 10); 
-%plot3(Orbit2(end,1),Orbit2(end,2),Orbit2(end,3), 'g*', 'MarkerSize', 10);
-%plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'y*', 'MarkerSize', 10);
-plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'c', 'LineWidth', 1.5);
-plot3(Orbit2A(end,1),Orbit2A(end,2),Orbit2A(end,3), 'r*', 'MarkerSize', 10);
-plot3(RL1CP(1),RL1CP(2),RL1CP(3),'yo', 'MarkerSize',10)
-plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5);
-plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'y', 'LineWidth', 1.5);
+plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'b', 'LineWidth', 1.5); %Orbit 2
+plot3(OrbitC2(:,1),OrbitC2(:,2),OrbitC2(:,3), 'c', 'LineWidth', 1.5); %circ orbit 2
+plot3(OrbitIR2(:,1),OrbitIR2(:,2),OrbitIR2(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
+plot3(OrbitMS(:, 1), OrbitMS(:, 2), OrbitMS(:, 3), 'g', 'LineWidth', 1.5); %orbit 3
+plot3(OrbitH2(:, 1), OrbitH2(:, 2), OrbitH2(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
 xlabel('X (km)');
 ylabel('Y (km)');
 zlabel('Z (km)');
 grid on;
 legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
-title('Spacecraft Trajectory under Continuous Thrust');
+title('Transfer Orbit Courier 1B to Courier 1B RB');
+%make transfer orbit lines dashed!!
+
+
