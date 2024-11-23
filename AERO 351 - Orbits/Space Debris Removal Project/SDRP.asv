@@ -5,7 +5,7 @@
 %% Workspace Prep
 
 format long     %Allows for more accurate decimals
-close all;      %Clears all
+%close all;      %Clears all
 clear all;      %Clears Workspace
 clc;            %Clears Command Window
 
@@ -394,27 +394,27 @@ VL2JDC = [Orbit2C(end,4),Orbit2C(end,5),Orbit2C(end,6)];
 % title('Spacecraft Trajectory under Continuous Thrust');
 % 
 % 
-figure('Name', 'Transfer Orbit Courier 1B to Courier 1B RB');
-plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
-hold on;
-plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5); %Orbit 1
-plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5); %Circ Orbit
-plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5); %Orbit 2
-plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10); %Inc Raan burn
-plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'w*', 'MarkerSize', 10); %Circ Burn
-plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
-plot3(RL1CP(1),RL1CP(2),RL1CP(3),'m*', 'MarkerSize',10) %HT burn 1
-plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
-plot3(HT1(end, 1), HT1(end, 2), HT1(end, 3), 'm*', 'LineWidth', 1.5); %HT burn 2
-plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'r', 'LineWidth', 1.5); %Phase change orbit
-plot3(Phase1(end, 1), Phase1(end, 2), Phase1(end, 3), 'c*', 'LineWidth', 1.5); %Both Phase change burns & Rendezvous
-xlabel('X (km)');
-ylabel('Y (km)');
-zlabel('Z (km)');
-grid on;
-legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
-title('Transfer Orbit Courier 1B to Courier 1B RB');
-%make transfer orbit lines dashed!!
+% figure('Name', 'Transfer Orbit Courier 1B to Courier 1B RB');
+% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+% hold on;
+% plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5); %Orbit 1
+% plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5); %Circ Orbit
+% plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5); %Orbit 2
+% plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10); %Inc Raan burn
+% plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'w*', 'MarkerSize', 10); %Circ Burn
+% plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
+% plot3(RL1CP(1),RL1CP(2),RL1CP(3),'m*', 'MarkerSize',10) %HT burn 1
+% plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
+% plot3(HT1(end, 1), HT1(end, 2), HT1(end, 3), 'm*', 'LineWidth', 1.5); %HT burn 2
+% plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'r', 'LineWidth', 1.5); %Phase change orbit
+% plot3(Phase1(end, 1), Phase1(end, 2), Phase1(end, 3), 'c*', 'LineWidth', 1.5); %Both Phase change burns & Rendezvous
+% xlabel('X (km)');
+% ylabel('Y (km)');
+% zlabel('Z (km)');
+% grid on;
+% legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+% title('Transfer Orbit Courier 1B to Courier 1B RB');
+% %make transfer orbit lines dashed!!
 
 %% LEO to MEO
 
@@ -483,7 +483,8 @@ stateC = [RL2C,VL2C];
 % RMS = [OrbitC2(end,1),OrbitC2(end,2),OrbitC2(end,3)];
 % VMS = [OrbitC2(end,4),OrbitC2(end,5),OrbitC2(end,6)];
 
-[~,~,~,~,~,~,~,p5] = rv2coes(RM23B,VM23B,mu,Rearth); %arg of peri of the circ orbit of leo 2
+[~,~,~,nuM23,~,~,ArgPT2,p5] = rv2coes(RM23B,VM23B,mu,Rearth); %arg of peri of the circ orbit of leo 2
+
 
 tspan = [0,0.25*p5];
 stateIR2 = [RM23B,VM23B];
@@ -494,6 +495,7 @@ VIR2 = [OrbitIR2(end,4),OrbitIR2(end,5),OrbitIR2(end,6)];
 %% Hohmann Transfer 2
 
 [~,~,~,nuM23,~,~,ArgPT2,p5,t2] = rv2coes(RIR2,VIR2,mu,Rearth); %arg of peri of the circ orbit of leo 2
+
 
 Rp = norm(RM23B);
 Ra = norm(RMS); %*-(RM23B/norm(RM23B)); %multiply by unit vector and neg to flip dir
@@ -513,30 +515,24 @@ tspan = [0,0.5*p4];
 stateH2 = [RH2_1,VH2_1];
 [~,OrbitH2] = ode45(@twobodymotion,tspan,stateH2,options,mu); %inc raan burn of leo2
 
+
 tspan = [0,tP];
 stateIR2 = [RM23B,VM23B];
 [~,OrbitIR22] = ode45(@twobodymotion,tspan,stateIR2,options,mu); %inc raan burn of leo2
 RIR22 = [OrbitIR22(end,1),OrbitIR22(end,2),OrbitIR22(end,3)];
 VIR22 = [OrbitIR22(end,4),OrbitIR22(end,5),OrbitIR22(end,6)];
 
-theta3 = acosd((dot(RIR22,RH2_1))/... %in radians!! Law of dot products?
-    (norm(RIR22)*norm(RH2_1))); %Angle between apoapse (circ burn) & inc raan change 
-dt = p5*(theta3/360);
 
-tspan = [0,dt];
-stateIR2 = [RIR22,VIR22];
-[~,OrbitIR222] = ode45(@twobodymotion,tspan,stateIR2,options,mu); %inc raan burn of leo2
-RIR222 = [OrbitIR222(end,1),OrbitIR222(end,2),OrbitIR222(end,3)];
-VIR222 = [OrbitIR222(end,4),OrbitIR222(end,5),OrbitIR222(end,6)];
+
+
 
 
 figure('Name', 'Transfer Orbit Courier 1B RB to H2SAT');
 plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
 hold on;
 plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'b', 'LineWidth', 1.5); %Orbit 2
-plot3(OrbitC2(:,1),OrbitC2(:,2),OrbitC2(:,3), 'r', 'LineWidth', 1.5); %circ orbit 2
+plot3(OrbitC2(:,1),OrbitC2(:,2),OrbitC2(:,3), 'c', 'LineWidth', 1.5); %circ orbit 2
 plot3(OrbitIR22(:,1),OrbitIR22(:,2),OrbitIR22(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
-plot3(OrbitIR222(:,1),OrbitIR222(:,2),OrbitIR222(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
 plot3(OrbitMS(:, 1), OrbitMS(:, 2), OrbitMS(:, 3), 'g', 'LineWidth', 1.5); %orbit 3
 plot3(OrbitH2(:, 1), OrbitH2(:, 2), OrbitH2(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
 xlabel('X (km)');
