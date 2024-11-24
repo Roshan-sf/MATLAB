@@ -1,4 +1,4 @@
-%Roshan Jaiswal-Ferri, Stefan Rosu, Michiru Warren, Benjamin Howard
+%Roshan Jaiswal-Ferri
 %Section - 01 
 %Aero 351: Space Debris Removal - 11/13/24
 
@@ -85,12 +85,8 @@ JDStart = juliandate(2024,11,22,0,0,0); %start nov-22-2024 at midnight
 [R,V] = keplerian2ijk(aL1*1000,eccL1,incL1,RAANL1,ArgPL1,nuL1);
 R = R./1000;
 V = V./1000;
-%% Note for Dr. A:
-%We used keplerian2ijk for help debugging and cross checking, later in the
-%script you can see us use our own coes2rvd (degrees) function that we
-%coded and which outputs exactly the same answer! :)
-
-%%
+%DEBUG: 
+% [~,a,e] = rv2coes(R,V,mu,Rearth);
 
 [~,~,~,~,~,~,~,p] = rv2coes(R,V,mu,Rearth);
 
@@ -177,6 +173,11 @@ R22 = R22./1000;
 V22 = V22./1000;
 stateL2tle = [R22, V22];
 stateL2 = [RL1A, VL1C];
+
+% %prop of leo orbit 2 (rocket body) -trying to match this-
+% [timeNewL22,Orbit2] = ode45(@twobodymotion,tspan,stateL22,options,mu);
+% RL22 = [Orbit2(end,1),Orbit2(end,2),Orbit2(end,3)];
+% VL22 = [Orbit2(end,4),Orbit2(end,5),Orbit2(end,6)];
 
 %prop of circularized burn
 [timeNewL2,Trans12_1] = ode45(@twobodymotion,tspan12,stateL2,options,mu);
@@ -277,7 +278,7 @@ nuJDd = rad2deg(nuJD);
 Rp1 = norm(RORB2P); %km
 Ra1 = norm(R2A); %km
 theta1B = nuJDd; %deg
-theta1C = nuL2JDd/5; %deg
+theta1C = nuL2JDd; %deg
 ecc1 = eccL2;
 a1 = aL2;
 h2 = sqrt(mu*a1*(1-ecc1^2));
@@ -316,13 +317,15 @@ dV = 2*sqrt((Vt1^2)+(Vt2^2)-2*Vt1*Vt2*cosd(0-FPAb1));
 
 %% Calculating delta v and propogating phase change
 
+% [RP,VP] = keplerian2ijk(a2*1000,ecc2,incL2,RAANL2,ArgPL2,nuJDd);
+% RP = RP./1000;
+% VP = VP./1000;
+
 %dV = VP - VORB2P'; %calculating the dV value
 VORB2PU = VORB2P/norm(VORB2P);
 dV2 = VORB2PU*(dV/2);
 
 dVt = dVt + norm(dV); %adding dV from both burns
-
-dt = dt*5;
 
 tspanP = [0,dt];
 stateP = [RORB2P,(VORB2P-dV2)];
@@ -343,44 +346,82 @@ VL2JDC = [Orbit2C(end,4),Orbit2C(end,5),Orbit2C(end,6)];
 
 
 
-%% LEO to LEO Plots
+%%
+
+% figure('Name', 'Orbit Trajectory');
+% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+% hold on;
+% plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5);
+% plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5);
+% plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5);
+% plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10);
+% plot3(Orbit1(end,1),Orbit1(end,2),Orbit1(end,3), 'w*', 'MarkerSize', 10); 
+% plot3(Orbit2(end,1),Orbit2(end,2),Orbit2(end,3), 'g*', 'MarkerSize', 10);
+% plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'y*', 'MarkerSize', 10);
+% plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'c', 'LineWidth', 1.5);
+% plot3(Orbit2A(end,1),Orbit2A(end,2),Orbit2A(end,3), 'r*', 'MarkerSize', 10);
+% plot3(RL1CP(1),RL1CP(2),RL1CP(3),'yo', 'MarkerSize',10)
+% plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5);
+% plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'y', 'LineWidth', 1.5);
+% xlabel('X (km)');
+% ylabel('Y (km)');
+% zlabel('Z (km)');
+% grid on;
+% legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+% title('Spacecraft Trajectory under Continuous Thrust');
+% 
+% figure('Name', 'Orbit Trajectory Transfers');
+% plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+% hold on;
+% %plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5);
+% plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5);
+% %plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5);
+% plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10);
+% %plot3(Orbit1(end,1),Orbit1(end,2),Orbit1(end,3), 'w*', 'MarkerSize', 10); 
+% %plot3(Orbit2(end,1),Orbit2(end,2),Orbit2(end,3), 'g*', 'MarkerSize', 10);
+% %plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'y*', 'MarkerSize', 10);
+% plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'c', 'LineWidth', 1.5);
+% plot3(Orbit2A(end,1),Orbit2A(end,2),Orbit2A(end,3), 'r*', 'MarkerSize', 10);
+% plot3(RL1CP(1),RL1CP(2),RL1CP(3),'yo', 'MarkerSize',10)
+% plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5);
+% plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'y', 'LineWidth', 1.5);
+% plot3(ORB2P(:, 1), ORB2P(:, 2), ORB2P(:, 3), 'c', 'LineWidth', 1.5);
+% plot3(Phase1(end, 1), Phase1(end, 2), Phase1(end, 3), 'c*', 'LineWidth', 1.5);
+% plot3(Orbit2C(end, 1), Orbit2C(end, 2), Orbit2C(end, 3), 'co', 'LineWidth', 1.5);
+% xlabel('X (km)');
+% ylabel('Y (km)');
+% zlabel('Z (km)');
+% grid on;
+% legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+% title('Spacecraft Trajectory under Continuous Thrust');
+% 
+% 
+[x, y, z] = sphere;
 
 figure('Name', 'Transfer Orbit Courier 1B to Courier 1B RB');
-addEarth();
+%plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
+h = surf(x*Rearth,y*Rearth,z*Rearth);
+h.FaceColor = 'g';
+h.EdgeColor = "none";
 hold on;
 plot3(Orbit1(:, 1), Orbit1(:, 2), Orbit1(:, 3), 'b', 'LineWidth', 1.5); %Orbit 1
+plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5); %Circ Orbit
 plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'g', 'LineWidth', 1.5); %Orbit 2
-plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5); %Circ Orbit
-plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
-plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
-plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'r', 'LineWidth', 1.5); %Phase change orbit
-xlabel('X (km)');
-ylabel('Y (km)');
-zlabel('Z (km)');
-grid on;
-legend('Earth','LEO1 (Courier 1B)','LEO2 (Courier 1B RB)','Transfer Orbit')
-title('Transfer Orbit (Courier 1B to Courier 1B RB)');
-axis equal
-
-figure('Name', 'Transfer Orbit Courier 1B to Courier 1B RB');
-plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
-hold on;
-plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'g*', 'MarkerSize', 10); %Circ Burn
 plot3(Trans12_1(end,1),Trans12_1(end,2),Trans12_1(end,3), 'r*', 'MarkerSize', 10); %Inc Raan burn
+plot3(Orbit1A(end,1),Orbit1A(end,2),Orbit1A(end,3), 'w*', 'MarkerSize', 10); %Circ Burn
+plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
 plot3(RL1CP(1),RL1CP(2),RL1CP(3),'m*', 'MarkerSize',10) %HT burn 1
-plot3(HT1(end, 1), HT1(end, 2), HT1(end, 3), 'g*', 'LineWidth', 1.5); %HT burn 2
-plot3(Phase1(end, 1), Phase1(end, 2), Phase1(end, 3), 'b*', 'LineWidth', 1.5); %Both Phase change burns & Rendezvous
-plot3(Trans12_1(:, 1), Trans12_1(:, 2), Trans12_1(:, 3), 'r', 'LineWidth', 1.5); %Circ Orbit
-plot3(Trans12_2(:,1),Trans12_2(:,2),Trans12_2(:,3), 'm', 'LineWidth', 1.5); %Inc raan orbit
-plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'g', 'LineWidth', 1.5); %HT Trans orbit
-plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'b', 'LineWidth', 1.5); %Phase change orbit
+plot3(HT1(:, 1), HT1(:, 2), HT1(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
+plot3(HT1(end, 1), HT1(end, 2), HT1(end, 3), 'm*', 'LineWidth', 1.5); %HT burn 2
+plot3(Phase1(:, 1), Phase1(:, 2), Phase1(:, 3), 'r', 'LineWidth', 1.5); %Phase change orbit
+plot3(Phase1(end, 1), Phase1(end, 2), Phase1(end, 3), 'c*', 'LineWidth', 1.5); %Both Phase change burns & Rendezvous
 xlabel('X (km)');
 ylabel('Y (km)');
 zlabel('Z (km)');
 grid on;
-legend('Earth','Circ Burn','Inc & RAAN Burn','HT Burn 1','HT Burn 2','PC Burn 1 & 2')
-title('Individual Transfer Orbits (Courier 1B to Courier 1B RB)');
-axis equal
+legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+title('Transfer Orbit Courier 1B to Courier 1B RB');
+%make transfer orbit lines dashed!!
 
 %% LEO to MEO
 
@@ -548,7 +589,7 @@ VMS_3 = [OrbitMS_3(end,4),OrbitMS_3(end,5),OrbitMS_3(end,6)];
 
 JDCurrent = JDCurrent + pM/2;
 
-%% Phase Change 2
+%% Phase Change
 
 [~,~,~,nuMP,~,~,wt1,~,tp1] = rv2coes(RMS_2P,VMS_2P,mu,Rearth); %true anom of meo orbit
 [~,~,~,nuJDC,~,~,wt1,~,tp] = rv2coes(RMS_3,VMS_3,mu,Rearth); %true anom of meo orbit
@@ -633,40 +674,33 @@ JDCurrent = JDCurrent + 5*pM; %adding 5 periods orbiting with H2Sat
 %% Plotting
 
 figure('Name', 'Transfer Orbit Courier 1B RB to H2SAT');
-addEarth();
+plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
 hold on;
 plot3(Orbit2(:, 1), Orbit2(:, 2), Orbit2(:, 3), 'b', 'LineWidth', 1.5); %Orbit 2
-plot3(OrbitMS(:, 1), OrbitMS(:, 2), OrbitMS(:, 3), 'g', 'LineWidth', 1.5); %orbit 3
 plot3(OrbitC2(:,1),OrbitC2(:,2),OrbitC2(:,3), 'r', 'LineWidth', 1.5); %circ orbit 2
 plot3(OrbitIR2_2(:,1),OrbitIR2_2(:,2),OrbitIR2_2(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
 plot3(OrbitIR2_3(:,1),OrbitIR2_3(:,2),OrbitIR2_3(:,3), 'r', 'LineWidth', 1.5); %Inc raan orbit
+plot3(OrbitMS(:, 1), OrbitMS(:, 2), OrbitMS(:, 3), 'g', 'LineWidth', 1.5); %orbit 3
 plot3(OrbitH2(:, 1), OrbitH2(:, 2), OrbitH2(:, 3), 'r', 'LineWidth', 1.5); %HT Trans orbit
 plot3(PH2(:, 1), PH2(:, 2), PH2(:, 3), 'c', 'LineWidth', 1.5);
+plot3(RH2_2(1),RH2_2(2),RH2_2(3),'r*', 'MarkerSize',10) %End of ht pos
+plot3(RMS_3(1),RMS_3(2),RMS_3(3),'m*', 'MarkerSize',10) %End of 2nd meo prop
+plot3(RPH2_2(1),RPH2_2(2),RPH2_2(3),'m*', 'MarkerSize',10) %End of 2nd meo prop
+plot3(RMP(1),RMP(2),RMP(3),'go', 'MarkerSize',10) %perigee of meo
+%plot3(RMS3(1),RMS3(2),RMS3(3),'ro', 'MarkerSize',10) %end of 3rd meo prop (to perigee)
+plot3(RMS_2P(1),RMS_2P(2),RMS_2P(3),'r*', 'MarkerSize',10) %test p
+plot3(RMS_4(1),RMS_4(2),RMS_4(3),'mo', 'MarkerSize',10) %test p
+%plot3(R1(1),R1(2),R1(3),'yo', 'MarkerSize',10) %test p
+
+
+
 xlabel('X (km)');
 ylabel('Y (km)');
 zlabel('Z (km)');
 grid on;
-legend('Earth','LEO 2 (Courier 1B RB)','MEO (H2Sat)','Transfer Orbit 1','','','','Transfer Orbit 2');
-title('Transfer Orbit Courier (1B RB to H2SAT)');
-axis equal
-
-figure('Name', 'Transfer Orbit Courier 1B RB to H2SAT');
-plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin\
-hold on
-grid on
-plot3(OrbitC2(1,1),OrbitC2(1,2),OrbitC2(1,3),'c*', 'MarkerSize',10) %circ burn
-plot3(OrbitC2(end,1),OrbitC2(end,2),OrbitC2(end,3),'r*', 'MarkerSize',10) %inc + raan burn
-plot3(OrbitIR2_3(end,1),OrbitIR2_3(end,2),OrbitIR2_3(end,3),'m*', 'MarkerSize',10); %HT Burn 1
-plot3(OrbitH2(end, 1), OrbitH2(end, 2), OrbitH2(end, 3),'g*', 'MarkerSize',10); %HT burn 2
-plot3(RMP(1),RMP(2),RMP(3),'b*', 'MarkerSize',10);
-plot3(OrbitC2(:,1),OrbitC2(:,2),OrbitC2(:,3), 'r', 'LineWidth', 1.5); %circ orbit 2
-plot3(OrbitIR2_2(:,1),OrbitIR2_2(:,2),OrbitIR2_2(:,3), 'm', 'LineWidth', 1.5); %Inc raan orbit
-plot3(OrbitIR2_3(:,1),OrbitIR2_3(:,2),OrbitIR2_3(:,3), 'm', 'LineWidth', 1.5); %Inc raan orbit
-plot3(OrbitH2(:, 1), OrbitH2(:, 2), OrbitH2(:, 3), 'g', 'LineWidth', 1.5); %HT Trans orbit
-plot3(PH2(:, 1), PH2(:, 2), PH2(:, 3), 'b', 'LineWidth', 1.5);
-legend('Earth', 'Circ Burn','Inc & RAAN Burn','HT Burn 1','HT Burn 2','PC Burn 1 & 2')
-axis equal
-title('Individual Transfer Orbits (Courier 1B RB to H2SAT)');
+legend('Earth', 'Orbit 1', 'Transfer Orbit', 'Orbit 2', 'End T', 'End 1', 'End 2', 'Apogee', 'Second T Orbit');
+title('Transfer Orbit Courier 1B to Courier 1B RB');
+%make transfer orbit lines dashed!!
 
 
 %% MEO to GEO
@@ -684,7 +718,6 @@ VGS = [OrbitGS(end,4),OrbitGS(end,5),OrbitGS(end,6)];
 dV1 = V1 - VMS_4;
 dV2 = VGS - V2;
 dVL = norm(dV1) + norm(dV2);
-dVt = dVt + dVL;
 
 tspan = [0,78929];
 stateLE = [RMS_4,V1];
@@ -722,84 +755,24 @@ VLE = [OrbitL(end,4),OrbitL(end,5),OrbitL(end,6)];
 
 [~,~,~,~,~,~,~,pG] = rv2coes(RGS,VGS,mu,Rearth);
 
-figure('Name', 'Transfer Orbit H2SAT to GALAXY 14 (G-14)');
-addEarth();
+figure('Name', 'Transfer Orbit Courier 1B RB to H2SAT');
+plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
 hold on;
 plot3(OrbitMS(:, 1), OrbitMS(:, 2), OrbitMS(:, 3), 'b', 'LineWidth', 1.5);
 plot3(OrbitGS(:, 1), OrbitGS(:, 2), OrbitGS(:, 3), 'g', 'LineWidth', 1.5);
-plot3(OrbitL(:, 1), OrbitL(:, 2), OrbitL(:, 3), 'r', 'LineWidth', 1.5);
-xlabel('X (km)');
-ylabel('Y (km)');
-zlabel('Z (km)');
-legend('Earth','MEO (H2Sat)','GEO (Galaxy 14)','Lamberts Transfer Orbit')
-title('Transfer Orbit (H2SAT to GALAXY 14)')
-axis equal
+plot3(OrbitL(:, 1), OrbitL(:, 2), OrbitL(:, 3), 'g', 'LineWidth', 1.5);
 
-figure('Name', 'Transfer Orbit H2SAT to GALAXY 14 (G-14)');
-plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
-hold on;
-grid on
-plot3(OrbitL(:, 1), OrbitL(:, 2), OrbitL(:, 3), 'r', 'LineWidth', 1.5);
-xlabel('X (km)');
-ylabel('Y (km)');
-zlabel('Z (km)');
-legend('Earth','Lamberts Transfer Orbit')
-title('Individual Transfer Orbits (H2SAT to GALAXY 14)')
-axis equal
+%plot3(RH2_2(1),RH2_2(2),RH2_2(3),'r*', 'MarkerSize',10) %End of ht pos
 
-%% Final Display
 
-disp(['Total Delta V (km/s): ', num2str(dVt)])
 
-%% Functions
 
-function [a] = Me2a(Me,mu)
-    %ME2A Finds Semi-Major Axis from Mean Motion
-    %   [a] = Me2a(Me,mu)
 
-    Me1 = Me*((2*pi)/86400); %Converts from rev/day to rad/s
-    a = (mu/(Me1^2))^(1/3); %finds Semi-Major axis (a)
-end
 
-function earthHandle = addEarth(radius, axHandle)
-    % addEarth - Generates a 3D Earth with corrected orientation and adds it to a specified axes.
-    %
-    % Syntax:
-    %   earthHandle = addEarth(radius, axHandle)
-    %
-    % Inputs:
-    %   radius - Radius of the Earth (default: 6371 km).
-    %   axHandle - Axes handle where Earth will be plotted (default: gca).
-    %
-    % Outputs:
-    %   earthHandle - Handle to the Earth surface object.
 
-    if nargin < 1
-        radius = 6378; % Default Earth's radius in kilometers
-    end
-    if nargin < 2
-        axHandle = gca; % Default to the current axes
-    end
 
-    % Load Earth texture
-    earthTexture = imread('https://eoimages.gsfc.nasa.gov/images/imagerecords/57000/57730/land_ocean_ice_2048.png');
-    earthTexture = flipud(earthTexture); % Flip texture vertically to correct poles
 
-    % Create a sphere
-    [lon, lat, Z] = sphere(50); % Higher resolution for smoother appearance
 
-    % Scale the sphere to the specified radius
-    X = radius * lon;
-    Y = radius * lat;
 
-    % Create surface object
-    earthHandle = surf(axHandle, X, Y, radius * Z, 'EdgeColor', 'none', ...
-        'FaceColor', 'texturemap', 'CData', earthTexture);
 
-    % Adjust lighting and material properties
-    lightangle(axHandle, -45, 30);
-    lighting(axHandle, 'phong');
-    material(axHandle, 'shiny');
-    axis(axHandle, 'equal');
-    %axis(axHandle, 'off'); % Optional: Hide axes for a cleaner look
-end
+

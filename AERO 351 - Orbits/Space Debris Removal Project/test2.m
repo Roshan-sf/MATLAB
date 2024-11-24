@@ -1,4 +1,4 @@
-%Roshan Jaiswal-Ferri, Stefan Rosu, Michiru Warren, Benjamin Howard
+%Roshan Jaiswal-Ferri
 %Section - 01 
 %Aero 351: Space Debris Removal - 11/13/24
 
@@ -85,12 +85,8 @@ JDStart = juliandate(2024,11,22,0,0,0); %start nov-22-2024 at midnight
 [R,V] = keplerian2ijk(aL1*1000,eccL1,incL1,RAANL1,ArgPL1,nuL1);
 R = R./1000;
 V = V./1000;
-%% Note for Dr. A:
-%We used keplerian2ijk for help debugging and cross checking, later in the
-%script you can see us use our own coes2rvd (degrees) function that we
-%coded and which outputs exactly the same answer! :)
-
-%%
+%DEBUG: 
+% [~,a,e] = rv2coes(R,V,mu,Rearth);
 
 [~,~,~,~,~,~,~,p] = rv2coes(R,V,mu,Rearth);
 
@@ -359,7 +355,7 @@ ylabel('Y (km)');
 zlabel('Z (km)');
 grid on;
 legend('Earth','LEO1 (Courier 1B)','LEO2 (Courier 1B RB)','Transfer Orbit')
-title('Transfer Orbit (Courier 1B to Courier 1B RB)');
+title('Transfer Orbit Courier 1B to Courier 1B RB');
 axis equal
 
 figure('Name', 'Transfer Orbit Courier 1B to Courier 1B RB');
@@ -379,7 +375,7 @@ ylabel('Y (km)');
 zlabel('Z (km)');
 grid on;
 legend('Earth','Circ Burn','Inc & RAAN Burn','HT Burn 1','HT Burn 2','PC Burn 1 & 2')
-title('Individual Transfer Orbits (Courier 1B to Courier 1B RB)');
+title('Transfer Orbit Courier 1B to Courier 1B RB');
 axis equal
 
 %% LEO to MEO
@@ -647,13 +643,12 @@ ylabel('Y (km)');
 zlabel('Z (km)');
 grid on;
 legend('Earth','LEO 2 (Courier 1B RB)','MEO (H2Sat)','Transfer Orbit 1','','','','Transfer Orbit 2');
-title('Transfer Orbit Courier (1B RB to H2SAT)');
+title('Transfer Orbit Courier 1B RB to H2SAT');
 axis equal
 
 figure('Name', 'Transfer Orbit Courier 1B RB to H2SAT');
 plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin\
 hold on
-grid on
 plot3(OrbitC2(1,1),OrbitC2(1,2),OrbitC2(1,3),'c*', 'MarkerSize',10) %circ burn
 plot3(OrbitC2(end,1),OrbitC2(end,2),OrbitC2(end,3),'r*', 'MarkerSize',10) %inc + raan burn
 plot3(OrbitIR2_3(end,1),OrbitIR2_3(end,2),OrbitIR2_3(end,3),'m*', 'MarkerSize',10); %HT Burn 1
@@ -666,7 +661,6 @@ plot3(OrbitH2(:, 1), OrbitH2(:, 2), OrbitH2(:, 3), 'g', 'LineWidth', 1.5); %HT T
 plot3(PH2(:, 1), PH2(:, 2), PH2(:, 3), 'b', 'LineWidth', 1.5);
 legend('Earth', 'Circ Burn','Inc & RAAN Burn','HT Burn 1','HT Burn 2','PC Burn 1 & 2')
 axis equal
-title('Individual Transfer Orbits (Courier 1B RB to H2SAT)');
 
 
 %% MEO to GEO
@@ -732,22 +726,20 @@ xlabel('X (km)');
 ylabel('Y (km)');
 zlabel('Z (km)');
 legend('Earth','MEO (H2Sat)','GEO (Galaxy 14)','Lamberts Transfer Orbit')
-title('Transfer Orbit (H2SAT to GALAXY 14)')
+title('Transfer Orbit H2SAT to GALAXY 14 (G-14)')
 axis equal
 
 figure('Name', 'Transfer Orbit H2SAT to GALAXY 14 (G-14)');
 plot3(0, 0, 0, 'g*', 'MarkerSize', 10); % Earth at the origin
 hold on;
-grid on
 plot3(OrbitL(:, 1), OrbitL(:, 2), OrbitL(:, 3), 'r', 'LineWidth', 1.5);
 xlabel('X (km)');
 ylabel('Y (km)');
 zlabel('Z (km)');
 legend('Earth','Lamberts Transfer Orbit')
-title('Individual Transfer Orbits (H2SAT to GALAXY 14)')
+title('Transfer Orbit H2SAT to GALAXY 14 (G-14)')
 axis equal
 
-%% Final Display
 
 disp(['Total Delta V (km/s): ', num2str(dVt)])
 

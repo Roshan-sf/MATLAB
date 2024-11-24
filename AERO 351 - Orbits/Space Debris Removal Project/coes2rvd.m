@@ -1,4 +1,4 @@
-function [R1,V1] = coes2rv(a,ecc,inc,RAAN,ArgP,theta,mu)
+function [R1,V1] = coes2rvd(a,ecc,inc,RAAN,ArgP,theta,mu)
     %COES2RV Summary of this function goes here
     %   Detailed explanation goes here
     h = (mu*(a*(1-ecc^2)))^(1/2);
