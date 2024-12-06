@@ -1,4 +1,4 @@
-function [mu_air] = sLawAir(T)
+function [mu_air] = Southerlands(T)
 
 % Define constants
 mu_refAir = 1.716e-5;   % [Pa.s]

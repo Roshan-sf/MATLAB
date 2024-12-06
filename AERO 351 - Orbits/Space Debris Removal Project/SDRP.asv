@@ -697,7 +697,7 @@ title('Individual Transfer Orbits (Courier 1B RB to H2SAT)');
 %% MEO to GEO
 
 [RG,VG] = coes2rvd(aG,eccG,incG,RAANG,ArgPG,nuG,mu); %Starting geo R&V
-[~,~,~,~,~,~,~,pG] = rv2coes(RG,VG,mu,Rearth);
+[~,~,~,~,~,~,~] = rv2coes(RG,VG,mu,Rearth);
 
 tspan = [0,JDCurrent+(JDStart-JDtimeG)+78929];
 stateGS = [RG,VG];

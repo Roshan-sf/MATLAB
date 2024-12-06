@@ -24,5 +24,54 @@ vD5 = 5/t;
 t = 12;
 vD4 = 5/t;
 
-t = 
-vD3
+t = 7;
+vD3 = 3/7;
+
+t = 11;
+vD2 = 3/11;
+
+t = 16;
+vD1 = 3/16;
+
+Di = [3.515,1.897,1.05,0.832,0.626,0.308]; % in inches
+D = Di.*0.0254; %diam in meters
+
+f = [vD1,vD2,vD3,vD4,vD5,vD6];
+
+for i = 1:6
+    S(i) = (f(i)*D(i))/U; %strouhal number
+end
+
+%Re Calc:
+
+rho = 1000;
+u = 0.0010016; %dyn visc of water at 20C
+
+for i = 1:6
+    Re(i) = (rho*U*D(i))/u;
+end
+
+
+%% HW Calcs
+
+Re2 = [5,20,120,1000,10000];
+S2 = [0.666,0.697,0.75,0.857,3.541];
+
+%% Plotting
+
+figure;
+hold on;
+grid on;
+
+% Plot S vs Re
+plot(S, Re, 'bo-', 'LineWidth', 2, 'MarkerSize', 8);
+
+% Plot S2 vs Re2
+%plot(S2, Re2, 'r*-', 'LineWidth', 2, 'MarkerSize', 8);
+
+% Add labels, title, and legend
+ylabel('Reynolds Number (Re)', 'FontSize', 12);
+xlabel('Strouhal Number (S)', 'FontSize', 12);
+title('Reynolds Number vs Strouhal Number', 'FontSize', 14);
+legend('S vs Re', 'S2 vs Re2', 'Location', 'Best');
+
