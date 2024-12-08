@@ -1,6 +1,19 @@
 function [EtoP, PtoE] = ECI2PERI(omega,inc,RAAN)
     %ECI2PERI Earth Centered Inertial Frame to Perifocal Frame
     %   [EtoP, PtoE] = ECI2PERI(omega,inc,RAAN)
-    EtoP = inv(rotz(omega))*inv(rotx(inc))*inv(rotz(RAAN));
+    % EtoP = inv(rotz(omega))*inv(rotx(inc))*inv(rotz(RAAN));
+    % PtoE = inv(EtoP);
+
+    Z = [cosd(omega),sind(omega),0;...
+        -sind(omega),cosd(omega),0;...
+        0,0,1];
+    X = [1,0,0; ...
+        0,cosd(inc), sind(inc);...
+        0, -sind(inc), cosd(inc)];
+    Z2 = [cosd(RAAN),sind(RAAN),0;...
+        -sind(RAAN),cosd(RAAN),0;...
+        0,0,1];
+
+    EtoP = Z*X*Z2;
     PtoE = inv(EtoP);
 end

@@ -21,9 +21,9 @@ tol = 1e-8;
 
 %% PART 2: Datetime Calcs
 
-JD2000 = juliandate(2000,1,1,0,0,0);
-JD1 = juliandate(2005,8,15,0,0,0);
-JD2 = juliandate(2006,3,15,0,0,0);
+JD2000 = juliandate(2000,1,1);
+JD1 = juliandate(2005,8,15);
+JD2 = juliandate(2006,3,15);
 dt = (JD2 - JD1)*86400; %delta t of transf in seconds
 
 T01 = (JD1-JD2000)/36525;
@@ -39,13 +39,13 @@ PCe = AERO351planetary_elements2(3,T01); %Finds the Planetary Coes of earth
 Me = deg2rad(PCe(6) - PCe(5));
 w = PCe(5) - PCe(4); %arg of peri (deg)
 
-a = sqrt((1-PCe(2))/(1+PCe(2))); %not semi major axis
+E = M2E(Me,PCe(2)); %finds eccentric anomaly in rad
+theta = E2f(E,PCe(2));
+
 E2 = Me2e(Me,PCe(2));
-theta2 = 2*atand(tan(E2/2)/a); %in deg
 
-[a,ecc,inc,raan,w,theta,w_hat,L] = pcoes(PCe);
 
-[Re,Ve] = coes2rvd(PCe(1),PCe(2),PCe(3),PCe(4),w,theta2,muSun);
+[Re,Ve] = coes2rvd(PCe(1),PCe(2),PCe(3),PCe(4),w,rad2deg(theta),muSun);
 Re = Re';
 Ve = Ve';
 
@@ -58,11 +58,10 @@ PCm = AERO351planetary_elements2(4,T02); %Finds the Planetary Coes of mars
 Me = PCm(6) - PCm(5);
 w = PCm(5) - PCm(4); %arg of peri (deg)
 
-a = sqrt((1-PCe(2))/(1+PCe(2))); %not semi major axis
-E2 = Me2e(Me,PCe(2));
-theta2 = 2*atand(tan(E2/2)/a); %in deg
+E = M2E(deg2rad(Me),PCm(2)); %finds eccentric anomaly in rad
+theta = E2f(E,PCm(2));
 
-[Rm,Vm] = coes2rvd(PCm(1),PCm(2),PCm(3),PCm(4),w,theta2,muSun);
+[Rm,Vm] = coes2rvd(PCm(1),PCm(2),PCm(3),PCm(4),w,rad2deg(theta),muSun);
 Rm = Rm';
 Vm = Vm';
 %% Cruise Phase Calcs
@@ -124,21 +123,3 @@ disp(dVt)
 % 7 = Uranus
 % 8 = Neptune
 
-function [a,ecc,inc,raan,w,theta,w_hat,L] = pcoes(pcoesVec)
-    
-    a = pcoesVec(1);
-    ecc = pcoesVec(2);
-    inc = pcoesVec(3);
-    raan = pcoesVec(4);
-    w_hat = pcoesVec(5);
-    L = pcoesVec(6);
-
-    Me = L - w_hat; %mean anamoly in deg
-    Mer = deg2rad(Me); %mean anamoly in rad
-    w = w_hat - raan; %arg of peri (deg)
-
-    a2 = sqrt((1-ecc)/(1+ecc)); %not semi major axis
-    E = Me2e(Mer,ecc); %eccentric anamoly
-    theta = 2*atand(tan(E/2)/a2); %in deg
-
-end

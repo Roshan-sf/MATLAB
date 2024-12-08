@@ -1,3 +1,54 @@
+%% Roshan Jaiswal-Ferri
+%Section - 01 
+%Aero 351 Final Exam Question 4: 12/07/24
+
+%% Workspace Prep
+
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Constant/Global Vars
+
+options = odeset('RelTol',1e-8,'AbsTol',1e-8);
+muSun = 1.327e11; %mu values from curtis
+muMars = 42828; 
+mu = 398600; %earth
+Rmars = 3396; %km
+Rearth = 6378; %km
+tol = 1e-7;
+Rpark = Rearth + 200;
+
+%% Creating R & V Vectors
+
+Vpark = sqrt(mu/Rpark);
+Vesc = sqrt(2)*Vpark;
+R = [Rpark,0,0];
+V = [0,Vpark,0];
+
+%% Counting Burns
+time = 0;
+burns = 0;
+
+while V < Vesc
+    [~,~,~,~,~,~,~,p] = rv2coes(R,V,mu,Rearth);
+    time = time + p;
+    V = V + [0,1.075,0];
+    burns = burns + 1;
+end
+
+%% Display Results
+disp(['Parking Velocity (km/s): ', num2str(Vpark)])
+disp(['Escape Velocity (km/s): ', num2str(Vesc)])
+disp(['Num of Perigee Burns: ', num2str(burns)])
+disp(['Final Velocity at Perigee: ', num2str(norm(V))])
+disp(['Total Time (hrs): ', num2str(time/3600)])
+
+%% Functions:
+
+%% rv2coes
+
 function [hM,a,e,nu,i,RAAN,w,p,t,en,Alta,Altp] = rv2coes(R,V,mu,r)
 %Function for finding orbital state vectors RV
 %   Input is in SI & %ALL ANGLES IN RADIANS!!
@@ -32,30 +83,30 @@ ukM = norm(uk);
 hM = norm(h); %Calculating specific energy
 
 
-%% PART 1: Initial Calculations for later
+% PART 1: Initial Calculations for later
 
 ep = ((VM^2)/2)-((mu)/RM); %Calculating Epsilon (specific mechanical energy) in J/kg
 
 
-%% PART 2: Calculating semi-major axis
+% PART 2: Calculating semi-major axis
 
 a = -((mu)/(2*ep)); %in km
 
-%% PART 3: Genreal equation calculation for period
+% PART 3: Genreal equation calculation for period
 
 p = (2*pi)*sqrt((a^3)/(mu)); %period of orbit in seconds (ellipse & circ)
 
-%% PART 4: Calculating eccentricity
+% PART 4: Calculating eccentricity
 eV = (1/mu)*((((VM^2)-((mu)/(RM)))*R)-(dot(R,V)*V)); %eccentricity vector is from origin to point of periapsis 
 
 e = norm(eV);
 
-%% PART 5: inclination in rad
+% PART 5: inclination in rad
 
 i = acos((dot(uk,h))/((hM)*(ukM))); %in rad not deg
 
 
-%% PART 6: RAAN in rad
+% PART 6: RAAN in rad
 
 n = cross(uk,h); %projection of momentum vector in orbital plane and node line?
 nM = norm(n);
@@ -66,7 +117,7 @@ else
     RAAN = (2*pi)-(acos((dot(ui,n))/((uiM)*(nM))));
 end
 
-%% PART 7: Argument of Periapsis in rad
+% PART 7: Argument of Periapsis in rad
 
 if eV(3) >= 0 %k component of eccentricity vector (height)
     w = acos(dot(n,eV)/(nM*e));
@@ -74,7 +125,7 @@ else
     w = (2*pi)-(acos(dot(n,eV)/(nM*e)));
 end
 
-%% PART 8: nu (or theta) true anomaly in rad
+% PART 8: nu (or theta) true anomaly in rad
 
 if h2 >= 0 %dot product of R and V idk what it represents
     nu = acos(dot(eV,R)/(e*RM));
@@ -82,7 +133,7 @@ else
     nu = (2*pi)-(acos(dot(eV,R)/(e*RM)));
 end
 
-%% PART 9: Time since perigee passage
+% PART 9: Time since perigee passage
 
 E = 2*atan(sqrt((1-e)/(1+e))*tan(nu/2));
 Me = E - e*sin(E);
@@ -93,12 +144,12 @@ if t < 0 %If it is negative it is other way around circle think 360-angle
     t = p + t; %this shows adding but it is adding a negative
 end
 
-%% PART 10: Calculating Energy
+% PART 10: Calculating Energy
 
 energy = (VM^2)/2 - mu/RM; %km^2/s^2
 en = energy;
 
-%% PART 11: Calculating Apogee and Perigee Altitude
+% PART 11: Calculating Apogee and Perigee Altitude
 
 Alta = a*(1+e)-r;
 Altp = a*(1-e)-r;
