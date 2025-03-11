@@ -135,6 +135,11 @@ close all;      %Clears all
 clear all;      %Clears Workspace
 clc;            %Clears Command Window
 
+%Before
+
+r = 0.0015875; %1/16in in meters
+r2 = 0.0071755;
+r3 = 0.008763;
 Pr = 0.7496;
 T0 = 1916.667;
 rho = 0.268; %kg/m^3
@@ -147,11 +152,64 @@ D = 0.003175; %1/8 in in meters
 L = D;
 mu = 48.445/10^6;
 Re = (rho*v*L)/mu;
+w = L/2; %width of throat from centerline
 
+kcardboard = 0.15;
+kclay = 0.18;
+kgas = 0.36;
 Nu = 0.023*(Re^0.8)*(Pr^0.4);
+hbar = (Nu*kgas)/D;
 
+Tinf = 285.928; %amb at 55 F (in K)
+Ts = T;
+hc = 10; %given?
 
+R1 = (hbar*2*pi*r*w)^-1;
+R2 = log(r2/r)/(2*pi*kclay*w);
+R3 = log(r3/r2)/(2*pi*kcardboard*w);
+R4 = (hc*2*pi*r3*w)^-1;
+
+qburn = (Ts-Tinf)/(R1+R2+R3+R4);
+
+%After
+
+Ts = 306.483; %92F in K
+Pr = 0.71;
+Tf = (Ts+Tinf)/2;
+B = 1/Tf;
+v = 18.828666666666667/10^6; %interpolated and found from table 28
+g = 9.8;
+Lc = r*2; %meters
+kair = 0.026033333333333335;
+
+Gr = (g*B*(Ts-Tinf)*Lc^3)/(v^2);
+Ra = Gr*Pr;
+
+Nu = (0.6 + (0.387*Ra^(1/6)) / (1 + (0.559/Pr)^(9/16))^(8/27))^2;
+hbar2 = (Nu*kair)/D;
+
+R1 = (hc*2*pi*r*w)^-1;
+R2 = log(r2/r)/(2*pi*kclay*w);
+R3 = log(r3/r2)/(2*pi*kcardboard*w);
+R4 = (hbar2*2*pi*r3*w)^-1;
+
+qend = (Ts-Tinf)/(R1+R2+R3+R4);
+
+%qavg
+tburn = 1.7; %burn time in seconds for estes d 12-5
+ttotal = 445 - 142; %total time starting at burn until taper off
+qavg = qburn*(tburn/ttotal)+qend*(1-(tburn/ttotal));
+
+%havg
+havg = hbar*(tburn/ttotal)+hbar2*(1-(tburn/ttotal));
+
+% rocket = readtable("Lab3_1A\rocket_motor_temperature.dat");
+% figure
+% plot(rocket.Var2,rocket.Var4)
 x = 1;
+
+
+
 
 
 
