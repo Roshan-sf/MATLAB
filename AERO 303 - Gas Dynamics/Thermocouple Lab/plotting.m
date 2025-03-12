@@ -139,7 +139,7 @@ clc;            %Clears Command Window
 
 r = 0.0015875; %1/16in in meters
 r2 = 0.0071755;
-r3 = 0.008763;
+r3 = 0.008763; % 0.345in to meters
 Pr = 0.7496;
 T0 = 1916.667;
 rho = 0.268; %kg/m^3
@@ -151,14 +151,14 @@ v = a;
 D = 0.003175; %1/8 in in meters
 L = D;
 mu = 48.445/10^6;
-Re = (rho*v*L)/mu;
+Re = (rho*v*L)/mu; %Diam of whole motor for length--------------
 w = L/2; %width of throat from centerline
 
 kcardboard = 0.15;
 kclay = 0.18;
 kgas = 0.36;
 Nu = 0.023*(Re^0.8)*(Pr^0.4);
-hbar = (Nu*kgas)/D;
+hbar = (Nu*kgas)/r3;
 
 Tinf = 285.928; %amb at 55 F (in K)
 Ts = T;
@@ -186,26 +186,39 @@ Gr = (g*B*(Ts-Tinf)*Lc^3)/(v^2);
 Ra = Gr*Pr;
 
 Nu = (0.6 + (0.387*Ra^(1/6)) / (1 + (0.559/Pr)^(9/16))^(8/27))^2;
-hbar2 = (Nu*kair)/D;
+hbar2 = (Nu*kair)/r3; %Diam of whole motor for length--------------
 
 R1 = (hc*2*pi*r*w)^-1;
 R2 = log(r2/r)/(2*pi*kclay*w);
 R3 = log(r3/r2)/(2*pi*kcardboard*w);
 R4 = (hbar2*2*pi*r3*w)^-1;
 
+%qend = qburn/5; 
 qend = (Ts-Tinf)/(R1+R2+R3+R4);
 
 %qavg
 tburn = 1.7; %burn time in seconds for estes d 12-5
-ttotal = 445 - 142; %total time starting at burn until taper off
+ttotal = 445 - 190; %total time starting at burn until taper off
 qavg = qburn*(tburn/ttotal)+qend*(1-(tburn/ttotal));
-
+qavg = qavg*0.9;
 %havg
 havg = hbar*(tburn/ttotal)+hbar2*(1-(tburn/ttotal));
 
+% q = h*A*dT
+
+A = 2*pi*r3*w;
+dT = qavg/(havg*A); %in Kelvin - should be more than 1.8 degrees
+
+T2 = Tinf + dT; %outside surf temp after heat transf (wrong)
+%thermocouples red ~121 degrees F this shows 287 K which is ~57 F
+
 % rocket = readtable("Lab3_1A\rocket_motor_temperature.dat");
-% figure
+% figure('Name','Exterior Rocket Motor Temp')
 % plot(rocket.Var2,rocket.Var4)
+% xlabel('Time (s)')
+% ylabel('Temp (F)')
+% title('Exterior Rocket Motor Temp')
+% grid on
 x = 1;
 
 
