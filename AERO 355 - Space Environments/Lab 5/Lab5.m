@@ -4,6 +4,7 @@
     
     %% Workspace Prep
     
+    warning off
     format long     %Allows for more accurate decimals
     close all;      %Clears all
     clear all;      %Clears Workspace
@@ -76,12 +77,12 @@
     %% Error Analysis
     
     lsra = 0.000001/2;
-    lsrx = 0.5;
-    lsrl = 0.5; %use error of 0.5 for length
-    lsrd = 0.01/2; 
-    lsrw = 0.005+0.5;
-    Eunc = 0.5;
-    Iunc = lsrd^4;
+    lsrx = 1/32; 
+    lsrl = 1/32; %use error of 0.5 for length
+    lsrd = 1/32; 
+    lsrw = 0.0005+0.5;
+    %Eunc = 0.0005;
+    Iunc = ((pi*d^3)/16)*lsrd;%lsrd^4;
     lsrp = lsrw;
     I = Irod;
     
@@ -95,7 +96,8 @@
     
     dtdp = x^3/(3*E*I);
     
-    error_disp_hard = (dtdx*lsrx) + (dtdi*Iunc) + (dtdw*lsrw) + (dtdp*lsrp);
+    %error_disp_hard = (dtdx*lsrx) + (dtdi*Iunc) + (dtdw*lsrw) + (dtdp*lsrp);
+    error_disp_hard = sqrt((dtdx*lsrx)^2 + (dtdi*Iunc)^2 + (dtdw*lsrw)^2 + (dtdp*lsrp)^2);
     
     %%
     
@@ -111,7 +113,8 @@
     dkdi = (3*E)/L^3; %Check this, it is huge
     dkdl = (-9*E*I)/L^4;
     
-    error_k_easy = (dkdi*Iunc) + (dkdl*lsrl);
+    %error_k_easy = (dkdi*Iunc) + (dkdl*lsrl);
+    error_k_easy = sqrt((dkdi*Iunc)^2 + (dkdl*lsrl)^2);
     
     %%
     
@@ -125,7 +128,8 @@
         dmdp = (Q*x);
         dmdw = (Q*x^2)/2;
         if i == 1
-            error_moment_post = (dmdq*lsra) + (dmdx*lsrx) + (dmdp*lsrp) + (dmdw*lsrw); % Q???
+            %error_moment_post = (dmdq*lsra) + (dmdx*lsrx) + (dmdp*lsrp) + (dmdw*lsrw); % Q???
+            error_moment_post = sqrt((dmdq*lsra)^2 + (dmdx*lsrx)^2 + (dmdp*lsrp)^2 + (dmdw*lsrw)^2);
         elseif i == 2
             error_moment_pre = (dmdq*0) + (dmdx*lsrx) + (dmdp*lsrp) + (dmdw*lsrw);
         end
