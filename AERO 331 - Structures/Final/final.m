@@ -1,6 +1,6 @@
 %% Roshan Jaiswal-Ferri
 %Section - 02
-%Aero 331 HW 3: 3/14/25
+%Aero 331 Final Exam Question 2: 3/20/25
 
 %% Workspace Prep
 
