@@ -1,4 +1,4 @@
-function dstate = twobodymotion(time,state,muEarth) %dstate is derivitve of state
+function dstate = twobodymotion(time,state,mu) %dstate is derivitve of state
 %FUNCTION put in descrip    
 
     %define vars
@@ -13,9 +13,9 @@ function dstate = twobodymotion(time,state,muEarth) %dstate is derivitve of stat
     r = norm([x y z]);
     
     %accel: !!eqs of motion!!
-    ddx = -muEarth*x/r^3;
-    ddy = -muEarth*y/r^3;
-    ddz = -muEarth*z/r^3;
+    ddx = -mu*x/r^3;
+    ddy = -mu*y/r^3;
+    ddz = -mu*z/r^3;
     
     dstate = [dx; dy; dz; ddx; ddy; ddz];
 
