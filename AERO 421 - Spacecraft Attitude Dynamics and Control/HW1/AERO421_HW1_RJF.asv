@@ -1,7 +1,6 @@
 %% Roshan Jaiswal-Ferri & Stefan Rosu
 %Section - 01
 %Aero 421 HW1: 4/2/25
-%Note: This was prepared with the help of Dr. Mehiel's Template script
 
 %% Workspace Prep
 
@@ -37,11 +36,32 @@ rb = Cbg*r;
 rbm = norm(rb);
 rcross = vcross(rb);
 
-J = [100,0,0;...
+I = [100,0,0;...
     0,120,0;...
     0,0,80];
 
-Tg = ((3*mu)/(rbm^5)) * rcross*J*r;
+I = I./1e6;
+
+Tg = ((3*mu)/(rbm^5)) * rcross*I*rb;
+
+disp('Gravity Gradient Torque: ')
+disp(num2str(Tg))
+disp(' ')
+
+%% 13.1
+
+wx = 0.1;
+wy = 0.02;
+wz =
+
+Ix = 98; % kg·m2
+Iy = 102; % kg·m2
+Iz = 150; %kg·m2
+
+I = [Ix,0,0;...
+    0,Iy,0;...
+    0,0,Iz];
+
 
 %% Functions
 
