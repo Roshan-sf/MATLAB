@@ -50,8 +50,9 @@ disp(num2str(Tg))
 disp(' ')
 
 %% 13.1
-% a) the satellite exhibits free precession with nutation due to imperfect 
-% deployment, but remains stable due to spinning about the axis of max inertia.
+% a) This is an oblate spinner because Iz is larger than Ix and Iy, meaning
+% the mass is distributed farther away from the spin axis which gives it a
+% large moment of inertia
 
 
 %Assume It = Ix =Iy & Iz = Ia, where It = 100
