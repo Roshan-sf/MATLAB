@@ -1,0 +1,154 @@
+%% Roshan Jaiswal-Ferri & Stefan Rosu
+%Section - 01
+%Aero 421 FP3: 4/23/25
+%Note: This was prepared with the help of Dr. Mehiel's Template script
+
+%% Workspace Prep
+
+%warning off
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Part 1 - Mass Properties
+
+% Mass properties for normal operations phase
+
+% Calculate the total mass, inertia and Center of Mass of the MehielSat
+
+% You will need to change this
+cm = [0; 0; 0.23438];
+total_mass = 640; %kg
+J = [812.0396             0             0; %imported from first script
+       0      545.3729             0;
+       0             0      627.7083];
+
+fprintf('The spacecraft mass for the normal operations mode is:\n')
+display(num2str(total_mass))
+fprintf('The spacecraft center of mass for the normal operations mode is:\n')
+disp(num2str(cm))
+fprintf('The Inertia Matrix for the normal operations mode is:\n')
+display(num2str(J))
+
+%% Part 2 - Geometric Properties of MehielSat during Normal Operations
+
+% Define the sun in F_ECI and residual dipole moment in F_b
+
+% I constructed a matrix where the rows represent each surface of the
+% MehielSat.  The first column stores the Aera of the surface, the next
+% three columns define the normal vector of that surface in F_b, and the
+% final three columns store the center of presure of the surface (geometric
+% center of the surface) in F_b.
+
+% First get rhos vectors with respect to the center of the spacecraft bus
+% the MehielSat BUS is a box
+Areas = 4*ones(6,1); %areas of faces
+normals = [1 0 0; -1 0 0; 0 1 0; 0 -1 0; 0 0 1; 0 0 -1]; %normal vectors
+cps   =   [1 0 0; -1 0 0; 0 1 0; 0 -1 0; 0 0 1; 0 0 -1]; %center of pressure
+
+%normal vector 0 0 1 is sensor direction (according to canvas page)
+
+% Append geometric properties for Solar Panel 1 (on the right from top vw)
+Areas = [Areas;6;6;0.15;0.15;0.1];
+normals = [normals; 0 0 1; 0 0 -1; 1 0 0; -1 0 0; 0 1 0];
+% for solar components it is top bottom thin side -y thin side y then outer
+cps = [cps; 0 0 1; 0 0 -1; 1 0 0; -1 0 0; 0 1 0];
+
+
+% Append geometric properties for Solar Panel 2
+Areas = [Areas;6;6;0.15;0.15;0.1];
+normals = [normals;0 0 -1; 0 0 1; -1 0 0; 1 0 0; 0 -1 0];
+cps   =   [cps;    0 0 -1; 0 0 1; -1 0 0; 1 0 0; 0 -1 0];
+
+
+% Append geometric properties for Sensor
+Areas = [Areas;0.0625;0.25;0.25;0.25;025];
+normals = [normals; 0 0 1; 1 0 0; -1 0 0; 0 1 0; 0 -1 0];
+cps   =   [cps;     0 0 1; 1 0 0; -1 0 0; 0 1 0; 0 -1 0];
+
+
+% now subtract the center of mass to get the location of the rho vectors
+% with respect to the center of mass
+
+% Now build the matrix
+surfaceProperties = [Areas cps normals];
+
+%% Part 3 - Initialize Simulation States
+
+% Current JD - has to be on the solar equinox, why? - we'll use 3/20/2024
+% from https://aa.usno.navy.mil/data/JulianDate
+% Need this so we can convert from F_ECEF to F_ECI and to F_b for the
+% magnetic field model
+JD_0 = 2460390;
+
+% Spacecraft Orbit Properties
+mu = 398600; % km^3/s^2
+h = 53335.2; % km^2/s
+e = 0; % none
+Omega = 0*pi/180; % radians
+inc = 98.43*pi/180; % radians
+omega = 0*pi/180; % radians
+nu = 0*pi/180; % radians
+
+a = h^2/mu/(1 - e^2);
+orbital_period = 2*pi*sqrt(a^3/mu);
+
+% Set/Compute initial conditions
+% intial orbital position and velocity
+%[r_ECI_0, v_ECI_0] = coe2rv([h e Omega inclination omega nu]);
+[r_ECI_0, v_ECI_0] = coes2rvd(a,e,rad2deg(inc),0,omega,nu,mu);
+
+% No external command Torque
+T_c = [0; 0; 0]; % Nm
+
+rV = r_ECI_0; %Position Vector km
+vV = v_ECI_0; %Vel Vector km/s
+
+%Converting to F'LVLH
+
+Zlvlh = -(rV/norm(rV));
+Ylvlh = -(cross(rV,vV)/norm(cross(rV,vV)));
+Xlvlh = cross(Ylvlh,Zlvlh);
+
+%Creating Matrix with new vectors
+
+Clvlh_eci = [Xlvlh, Ylvlh, Zlvlh]';
+disp(num2str(Clvlh_eci))
+C_b_ECI_0 = Clvlh_eci;
+
+% Compute inital F_LVLH basis vectors in F_ECI components based on F_LVLH
+% definition
+
+% Initial Euler angles relating F_body and F_LVLH (given)
+phi_0 = 0;
+theta_0 = 0;
+psi_0 = 0;
+E_b_LVLH_0 = [phi_0; theta_0; psi_0];
+
+% Initial Quaternion relating F_body and F_LVLH (given)
+q_b_LVLH_0 = [0; 0; 0; 1];
+
+% Compute initial C_LVLH_ECI_0, C_b_LHVL_0, and C_b_ECI_0 rotaiton matrices
+
+
+% Initial Euler angles relating body to ECI
+E_b_ECI_0 = rotm2eul(C_b_ECI_0);
+
+% Initial quaternion relating body to E
+q_b_ECI_0 = rotm2quat(C_b_ECI_0);
+
+% Initial body rates of spacecraft (given)
+w_b_ECI_0 = [0.001; -0.001; 0.002];
+
+%% Part 4 - Simulate Results
+
+n_revs = 1; %revs
+tspan = n_revs * orbital_period;
+out = sim('FP_Solutions_Part_3_disturbance.slx');
+
+%% Part 5 - Plot Results
+
+% Plot Angular Velocities, Euler Angles and Quaternions
+
+% Plot Disturbance torques in F_b
