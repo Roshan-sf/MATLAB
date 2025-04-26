@@ -94,7 +94,7 @@ degbol = (Tempdiff*-degB)/100; %drop in performance at current temp
 %pbol = arrayAcm*std_power*degbol*Fp; 
 
 n0 = 28.3/100;
-n = n0*(1+TempC*(Tempdiff));
+n = n0*(1+*(Tempdiff)); %the bug in the code making too much power is here :/
 pbol = Se*n*Fp*arrayA; %power generated in mW at BOL per 1 panel
 
 disp('Power generated in W at BOL:')
@@ -112,15 +112,15 @@ disp(num2str(2*(peol/1000)))
 disp(' ')
 
 syms F %size factor
-eq4 = 215 == (peol/1000)*F;
+eq4 = 215 == (peol*2/1000)*F;
 soln3 = solve(eq4,F);
 sizef = double(soln3);
 
 %find new area
 newArraycm = arrayAcm*sizef;
-cells = (newArraycm/cella)-(60*3);
+cells = (newArraycm/cella)-(2*60*3);
 
-disp('Minimum whole new cells per panel needed to reach 215W at EOL & equi temp:')
+disp('Minimum whole new cells needed to reach 215W at EOL & equi temp:')
 disp(num2str(ceil(cells)))
 disp(' ')
 
@@ -149,8 +149,7 @@ disp(' ')
 
 % Question 2
 
-alt2 = r - newR;
-FOR = 2*asind(newR/alt2);
+FOR = 2*asind(newR/r);
 
 disp('Field of Regard for s/c in CEO orbit (deg):')
 disp(num2str(FOR))

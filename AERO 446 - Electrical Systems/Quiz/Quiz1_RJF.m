@@ -94,7 +94,7 @@ degbol = (Tempdiff*-degB)/100; %drop in performance at current temp
 %pbol = arrayAcm*std_power*degbol*Fp; 
 
 n0 = 28.3/100;
-n = n0*(1+28*(Tempdiff)); %the bug in the code making too much power is here :/
+n = n0*(1+BOL*(Tempdiff)); %the bug in the code making too much power is here :/
 pbol = Se*n*Fp*arrayA; %power generated in mW at BOL per 1 panel
 
 disp('Power generated in W at BOL:')
