@@ -1,4 +1,4 @@
-%% Roshan Jaiswal-Ferri & Stefan Rosu
+%% Roshan Jaiswal-Ferri
 %Section - 01
 %Aero 446 HW3: 4/25/25
 
@@ -129,8 +129,29 @@ disp(' ')
 
 % Peak to peak power means energy is stored during low demand and matched
 % at high demand. This is useful because it allows you to store extra power
-% and can improve the efficiency of the system
+% and can improve the efficiency of the system.
 
+%% Question 2.4
+
+% Solar panels will have better performance coming out of an eclipse
+% because their operating temperature will genreally be cooler and closer
+% to the optimal performance temp. The temperature differential slowly
+% rises over the day time of the orbit and decreases efficiency.
+
+%% Question 2.5
+
+% Solar panel degredation is definitely worse in LEO because of earth's
+% atmosphere-components like a lot of AO, outgassing/particulates in the 
+% higher atmosphere. They will also go through many more thermal cycles in
+% LEO which can cause fatigue.
+
+%% Problem 3
+
+% 1) False
+% 2) False
+% 3) True
+% 4) False
+% 5) True
 
 %% Functions
 

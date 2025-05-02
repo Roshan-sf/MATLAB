@@ -1,4 +1,4 @@
-%% Roshan Jaiswal-Ferri & Stefan Rosu
+%% Roshan Jaiswal-Ferri
 %Section - 01
 %Aero 356 Q1: 4/25/25
 

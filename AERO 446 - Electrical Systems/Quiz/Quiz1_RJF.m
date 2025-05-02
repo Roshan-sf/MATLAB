@@ -77,7 +77,7 @@ E = 0.85;
 Pabs = abs*Se*arrayA;
 
 syms T
-eq3 = Pabs == sb*E*(2*arrayA)*T^4; %multiplied area by 2 for emittance
+eq3 = Pabs == sb*E*(arrayA)*T^4;
 soln2 = solve(eq3,T);
 Temp = double(soln2(2));
 TempC = Temp-273.15;
@@ -93,12 +93,12 @@ Tempdiff = TempC - 28;
 degbol = (Tempdiff*-degB)/100; %drop in performance at current temp
 %pbol = arrayAcm*std_power*degbol*Fp; 
 
-n0 = 28.3/100;
-n = n0*(1+BOL*(Tempdiff)); %the bug in the code making too much power is here :/
+n0 = 28.1/100;
+n = n0*(1+(degB/100)*(Tempdiff)); %the bug in the code making too much power is here :/
 pbol = Se*n*Fp*arrayA; %power generated in mW at BOL per 1 panel
 
 disp('Power generated in W at BOL:')
-disp(num2str(2*(pbol/1000)))
+disp(num2str(2*(pbol)))
 disp(' ')
 
 % Question 5
@@ -107,12 +107,12 @@ Dyr = 0.005; %degredation per year in percent
 lifedegredation = (1-Dyr)^lty;
 peol = pbol*lifedegredation; %in mW
 
-disp('Power generated in W at BOL:')
-disp(num2str(2*(peol/1000)))
+disp('Power generated in W at EOL:')
+disp(num2str(2*(peol)))
 disp(' ')
 
 syms F %size factor
-eq4 = 215 == (peol*2/1000)*F;
+eq4 = 215 == (peol*2)*F;
 soln3 = solve(eq4,F);
 sizef = double(soln3);
 
