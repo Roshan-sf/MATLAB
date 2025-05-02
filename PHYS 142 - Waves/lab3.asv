@@ -1,0 +1,131 @@
+%% Roshan Jaiswal-Ferri
+%Section - 45
+%PHYS 142
+
+%% Workspace Prep
+
+warning off
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Plotting for part c
+
+mf = [1,	135; % mode vs freq
+      2,	277;
+      3,	417;
+      4,	554;
+      5,	695;
+      6,	787;];
+
+x = (mf(:,1)/100)';
+f = mf(:,2).^2;
+
+p = polyfit(x,f,1);
+bf = polyval(p,x);
+g = (4*pi^2)/p(1);
+
+figure('Name','Linearized Form')
+plot(x,f,'*')
+hold on
+grid on
+plot(x,bf)
+% plot(0,0,'r.')
+% plot(0,0,'r*')
+% plot(0,0,'ro')
+xlabel('Mode #')
+ylabel('Freq')
+title('Linearized Form')
+legend('Data Points','Line of Best Fit (y = 3.8236x + 0.875) ',...
+    'Origin',Location='best')
+
+disp(['Calculated g: ', num2str(g), 'm/s^2'])
+disp(['Percent Dif.: ', num2str(abs((9.80-g)/9.80)*100), '%'])
+disp(' ')
+
+%% Determine the spring constant and effective mass from  Period vs. Mass  
+
+msp = 0.162;
+g = 9.81;
+mass = [96.4, 146.4, 196.4, 246.4, 296.4, 346.4, 396.4]./1000; %in kg
+period = [0.883, 0.966, 1.22, 1.21, 1.24, 1.32, 1.6]; %seconds
+
+force = mass.*g; %force in newtons
+k = (4*pi^2.*mass)./period.^2;
+
+k = mean(k);
+meff = (1/3)*msp; %apprax mass fraction
+
+disp(['K value found from mass & period: ', num2str(k), ' N-m'])
+disp(['Effective mass fraction of spring: ', num2str(meff), ' kg'])
+
+
+Tsp2 = period.^2;
+k = 8.44;
+beta = 1/3;
+
+p2 = polyfit(mass,Tsp2,1);
+bf2 = polyval(p2,mass); %line of best fit
+meffsp = (p2(2)*k)/(4*pi^2*beta);
+
+disp(['Effective mass fraction of spring calculated: ',...
+    num2str(meffsp), ' kg'])
+
+figure('Name','Linearized Form Spring Constant')
+plot(mass,Tsp2,'*')
+hold on
+grid on
+plot(mass,bf2)
+plot(0,0,'r.')
+plot(0,0,'r*')
+plot(0,0,'ro')
+xlabel('Attatched Mass (kg)')
+ylabel('Period T^2 (s^2)')
+title('Linearized Form Spring Constant')
+legend('Data Points','Line of Best Fit (y = 5.0062x + 0.2672) ',...
+    'Origin',Location='best')
+
+%% Finding Period of phone on spring
+
+data = readtable('Acceleration without g 2025-04-09 13-13-45.xls');
+
+t2 = data.Time_s_;
+a2 = data.LinearAccelerationY_m_s_2_;
+
+t = t2(1:200);
+a = a2(1:200);
+
+zero_crossings = [];  % to store interpolated time values at zero crossing
+
+for i = 1:length(a)-1
+    if a(i) * a(i+1) < 0  % sign change => zero crossing
+        % Linear interpolation to estimate crossing time
+        t0 = t(i);
+        t1 = t(i+1);
+        a0 = a(i);
+        a1 = a(i+1);
+        
+        % Interpolate to find zero crossing time
+        t_cross = t0 - a0 * (t1 - t0) / (a1 - a0);
+        
+        zero_crossings(end+1) = t_cross;
+    end
+end
+
+disp('Zero crossings occur at times:');
+disp(num2str(zero_crossings));
+
+t1 = mean(zero_crossings(1:3));
+t2 = mean(zero_crossings(4:6));
+
+dt = t2-t1;
+
+p = dt*2;
+disp(['period: ', num2str(p)])
+
+% figure('Name','Gathered Data')
+% plot(t,a)
+% xlabel('Time (s)')
+% ylabel('Accel (g)')
+% grid on

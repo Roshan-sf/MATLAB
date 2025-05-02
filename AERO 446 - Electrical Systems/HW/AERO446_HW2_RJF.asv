@@ -1,0 +1,61 @@
+%% Roshan Jaiswal-Ferri
+%Section - 01
+%Aero 446 HW2: 4/18/25
+
+%% Workspace Prep
+
+%warning off
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Problem 1
+
+%1) Immediate command!
+%2) Multi-Step
+%3) Prohibited Commands
+%4) Multi-Step
+%5) Block Command
+
+%% Problem 2
+
+%                   !!!!table at bottom!!!!
+
+%% Problem 3
+
+%Assume you’re designing two electronic subsystems for a spacecraft at NASA.
+% The worst-case predicted temperature ranges are
+%• System A: -3°C to +45°C
+%• System B: -20°C to +60°C
+%What are the Flight Acceptance and Prototype qualification temperature 
+% limits for these components?
+
+%System A
+%Flight Acceptance:
+%   -8 to 50 C
+%Prototype:
+%   -13 to 55 C
+
+%System A
+%Flight Acceptance:
+%   -25 to 65 C
+%Prototype:
+%   -30 to 70 C
+
+
+% Source: https://explorers.larc.nasa.gov/2019APSMEX/MO/pdf_files/gsfc-std-7000a_final_3-28-18.pdf
+%Pg 152
+%% Problem 4
+
+T = 327;
+r = 6050*1000; %radius in meters
+sb = 5.67*10^-8;
+E = 1; %black body
+A = 4*pi*r^2;
+
+Q = E*sb*A*T^4; %W/m^2
+
+
+
+%% Problem 5

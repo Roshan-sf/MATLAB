@@ -1,0 +1,52 @@
+%% Roshan Jaiswal-Ferri
+%Section - 01
+%Aero 446 HW1: 4/11/25
+
+%% Workspace Prep
+
+%warning off
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Question 1
+
+mu = 398600;
+Re = 6378;
+KuiperP2 = 450; % km
+OneWeb = 1200; %km
+O3bmPOWER = 8000; % km
+
+r = [KuiperP2,OneWeb,O3bmPOWER] + Re;
+
+p = (2*pi*sqrt((r.^3)./mu))./60;
+disp(['Period in Minutes in order: ', num2str(p)])
+
+FOR = 2*asind(Re./r);
+
+disp(['Angles of FOR in order (deg): ', num2str(FOR)])
+
+%% Question 2 
+
+period = 86164; %23h 56m 4s in seconds (1 day)
+rgeo = (mu*(period/(2*pi))^2)^(1/3);
+disp(['Rgeo: ', num2str(rgeo), ' km'])
+FORg = 2*asind(Re/rgeo);
+disp(['FOR for geo: ', num2str(FORg), ' deg'])
+
+%% Question 3
+
+period = 88642; %mars day
+rgeo = (mu*(period/(2*pi))^2)^(1/3);
+disp(['Rgeo: ', num2str(rgeo), ' km'])
+FORg = 2*asind(Re/rgeo);
+disp(['FOR for mars geo: ', num2str(FORg), ' deg'])
+
+%% Question 4
+
+rwv = 617radius from google of s/c
+FOV = 2*atand((6.5)/rwv);
+disp(['FOV: ', num2str(FOV), ' deg'])
+
+
