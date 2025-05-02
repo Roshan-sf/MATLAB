@@ -1,0 +1,33 @@
+%% Roshan Jaiswal-Ferri
+%Section - 01 
+%Aero 303 Lab 1: 01/27/25
+
+%% Workspace Prep
+
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%%
+
+% T1 = readmatrix("run_2_data_group_2.csv");
+% T2 = readmatrix("run_3_data_group_2.csv");
+
+% Load the CSV file
+data = readtable('run_2_data_group_2.csv');
+time_ms = data{:, 1};      % First column: Time in ms
+voltage = data{:, 2};      % Second column: Voltage (not used for plotting)
+force_lbf = data{:, 3};    % Third column: Pound force
+
+% Adjust time to start at 0 and convert to seconds
+time_s = (time_ms - time_ms(1)) / 1000;
+
+% Plot time in seconds vs pound force
+figure;
+plot(time_s, force_lbf, 'LineWidth', 1.5);
+xlabel('Time (s)');
+ylabel('Force (lbf)');
+title('Time vs Force');
+grid on;
+

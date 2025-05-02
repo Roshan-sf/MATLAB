@@ -35,17 +35,10 @@ T02 = (JD2-JD2000)/36525;
 PCe = AERO351planetary_elements2(3,T01); %Finds the Planetary Coes of earth
 % Mean longitude - longitude of perihelion = Mean Anomaly (L - w_hat = Me)
 % w_bar = w + raan
-
-Me = deg2rad(PCe(6) - PCe(5));
-w = PCe(5) - PCe(4); %arg of peri (deg)
-
-a = sqrt((1-PCe(2))/(1+PCe(2))); %not semi major axis
-E2 = Me2e(Me,PCe(2));
-theta2 = 2*atand(tan(E2/2)/a); %in deg
-
 [a,ecc,inc,raan,w,theta,w_hat,L] = pcoes(PCe);
 
-[Re,Ve] = coes2rvd(PCe(1),PCe(2),PCe(3),PCe(4),w,theta2,muSun);
+
+[Re,Ve] = coes2rvd(a,ecc,inc,raan,w,theta,muSun);
 Re = Re';
 Ve = Ve';
 
@@ -54,15 +47,10 @@ Ve = Ve';
 PCm = AERO351planetary_elements2(4,T02); %Finds the Planetary Coes of mars
 % Mean longitude - longitude of perihelion = Mean Anomaly (L - w_hat = Me)
 % w_bar = w + raan
+[a_m,ecc_m,inc_m,raan_m,w_m,theta_m,w_hat_m,L_m] = pcoes(PCm);
 
-Me = PCm(6) - PCm(5);
-w = PCm(5) - PCm(4); %arg of peri (deg)
 
-a = sqrt((1-PCe(2))/(1+PCe(2))); %not semi major axis
-E2 = Me2e(Me,PCe(2));
-theta2 = 2*atand(tan(E2/2)/a); %in deg
-
-[Rm,Vm] = coes2rvd(PCm(1),PCm(2),PCm(3),PCm(4),w,theta2,muSun);
+[Rm,Vm] = coes2rvd(a_m,ecc_m,inc_m,raan_m,w_m,theta_m,muSun);
 Rm = Rm';
 Vm = Vm';
 %% Cruise Phase Calcs
@@ -77,11 +65,6 @@ Vpark = sqrt(mu/Rpark);
 %Vinf = abs(norm(V1) - norm(Ve));
 Vinf = norm(V1 - Ve);
 Vbo = sqrt((Vinf^2)+((2*mu)/Rpark)); %V burn out
-
-% This stuff is all wrong lol
-% ecch = 1 + (Rpark*Vinf^2)/mu;
-% h_hyp = (mu*sqrt((ecch^2)-1))/Vinf;
-% Vhyp = h_hyp/Rpark;
 
 dV = abs(Vbo-Vpark); % ~3 km/s
 

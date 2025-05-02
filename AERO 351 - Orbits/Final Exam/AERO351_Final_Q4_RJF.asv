@@ -42,7 +42,7 @@ end
 disp(['Parking Velocity (km/s): ', num2str(Vpark)])
 disp(['Escape Velocity (km/s): ', num2str(Vesc)])
 disp(['Num of Perigee Burns: ', num2str(burns)])
-disp(['Final Velocity at Perigee (km/s): ', num2str(norm(V))])
+disp(['Final Velocity at Perigee (: ', num2str(norm(V))])
 disp(['Total Time (hrs): ', num2str(time/3600)])
 
 %% Functions:

@@ -36,16 +36,16 @@ h = sqrt(ap*muSun*(1+ecc*cosd(theta)));
 
 Vsc1 = h/ap;
 Ve = sqrt(muSun/Re);
-Vinf = Ve - Vsc1;
+Vinf = abs(Vsc1 - Ve);
 phi = 180; %ht ellipse where planet V is faster therefor phi = 180
-ecch = 1 + (flyr*(Vinf^2))/muSun; %1.0000013 is hyperbolic
+ecch = 1 + (flyr*(Vinf^2))/mu; %is hyperbolic
 
 %% Finding Turn Angle & phi_2
 ta = 2*asind(1/ecch); %turn angle
 phi2 = phi - ta;
 
 %% Finding V S/C 2
-Vinf2 = [Vinf*cosd(phi2), Vinf*sind(phi)];
+Vinf2 = [Vinf*cosd(phi2), Vinf*sind(phi2)];
 Vsc2 = Vinf2 + [Ve,0];
 Vsc1 = [Vsc1, 0];
 
