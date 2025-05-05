@@ -1,0 +1,21 @@
+%% Roshan Jaiswal-Ferri
+%Section - 01
+%Aero 446 HW1: 4/11/25
+
+%% Workspace Prep
+
+warning off
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Windowv
+
+%%
+
+heat = readtable("hot.csv");
+cool = readtable("CylinderCooling17min.csv");
+
+hot = heat.Temperature1__C_Run_1(1:8001,1);
+time = heat.Time_s_Run_1(1:8001,1);
+
+avg_slope1 = (time(end) - time(1)) / (hot(end) - hot(1));
