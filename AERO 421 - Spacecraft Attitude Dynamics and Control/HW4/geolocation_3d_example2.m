@@ -49,17 +49,17 @@ T = zeros(3,n);
 
 % Set the random number generator
 rng('default')
-s = rng
+s = rng;
 
 % Begin Monte Carlo Loop
 for i = 1:n
     % calc all sources of error for r, d_r_pos, d_r_sen, d_r_vel
     d_r_pos = 10*randn([3, 1]);
-    r = r_0 +  + d_r_pos;
+    r = r_0 + d_r_pos;
     
     % calc the errors for target location (d_lat, d_long, d_alt, d_JD)
-    % d_T(:,i) = lla2eci(lat_0 + d_lat, long_0 + d_long, alt_0 + d_alt, d_JD);
-    T(:,i) = T_0; % + d_T
+    %d_T(:,i) = lla2eci(lat_0 + d_lat, long_0 + d_long, alt_0 + d_alt, d_JD);
+    T(:,i) = T_0;% + d_T;
     
     % calc all erros for the pointing vector - sensor mounting angle
     % d_p = ...
@@ -80,7 +80,7 @@ mean(e_norm); %km
 e_s = sort(abs(e_norm));
 e90 = e_s(floor(n*0.9));
 
-% Make Plots
+%% Make Plots
 figure
 plot(e_norm);
 xlabel('trial')
@@ -101,3 +101,24 @@ title(horzcat('Scatter plot of ground error for ', num2str(n), ' iterations.'))
 zlabel('error in z (km)')
 ylabel('error in y (km)')
 view([-90,0])
+
+
+function [T_0, d] = sphere_line_intersect(c, Re, p_hat, r_0)
+    r = r_0 - c;
+    
+    % Compute quadratic terms
+    
+    discriminant = dot(r, p_hat)^2 - (dot(r,r) - Re^2);
+    
+    if discriminant < 0
+        warning('Discriminant less than zero, result will be imag')
+        d = 0;
+        T_0 = [0,0,0];
+    else
+        d1(1) = dot(-r,p_hat)+sqrt(discriminant);
+        d1(2) = dot(-r,p_hat)-sqrt(discriminant);
+        d = min(d1);
+
+        T_0 = r + d*p_hat;
+    end
+end
