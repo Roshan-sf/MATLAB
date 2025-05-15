@@ -86,8 +86,9 @@ for i = 1:length(altVec)
     dp(:,i) = mcData.r;
     dpn(i) = norm(dp(:,i));
     dr(i) = norm(mcData.r);
-    g_errors(i) = loc_error;
+    g_errors(i) = loc_error; %convrt km to m
     slant_ranges(i) = norm(T_0 - r02);
+    %mc_results{i} = mcData;
 
 end
 
@@ -112,8 +113,8 @@ for i = 1:length(latVec)
     p_03 = T_02 - r0; %update pointing vector
     phat_03 = p_03/norm(p_03);
 
-    [~, lat_error, Tg, mcData] = geo_monte_sim(r0, v0, phat_03, T_0, JD, error, target, Re, n, c);
-    g_errors(i) = lat_error; 
+    [~, loc_error, Tg, mcData] = geo_monte_sim(r0, v0, phat_03, T_0, JD, error, target, Re, n, c);
+    g_errors(i) = loc_error; %convrt km to m
 
 end
 
@@ -121,13 +122,10 @@ figure;
 plot(latVec, g_errors, 'r*');
 hold on
 grid on
+%plot(dpn,g_errors, 'b*');
 xlabel('Target Latitude (deg)');
 ylabel('90% Geolocation Error (m)');
 title('Geolocation Error vs. Altitude');
-
-%% Problem 4
-
-
 
 %% Functions
 
@@ -201,7 +199,6 @@ function [g, g_norm, T_g, monteCarloData] = geo_monte_sim(r_0, v_0, phat_0, T_0,
 
     z90 = 1.645;
     g = mean(e, 2) + z90 * std(e, 0, 2);
-    g2 = error90(e,z90);
     g_norm = mean(e_norm) + z90 * std(e_norm);
     T_g = mean(T_e, 2) + z90 * std(T_e, 0, 2);
     dp = mean(dp, 2) + z90 * std(dp, 0, 2);
@@ -217,14 +214,6 @@ function [g, g_norm, T_g, monteCarloData] = geo_monte_sim(r_0, v_0, phat_0, T_0,
     monteCarloData.T = T;
     monteCarloData.r = r;
     monteCarloData.p = dp;
-end
-
-function [out] = error90(in,z90)
-    if isequal(size(in), [3 1])
-        out = mean(in, 2) + z90 * std(in, 0, 2);
-    else
-        out = meain(in) + z90 * std(in);
-    end
 end
 
 function [T_0, d] = sphere_line_intersect(c, Re, p_hat, r_0)
