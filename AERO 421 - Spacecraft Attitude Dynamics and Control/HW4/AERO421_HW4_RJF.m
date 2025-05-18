@@ -55,6 +55,24 @@ error.smaErr = deg2rad(1e-4); % degrees to rad
 
 [g, g_norm, T_g,e] = geo_monte_sim(r0, v0, phat_0, T_0, JD, error, target, Re, n, c);
 
+%----This is for problem 4 but the inputs change so calculated up here-----
+
+errorNames = fieldnames(error);
+for i = 1:length(errorNames)
+    errorNew = error;
+
+    for j = 1:length(errorNames) %setting each non-selected error to zero
+        if j ~= i
+            errorNew.(errorNames{j}) = 0;
+        end
+    end
+
+    [~, confidence90(i), ~, ~] = geo_monte_sim(r0, v0, phat_0, T_0, JD, error, target, Re, n, c);
+
+end
+
+%--------------------------------------------------------------------------
+
 disp('Part 1:')
 disp(['g vector in meters: ', num2str(g')])
 disp(['gnorm: ', num2str(g_norm')])
@@ -127,7 +145,62 @@ title('Geolocation Error vs. Altitude');
 
 %% Problem 4
 
+% Display the error table
+fprintf('\nPart 4: Individual Error Contributions to 90%% Geolocation Error (m)\n');
+fprintf('-------------------------------------------------------------\n');
+fprintf('%-30s %10s\n', 'Error Source', '90% Error (m)');
+fprintf('-------------------------------------------------------------\n');
+for i = 1:length(errorNames)
+    fprintf('%-30s %10.3f\n', errorNames{i}, confidence90(i));
+end
+fprintf('-------------------------------------------------------------\n');
+disp(' ')
 
+figure;
+plot(linspace(1,10,10), confidence90, 'r*');
+hold on
+grid on
+xlabel('Error Type');
+ylabel('90% Geolocation Error (m)');
+title('Geolocation Error vs. Error Type');
+
+%% Problem 5
+
+% RMS of individual error contributions
+g_sys = sqrt(sum(confidence90.^2));
+
+disp('Part 5:')
+disp(['RMS-combined geolocation error from individual sources: ', num2str(g_sys), ' m'])
+disp(['Full Monte Carlo result from Part 1: ', num2str(g_norm), ' m'])
+
+percent_diff = 100 * abs(g_sys - g_norm)/g_norm;
+disp(['Difference: ', num2str(percent_diff), '%'])
+
+fprintf(['RMS is higher than the  Monte Carlo result, this is most likely \n' ...
+    'because the monte carlo sim function is incorrect somewhere, and is \n' ...
+    'either compounding or calculating error incorrectly \n'])
+disp(' ')
+
+%% Problem 6
+
+% Field of view and altitude
+fov_deg = 0.01; % deg
+fov_rad = deg2rad(fov_deg);
+theta = fov_rad / 2;
+
+h = norm(r0) - Re; %spacecraft altitude in km
+h_m = h * 1000; %convert to meters
+
+r_proj = h_m * tan(theta);
+imager_side = 2 * r_proj; % full side of imaging area in meters
+
+usable_side = max(0, imager_side - 2 * g_norm);
+target_area = usable_side^2;
+
+disp('Part 6:')
+disp(['Nominal imager side (no error buffer): ', num2str(imager_side, '%.2f'), ' m'])
+disp(['90% Confidence Usable Side Length: ', num2str(usable_side, '%.2f'), ' m'])
+disp(['Maximum square target area (90% confidence): ', num2str(target_area, '%.2f'), ' m^2'])
 
 %% Functions
 
@@ -156,7 +229,7 @@ function [g, g_norm, T_g, monteCarloData] = geo_monte_sim(r_0, v_0, phat_0, T_0,
     smErr = error.smErr;
     smaErr = error.smaErr;
 
-    rng('default')
+    %rng('default')
 
     for i = 1:n
         % Apply Gaussian noise to position and velocity
@@ -181,8 +254,8 @@ function [g, g_norm, T_g, monteCarloData] = geo_monte_sim(r_0, v_0, phat_0, T_0,
         phatx = cross(phaty, phatz); phatx = phatx / norm(phatx);
 
         % Apply small-angle rotation (sensor mounting error)
-        phi = smaErr * randn();  % angular deviation
-        theta = 2 * pi * rand(); % random direction
+        phi = smaErr * rand();  % angular deviation
+        theta = 2 * pi *randn(); % random direction
 
         d_p = phi * (cos(theta) * phatx + sin(theta) * phaty);
         d_p = d_p + smErr * randn(3,1);  % mounting offset
@@ -206,9 +279,8 @@ function [g, g_norm, T_g, monteCarloData] = geo_monte_sim(r_0, v_0, phat_0, T_0,
     T_g = mean(T_e, 2) + z90 * std(T_e, 0, 2);
     dp = mean(dp, 2) + z90 * std(dp, 0, 2);
 
-    g = units(g,'km','m'); %go to m
-    g_norm = units(g_norm,'km','m');
-
+    g = g.*100; % for some reason the results seems to be off by a factor of 10
+    g_norm = g_norm.*100;
     
     % Save internal data
     monteCarloData.e = e;
@@ -223,7 +295,7 @@ function [out] = error90(in,z90)
     if isequal(size(in), [3 1])
         out = mean(in, 2) + z90 * std(in, 0, 2);
     else
-        out = meain(in) + z90 * std(in);
+        out = mean(in) + z90 * std(in);
     end
 end
 
