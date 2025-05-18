@@ -1,0 +1,50 @@
+%% Roshan Jaiswal-Ferri
+%Section - 01
+%Aero 356: 5/15/25
+
+%% Workspace Prep
+
+%warning off
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command 
+
+%% Question 1
+
+%Rad Weighting
+Wp = 2;
+We = 1; %weighting for electron and proton
+
+%Body Parts
+Ws = 0.01; %skin
+Wst = 0.12; %stomach
+Wl = 0.12; %lungs
+Wb = 0.01; %brain
+Bp = [Ws,Wst,Wl,Wb];
+
+Dp = 1.2; %dose protons in grays
+De = 1.3; %does electrons in grays
+
+Ht = (Dp*Wp) + (De*We);
+E = sum(Ht.*Bp); %in sv or Gray they are the same lol
+disp(['Absorbed Radiation: ', num2str(E),' Sv'])
+
+%% Question 2
+
+attenuation = 8.2; %both in mm
+x = 2.1;
+Tao = exp((-x/attenuation));
+
+abs = -log10(Tao);
+disp(['Absorptance: ', num2str(abs)])
+
+%% Question 3
+
+LET = 2e6 * 1e3; % MeV*cm^2*mg^-1 to eV*cm^2*g^-1
+Ei = 4.43; %eV
+rho = 6.2; %g/cm^3
+q = 1.6e-19; %coulumbs
+
+Qd = (LET*rho*q)/Ei;
+disp([''])

@@ -1,6 +1,6 @@
 %% Roshan Jaiswal-Ferri
 %Section - 01
-%Aero 446 Quiz 2: 5/15/25
+%Aero 356 Midterm 1: 4/23/25
 
 %% Workspace Prep
 
@@ -14,22 +14,6 @@ clc;            %Clears Command
 Re = 6378; %km
 Se = 1366; %w/m^2
 mu = 398600;
-
-%% Problem 1
-
-% This is on paper
-
-%% Problem 2
-
-V = 4;
-Ah = 25; 
-
-Pusage = V*Ah;
-
-disp('--- Question 2')
-disp(['With A DOD of 50% the battery can support ', num2str(Pusage),...
-    'Wh of power in 1 hour'])
-disp(' ')
 
 %% Problem 3
 
@@ -77,17 +61,7 @@ Poute = pi + bus + comm;
 Pout = pr + bus + comm;
 
 bc = (Poute*td)/(DOD*n); %battery capacity in Wh
-Pcharge = ((Pout*tc)+(Poute*td)); %amount of power req each orbit
-
-syms Pin
-eq2 = Pcharge == Pin*n;
-soln = solve(eq2,Pin);
-Pin = double(soln);
-
-disp('--- Question 4')
-disp(['Battery Capacity with DOD of 50%: ', num2str(bc), 'Wh'])
-disp(['Charging power needed for whole orbit: ', num2str(Pin), 'Wh'])
-disp(' ')
+Pcharge = n*((Pout*tc)+(Poute*td));
 
 
 %% Problem 5
@@ -126,10 +100,6 @@ gain = 10^(gaindB/10);
 
 output = gain*input;
 
-disp('--- Question 6')
-disp(['Output Power: ', num2str(output), 'W'])
-disp(' ')
-
 %% Problem 7
 
 Vtn = 3.8; %V
@@ -139,8 +109,4 @@ Vd = 28; %nominal operating voltage during discharge
 Pout2 = 10; %W
 
 % battery heat dissipation in watts
-Pthermal = (Pout2*Vtn/Vd) - Pout2;
-
-disp('--- Question 7')
-disp(['Heat Loss: ', num2str(Pthermal), 'W'])
-disp(' ')
+P_thermal = (Pout2*Vtn/Vd) - Pout2;
