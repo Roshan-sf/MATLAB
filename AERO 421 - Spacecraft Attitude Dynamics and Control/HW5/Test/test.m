@@ -114,7 +114,7 @@ for i = 1:2
         q_C = qc2;
     end
     
-    output(i) = sim("ADCS_Design_RJF.slx");
+    output(i) = sim("test3.slx");
 end
 
 out = output(1);

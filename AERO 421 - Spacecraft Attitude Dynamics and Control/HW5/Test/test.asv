@@ -10,7 +10,7 @@ format long     %Allows for more accurate decimals
 close all;      %Clears all
 clear all;      %Clears Workspace
 clc;            %Clears Command Window
-%% Problem 1
+%%
 J = diag([1200,2000,2800]);
 
 ts = 100; %seconds
@@ -29,7 +29,8 @@ disp(' ')
 disp('Kd =')
 disp(num2str(Kd))
 
-%% Setup
+%% Part 2 - Simulink
+
 
 % Spacecraft Orbit Properties (given)
 global mu
@@ -87,8 +88,6 @@ E_b_LVLH_0 = [phi_0; theta_0; psi_0];
 % Initial quaternion relating body to E
 %q_b_ECI_0 = -rotm2quat(C_b_ECI_0);
 
-%% Problem 2: Defining Useful Stuff
-
 % Initial body rates of spacecraft (given)
 w_b_ECI_0 = [0.1; -0.05; 0.05];
 
@@ -101,39 +100,37 @@ E_b_ECI_0 = quat2eul(q0);
 
 tspan = 140; %orbital_period;
 
-qc1 = [0;0;0;1];
-
-e02 = [-0.2;0.5;0.2];
-n02 = sqrt(1-e02'*e02);
-qc2 = [e02;n02];
-
-for i = 1:2
-    if i == 1
-        q_C = qc1;
-    else
-        q_C = qc2;
-    end
-    
-    output(i) = sim("ADCS_Design_RJF.slx");
-end
-
-out = output(1);
-out2 = output(2);
+out = sim("test3.slx");
 
 %% Plot Results
 
-subplot(2,1,1)
-plot(out.tout, out.q_b_ECI(:,2:5))
-title('Quaternions')
-ylabel('Quaternion Parameter')
-legend('q_1','q_2','q_3','q_4')
-grid on
+% eul = squeeze(out.E_b_ECI.signals.values);
+% qua = squeeze(out.q_b_ECI.signals.values);
+% ang = squeeze(out.w_b_ECI.signals.values);
 
-subplot(2,1,2)
-plot(out.w_b_ECI(:,1), out.w_b_ECI(:,2:4))
+eul = squeeze(out.E_b_ECI.signals.values);
+% qua = squeeze(out.q_b_ECI.signals.values);
+% ang = squeeze(out.w_b_ECI.signals.values);
+
+
+figure
+subplot(3,1,1)
+plot(out.tout,ang)
+xlabel('time (seconds)')
+ylabel('angular velocity (rads/sec)')
 title('Angular Velocities')
-ylabel('angular velocity (rad/sec)')
-legend('\omega_x','\omega_y','\omega_z')
-grid on
+legend('w_x','w_y','w_z')
 
-sgtitle('Body to ECI Dynamics and Kinematics')
+subplot(3,1,2)
+plot(out.tout,qua)
+xlabel('time (seconds)')
+ylabel('Quaternion Parameter')
+title('Quaternions')
+legend('q_1','q_2','q_3','q_4')
+
+subplot(3,1,3)
+plot(out.tout,eul)
+xlabel('time (seconds)')
+ylabel('Angle (deg)')
+title('Euler Angles')
+legend('\phi','\theta','\psi')
