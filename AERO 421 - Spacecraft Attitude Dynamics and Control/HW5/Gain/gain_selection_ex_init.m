@@ -17,8 +17,9 @@ kd = .1;
 I = 1;
 wn = sqrt(kp/I)
 zeta = kd/(2*wn*I)
-
-Gsc = tf(1, [I 0 0])
+syms s
+%Gsc = tf(1, [I 0 0])
+Gsc = 1/(I*s^2);
 step(Gsc)
 
 Gc_d = tf([kd 0], 1)
