@@ -12,6 +12,7 @@ clc
 
 % Compute Mass properties for normal operations phase
 
+J = diag([1200,2000,2800]);
 
 %% Part 2 - Torque Free Attitudue Simulation
 
