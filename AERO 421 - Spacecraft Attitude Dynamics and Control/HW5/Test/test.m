@@ -1,6 +1,7 @@
-%% Roshan Jaiswal-Ferri
+%% Roshan Jaiswal-Ferri & Stefan Rosu
 %Section - 01
-%Aero 421 HW5: 5/23/25
+%Aero 421 HW1: 4/2/25
+%Note: This was prepared with the help of Dr. Mehiel's Template script
 
 %% Workspace Prep
 
@@ -113,108 +114,26 @@ for i = 1:2
         q_C = qc2;
     end
     
-    output(i) = sim("ADCS_Design_RJF_NonLinear.slx");
+    output(i) = sim("test3.slx");
 end
 
 out = output(1);
 out2 = output(2);
 
-for i = 1:2
-    if i == 1
-        q_C = qc1;
-    else
-        q_C = qc2;
-    end
-
-    outputL(i) = sim("ADCS_Design_RJF_Linear.slx");
-end
-
-outL = outputL(1);
-out2L = outputL(2);
-
 %% Plot Results
 
-figure('Name','Case 1')
 subplot(2,1,1)
 plot(out.tout, out.q_b_ECI(:,2:5))
-hold on
-plot(outL.tout, outL.q_b_ECI(:,2:5),'--')
 title('Quaternions')
 ylabel('Quaternion Parameter')
-%('q_1','q_2','q_3','q_4')
+legend('q_1','q_2','q_3','q_4')
 grid on
-xlabel('Time (s)')
 
 subplot(2,1,2)
 plot(out.w_b_ECI(:,1), out.w_b_ECI(:,2:4))
-hold on
-plot(outL.w_b_ECI(:,1), outL.w_b_ECI(:,2:4),'--')
 title('Angular Velocities')
 ylabel('angular velocity (rad/sec)')
-%('\omega_x','\omega_y','\omega_z')
-grid on
-xlabel('Time (s)')
-
-sgtitle('Nonlinear (Solid) vs Linear (Dashed) - Case 1')
-
-figure('Name','Case 2')
-subplot(2,1,1)
-plot(out2.tout, out2.q_b_ECI(:,2:5))
-hold on
-plot(out2L.tout, out2L.q_b_ECI(:,2:5),'--')
-title('Quaternions')
-ylabel('Quaternion Parameter')
-%('q_1','q_2','q_3','q_4')
-grid on
-xlabel('Time (s)')
-
-subplot(2,1,2)
-plot(out2.w_b_ECI(:,1), out2.w_b_ECI(:,2:4))
-hold on
-plot(out2L.w_b_ECI(:,1), out2L.w_b_ECI(:,2:4),'--')
-title('Angular Velocities')
-ylabel('angular velocity (rad/sec)')
-%('\omega_x','\omega_y','\omega_z')
-grid on
-xlabel('Time (s)')
-
-sgtitle('Nonlinear (Solid) vs Linear (Dashed) - Case 2')
-
-%%
-
-Tc = squeeze(outL.T.signals.values);
-Tnorm = vecnorm(Tc);
-
-figure('Name','Required Torque - Case 1')
-subplot(2,1,1)
-plot(outL.tout,Tc)
-xlabel('Time (s)')
-ylabel('T_c (Nm)')
+legend('\omega_x','\omega_y','\omega_z')
 grid on
 
-subplot(2,1,2)
-plot(outL.tout,Tnorm)
-xlabel('Time (s)')
-ylabel('Norm of T_c (Nm)')
-grid on
-
-sgtitle('Required Torque - Case 1')
-
-
-Tc2 = squeeze(out2L.T.signals.values);
-Tnorm2 = vecnorm(Tc2);
-
-figure('Name','Required Torque - Case 2')
-subplot(2,1,1)
-plot(out2L.tout,Tc2)
-xlabel('Time (s)')
-ylabel('T_c (Nm)')
-grid on
-
-subplot(2,1,2)
-plot(out2L.tout,Tnorm2)
-xlabel('Time (s)')
-ylabel('Norm of T_c (Nm)')
-grid on
-
-sgtitle('Required Torque - Case 2')
+sgtitle('Body to ECI Dynamics and Kinematics')

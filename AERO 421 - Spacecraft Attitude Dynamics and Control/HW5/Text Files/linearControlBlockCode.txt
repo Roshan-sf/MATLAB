@@ -1,0 +1,6 @@
+function [Mc,q_e]  = control_law(q_c, q, omega, Kp, Kd)
+%#codegen
+
+%q_e = quatMult(quatConjugate(q_c), q);
+q_e = quatMult(q, quatConjugate(q_c));
+Mc = -Kp*q_e(1:3,1) - Kd*omega;
