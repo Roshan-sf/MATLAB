@@ -4,7 +4,7 @@
 
 %% Workspace Prep
 
-%warning off
+warning off
 format long     %Allows for more accurate decimals
 close all;      %Clears all
 clear all;      %Clears Workspace
@@ -12,9 +12,15 @@ clc;            %Clears Command
 
 %% Reading Data
 
-data = readtable("Data\LangmuirProfessional.xlsx");
-V = data.voltage;
-I = data.current;
+POLYData = readtable("Data\LangmuirData.csv");
+Vp = POLYData.V;
+Ip = -((POLYData.V_I_MV).*(1e-3))./220;
+min2 = min(Ip);
+Ipfix = Ip - min2;
+
+UCLAData = readtable("Data\LangmuirProfessional.xlsx");
+V = UCLAData.voltage;
+I = UCLAData.current;
 uplift = abs(min(I)*1.00001);
 Ifix = I + uplift;
 
@@ -74,7 +80,7 @@ b2 = p2(2);
 syms x
 eq = (m*x) + b == (m2*x) + b2;
 soln = solve(eq,x);
-Vp = double(soln); %V
+VpUCLA = double(soln); %V
 
 %% Plasma Density
 
@@ -92,6 +98,62 @@ eq2 = IonSat == 0.6*q*n*sqrt((k*Te*11606)/mp)*Ap;
 soln2 = solve(eq2,n);
 np = double(soln2);
 
+%% Collected Data
+
+% Sort the absolute values and get their indices
+[~, idx2] = sort(abs(Ip));
+
+% Take the indices of the 10 values closest to zero
+numClosest2 = min(10, length(idx2)); %Talk about 20 value, how many min points, half the data (only 60 pts)
+closestIdx2 = idx2(1:numClosest2); 
+
+% Select those values from V
+Vfv2 = Vp(closestIdx2);
+
+Vf2 = abs(mean(Vfv2));
+disp(['Floating Potential Voltage: ', num2str(Vf2)])
+disp(' ')
+
+%% Ion Saturation Current
+
+% this is saying -5 volts, its really neg but it has absolute
+
+[~, idx2] = min(abs(Vp+5)); %it was chosen that the saturation zone ended ~5V
+
+IionSat2 = Ip(1:idx2);
+
+IonSat2 = abs(mean(IionSat2));
+disp(['Ion Saturation Voltage: ', num2str(IonSat2)])
+disp(' ')
+
+%% Finding Plasma Temp
+
+%40V to 51V for slope
+[~, idx_startSlope2] = min(abs(Vp-40));
+[~, idx_endSlope2] = min(abs(Vp-51));
+
+Islope2 = Ip(idx_startSlope2:idx_endSlope2);
+Vslope2 = Vp(idx_startSlope2:idx_endSlope2);
+p3 = polyfit(Vslope2,log(Islope2),1);
+
+Te = p3(1)^-1 %eV
+
+%% Find Voltage Potential
+
+[~, idx_startElectronSat2] = min(abs(Vp-70));
+IElectronSat2 = Ip(idx_startElectronSat2:end);
+VElectronSat2 = Vp(idx_startElectronSat2:end);
+p2 = polyfit(VElectronSat2,log(IElectronSat2),1);
+m = p(1);
+b = p(2);
+m2 = p2(1);
+b2 = p2(2);
+syms x
+eq = (m*x) + b == (m2*x) + b2;
+soln = solve(eq,x);
+Vp = double(soln);
+
+
 %%
 
 % figure()
@@ -99,12 +161,13 @@ np = double(soln2);
 % grid on
 % 
 % figure()
-% plot(V,Ifix)
+% plot(Vp,Ip)
 % grid on
 % 
 % figure()
-% semilogy(V,Ifix)
+% semilogy(Vp,Ipfix)
 % grid on
+
 
 
 
