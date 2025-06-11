@@ -1,6 +1,6 @@
 %% Roshan Jaiswal-Ferri & Stefan Rosu
 %Section - 01
-%Aero 421 FP7: 6/9/25
+%Aero 421 Sim Hack: 6/11/25
 
 %% Workspace Prep
 
