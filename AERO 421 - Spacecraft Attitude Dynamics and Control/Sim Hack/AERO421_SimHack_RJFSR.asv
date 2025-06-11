@@ -11,12 +11,8 @@ clear all;      %Clears Workspace
 clc;            %Clears Command Window
 
 %% Description
-% The mehiel sat starts pointing nadir wher it has 30 seconds point at the 
-% target using command and absolute quaternions as well as the rotation 
-% matricies. During the 240 second time period it must stay facing at the
-% target (while eventually pointing nadir right at the target) and then
-% find the command quaternion to point nadir at the end of the active
-% pointing phase.
+% The mehiel sat starts pointing nadir wher it has 30 seconds to find the
+% command and absolute quaternions 
 
 %% Mass properties for normal operations phase (Question 2)
 
@@ -66,11 +62,11 @@ T3 = data.T_2;
 T4 = data.T_3;
 Tt = data.T_t;
 
-[q1] = rotationM(R1,V1,T1)
-[q2] = rotationM(R2,V2,T2)
-[q3] = rotationM(R3,V3,T3)
-[q4] = rotationM(R4,V4,T4)
-[qt] = rotationM(Rt,Vt,Tt) %overhead
+[q1] = rotationM(R1,V1,T1);
+[q2] = rotationM(R2,V2,T2);
+[q3] = rotationM(R3,V3,T3);
+[q4] = rotationM(R4,V4,T4);
+[qt] = rotationM(Rt,Vt,Tt); %overhead
 
 %multiply each by the old one to find absolute 
 
@@ -140,23 +136,15 @@ E_b_ECI_t = C2EulerAngles(C_b_ECI_0);
 q_b_ECI_t = rotm2quat(C_b_ECI_0);
 
 %% Questions 4 & 6
-%both the command quaternions
 
-Cq4 = quatMult(q_b_ECI_1',q1)
-Cq6 = quatMult(q_b_ECI_t',qt)
+Cq1 = quatMult(q_b_ECI_1,q1);
+Cq2 = quatMult(q_b_ECI_t,qt);
 
-%% Question 5
-% First, I would make t_stare into a linspace
-% Then I would propage r and v using orbits functions and ode 45 to get a
-% function of r and v for the duration of the t_stare time
-% Then from here, I would calculate the new quaternion at every r as a
-% function of time. Then I would feed this into our control law in simulink,
-% and use the clock function to make sure that the times would line up. From
-% here it would be a standard feed back using quaternion
-% multiple to get the the error quaternion between the commanded quaternion
-% and the current quaternion, as shown below:
-% q_e = quatMult(q, quatConjugate(q_c));
-% Mc = -Kp*q_e(1:3,1) - Kd*omega;
+
+
+%q_e = quatMult(q, quatConjugate(q_c));
+domega = J\(T - cross(omega, J*omega));
+Mc1 = -Kp - Kd*omega;
 
 
 %%
@@ -244,3 +232,94 @@ function [q] = rotationM(R,V,T)
 
     q = [ahat;eta];    
 end
+
+
+% Simulate!
+out = sim('SimHack.slx');
+
+%% Plot Results
+
+q_b_ECI = squeeze(out.q_b_ECI.signals.values);
+E_b_ECI = squeeze(out.E_b_ECI.signals.values);
+w_b_ECI = squeeze(out.w_b_ECI.signals.values);
+
+figure('Name','Body to ECI')
+subplot(3,1,1)
+plot(out.tout, w_b_ECI)
+title('Angular Velocities')
+ylabel('angular velocity (rad/sec)')
+legend('\omega_x','\omega_y','\omega_z')
+grid on
+
+subplot(3,1,2)
+plot(out.tout, q_b_ECI)
+title('Quaternions')
+ylabel('Quaternion Parameter')
+legend('q_1','q_2','q_3','\eta')
+grid on
+
+subplot(3,1,3)
+plot(out.tout, E_b_ECI)
+title('Euler Angles')
+xlabel('time (seconds)')
+ylabel('Angle (rad)')
+legend('\phi','\theta','\psi')
+grid on
+
+sgtitle('Body to ECI Dynamics and Kinematics')
+
+%%
+
+q_b_LVLH = squeeze(out.q_b_LVLH.signals.values);
+E_b_LVLH = squeeze(out.E_b_LVLH.signals.values);
+w_b_LVLH = squeeze(out.w_b_LVLH.signals.values);
+
+
+figure('Name','Body to LVLH')
+subplot(3,1,1)
+plot(out.tout, w_b_LVLH)
+title('Angular Velocities')
+ylabel('angular velocity (rad/sec)')
+legend('\omega_x','\omega_y','\omega_z')
+grid on
+
+subplot(3,1,2)
+plot(out.tout, q_b_LVLH)
+title('Quaternions')
+ylabel('Quaternion Parameter')
+legend('q_1','q_2','q_3','\eta')
+grid on
+
+subplot(3,1,3)
+plot(out.tout, E_b_LVLH)
+title('Euler Angles')
+xlabel('time (seconds)')
+ylabel('Angle (rad)')
+legend('\phi','\theta','\psi')
+grid on
+
+sgtitle('Body to LVLH Dynamics and Kinematics')
+
+%%
+
+wheelz = squeeze(out.RWheel.signals.values);
+torque = squeeze(out.M_c.signals.values);
+
+figure('Name','Reaction Wheels')
+subplot(2,1,1)
+plot(out.tout(:,1), wheelz)
+title('Angular Velocities')
+ylabel('angular velocity (rad/sec)')
+legend('\omega_x','\omega_y','\omega_z')
+grid on
+
+subplot(2,1,2)
+plot(out.tout(:,1), torque)
+title('Commanded Torque ')
+ylabel('Torque (N/m)')
+legend('T_x','T_y','T_z')
+grid on
+
+%%
+
+torqueMag = sqrt(sum(torque.^2, 1));
