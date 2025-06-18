@@ -208,7 +208,4 @@ end
 %%
 
 quats(:,1) = out.tout;
-quats(:,2) = out.q_b_ECI(:,2);
-quats(:,3) = out.q_b_ECI(:,3);
-quats(:,4) = out.q_b_ECI(:,4);
-quats(:,5) = out.q_b_ECI(:,5);
+quats(:,2) = q
