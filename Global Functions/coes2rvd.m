@@ -1,4 +1,5 @@
-function [R1,V1,R2,V2] = coes2rvd(a,ecc,inc,RAAN,ArgP,theta,mu)
+function [R1,V1,RT,VT] = coes2rvd(a,ecc,inc,RAAN,ArgP,theta,mu)
+    %[R1,V1,RT,VT] = coes2rvd(a,ecc,inc,RAAN,ArgP,theta,mu)
     %COES2RV The outputs are the same except transposed
     % for ease of use with 1x3 or 3x1 vectors 
     % (my old code used the first 2)
@@ -14,6 +15,6 @@ function [R1,V1,R2,V2] = coes2rvd(a,ecc,inc,RAAN,ArgP,theta,mu)
     R1 = Q*R;
     V1 = Q*V;
     
-    R2 = R1';
-    V2 = V1';
+    RT = R1';
+    VT = V1';
 end
