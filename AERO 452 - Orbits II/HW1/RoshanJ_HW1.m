@@ -74,6 +74,19 @@ ylabel('Dist (km)')
 figure('Name','3D Chaser')
 plot3(rho(1,:),rho(2,:),rho(3,:))
 
+% Discussion:
+% The cyclical distance pattern between the two spacecraft makes sense
+% because both of the spacecraft are in slightly different orbits that are
+% modeled without disturbances. This means that the relative distance
+% between the two spacecraft will decrease as they approach eachother in
+% their orbits and increase as they fly apart. One reason why the relative
+% distance does not stay exactly the same/perfectly cyclical over time is
+% because the orbits do not have the same period, so each cycle the
+% relative distance changes a little bit until after many orbits the
+% relative distance will eventually also cycle back to the initial
+% positions (without disturbances). This is why you see the graph is ever
+% so slightly tilted.
+
 %% PART 2: Relative Positions
 
 Re = 6378; %km
@@ -107,6 +120,14 @@ disp(['Relative Position: ', num2str(rho'), ' km']);
 disp(['Relative Velocity: ', num2str(rhodot'), ' km/s']); %All in LVLH
 disp(['Relative Acceleration: ', num2str(rhodoubledot'), ' km/s^2']);
 disp(' ')
+
+% Discussion:
+% The calculated results make sense as in the current LVLH frame and ECI
+% both spacecraft a & b sit on specific axis and are on the same plane, so
+% the two component pos vector (x y) and one component velocity vector (x)
+% make sense. The acceleration was calculated with the newton's two body
+% equations of motion (same that we used in ode45 in 351) and then
+% subtituted to find the relative acceleration or rho double dot.
     
 %% PART 3: Chief & Target Propogation
 
@@ -154,6 +175,15 @@ grid on
 xlabel('Y Dist (km)')
 ylabel('X Dist (km)')
 
+% Discussion:
+% This is a really cool graph that shows the relative distance of a target
+% and chaser spacecraft. This graph shows the relative distance in the xy
+% plane, it is interesting because it shows how there is more change in one
+% direction than the other, it also shows the same pattern in problem one
+% where the relative distance is cyclical, however using these equations of
+% motion the results will lose accuracy quickly as the distance between
+% the two spacecraft increases beyond a (relatively) small amount.
+
 %% PART 4: CW Solutions
 
 T  = 90*60; % s
@@ -172,6 +202,13 @@ disp('Problem 4, Curtis 7.7')
 disp(['Relative position at 15 min: ', num2str(dr'), ' km']);
 disp(['Relative speed at 15 min: ', num2str(dv'), ' km/s']);
 disp(['Distance from station: ', num2str(norm(dr)), ' km']);
+
+% Discussion:
+% These results (while matching the book) also feel correct: there is a
+% low relative velocity and both the relative position and velocity have no
+% z component. The small relative distance is important because the CW
+% equations only work with the assumption of close proximity. There is also
+% no continuous burns and the orbits are circular. 
 
 %% Functions
 
