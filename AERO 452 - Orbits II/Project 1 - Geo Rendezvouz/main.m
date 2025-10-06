@@ -1,0 +1,29 @@
+%% Roshan Jaiswal-Ferri
+%Aero 452 Homework 1: 9/24/25
+
+%% Workspace Prep
+
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% PART 1: 
+
+%TLE = tleread("tleData.txt");
+
+mu = 398600;
+inc_tle = 34.1015; %degrees
+ecc_tle = 0.0001437;
+RAAN_tle = 90.3064; %degrees
+w_tle = 125.9101; %degree
+Me_tle = 216.3067; %degrees, Mean Anomaly
+n_tle = 1.00274146/24/60/60; % rev/sec, mean motion
+
+a = Me2a(Me_tle,mu);
+theta = MetoNu(Me_tle,ecc_tle);
+
+[R,V] = coes2rvd(a,ecc_tle,inc_tle,RAAN_tle,w_tle,theta,mu);
+
+
+

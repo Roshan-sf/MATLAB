@@ -1,0 +1,57 @@
+%% Roshan Jaiswal-Ferri
+%Aero 452 Homework 1: 9/24/25
+
+%% Workspace Prep
+
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Delta V inert vs Finert
+
+g = 9.8;
+ISPc = 60; %seconds
+ISPch = 320;
+ISPn = 950;
+ISPe = 3000;
+
+ISP = [ISPc, ISPch, ISPn, ISPe];
+finert = linspace(0,1,50);
+denom = log(1./finert) * g;
+
+for i = 1:4
+    dV(i,:) = ISP(i).*denom;
+end
+
+%% Feasabilty
+
+% The graph shows feasability of finert vs dv, where any space above each
+% line is not feasable (or to the left of the xline at 0.05). Each yline
+% represents the dv requirement for each mission, as long as there is space
+% under each finert dv line and above the xline, and to the right of the
+% 0.05 line, then that option is feasable (except for part b which requires
+% a finert of 0.4). Given that, here are the results:
+
+% a) All options are feasable
+% b) Only nuclear and electric systems are feasable
+% c) Chemical, Nuclear, & Electric systems are all feasable
+% d) Only electric is feasable
+
+figure('Name','DeltaV vs Finert')
+plot(finert,dV)
+grid on
+xline(0.05)
+xline(0.4)
+yline(50)
+yline(3940)
+yline(6790)
+yline(35880)
+xlabel('finert')
+ylabel('Delta V (m/s)')
+legend('Cold Gas ISP', 'Chemical ISP', 'Nuclear ISP', 'Electric ISP')
+
+% The shape of this graph makes sense, it is saying for each option the
+% more propellant to inert mass you have, the more delta v capable the
+% system is. As the inert mass increases the delta v drops. The more
+% efficient ss
