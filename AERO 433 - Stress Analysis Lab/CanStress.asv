@@ -1,0 +1,30 @@
+%% Roshan Jaiswal-Ferri
+%Aero 433 Stress Lab: 10/9/25
+
+%% Workspace Prep
+
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% Load Data:
+data = readcell("495BE642.TXT");
+% Pre Opening:
+hoop0 = data(7:19,4);
+hoopStress = cell2mat(hoop0); % Convert cell array to numeric array
+% Calculate the average hoop stress
+avgHoopStress0 = mean(hoopStress);
+long0 = data(7:19,3);
+longStress0 = cell2mat(long0); % Convert cell array to numeric array
+% Calculate the average hoop stress
+avgLongStress0 = mean(longStress0);
+% After opening:
+hoopF = data(20:78,4);
+hoopStressF = cell2mat(hoopF); % Convert cell array to numeric array
+% Calculate the average hoop stress
+avgHoopStressF = mean(hoopStressF);
+longF = data(20:78,3);
+longStressF = cell2mat(longF); % Convert cell array to numeric array
+% Calculate the average hoop stress
+avgLongStressF = mean(longStressF);

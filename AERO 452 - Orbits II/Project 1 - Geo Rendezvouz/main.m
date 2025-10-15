@@ -25,5 +25,4 @@ theta = MetoNu(Me_tle,ecc_tle);
 
 [R,V] = coes2rvd(a,ecc_tle,inc_tle,RAAN_tle,w_tle,theta,mu);
 
-
-
+%DATA for n in tle is rev/day need rad/s so 1 rev = 365 rad and day to s
