@@ -10,8 +10,8 @@ clc;            %Clears Command Window
 
 %% PART 1:
 
-Rchaser_LVLH = [0; 20; 0]; %LVLH km
-Vchaser_LVLH = [0.0050;	-0.0005;	0]; % km/s
+Rchaser_LVLH = [0; 40; 0]; %LVLH km
+Vchaser_LVLH = [0;	0;	0]; % km/s
 
 Rtarget_ECI = [3.4537e+04; -2.3865e+04; 3.9923e+03]; %ECI km
 Vtarget_ECI = [-1.4726; -2.3526; -1.3222]; %km/s
@@ -25,38 +25,69 @@ a = 1 / ( 2/r - v^2/mu );      % km, vis-viva
 n = sqrt(mu/a^3);              % rad/s (works well for near-circular & short arcs)
 P = 2*pi/n;                    % s, one chief orbit
 
-%% 
+%% Hold One: Football
 
-T = P;
-z = 1; %km
-syms zdot
-eq1 = z == (zdot/n)*sin(n*T);
-sol = solve(eq1,zdot);
-zdot = double(sol)
+a = 40;
+syms dvx
+eq1 = a == 2*(dvx/n);
+sol = solve(eq1,dvx);
+dvx = double(sol);
+
+Vchaser_LVLH_postBurn = [dvx;	0;	0]; % km/s
+
+tspan = [0, P];
+state = [Rtarget_ECI; Vtarget_ECI; Rchaser_LVLH; Vchaser_LVLH_postBurn]; 
+options = odeset('RelTol',1e-8,'AbsTol',1e-8);
+
+[~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+
+RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
+VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
+
+VCnorm = vecnorm(VC, 2, 2);
+
+figure('Name','Relative Distance')
+plot(RC(:,2),RC(:,1))
+hold on
+plot(0, 0, '*')
+grid on
+xlabel('Y Dist (km)')
+ylabel('X Dist (km)')
+
+%% Hold 2: Oscilatory
+
+Rchaser_LVLH = [0; 1; 0]; %LVLH km
+Vchaser_LVLH_postBurn = [0;	0;	0]; % km/s
+
+t = P;
+z = (zdot0/n)sin(n*t);
 
 
 
-%%
 
-% a = 20;
-% syms dvx
-% eq1 = a == 2*(dvx/n);
-% sol = solve(eq1,dvx);
-% dvx = double(sol);
-% 
-% Vchaser_LVLH_postBurn = [-1.3211e-13 + dvx;	-2.3212e-04;	0]; % km/s
-% 
-% tspan = [0, P];
-% state = [Rtarget_ECI; Vtarget_ECI; Rchaser_LVLH; Vchaser_LVLH_postBurn]; 
-% options = odeset('RelTol',1e-8,'AbsTol',1e-8);
-% 
-% [~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
-% 
-% RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
-% 
-% figure('Name','Relative Distance')
-% plot(RC(:,2),RC(:,1))
-% hold on
-% grid on
-% xlabel('Y Dist (km)')
-% ylabel('X Dist (km)')
+
+
+
+
+%% Hold 3:
+Rchaser_LVLH = [0; 0.02; 0]; %LVLH km
+Vchaser_LVLH_postBurn = [0;	0;	0]; % km/s
+
+tspan = [0, P];
+state = [Rtarget_ECI; Vtarget_ECI; Rchaser_LVLH; Vchaser_LVLH_postBurn]; 
+options = odeset('RelTol',1e-8,'AbsTol',1e-8);
+
+[~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+
+RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
+VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
+
+VCnorm = vecnorm(VC, 2, 2);
+
+figure('Name','Relative Distance')
+plot(RC(:,2),RC(:,1))
+hold on
+plot(0, 0, '*')
+grid on
+xlabel('Y Dist (km)')
+ylabel('X Dist (km)')
