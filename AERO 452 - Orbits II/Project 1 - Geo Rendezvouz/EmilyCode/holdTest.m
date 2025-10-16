@@ -84,12 +84,9 @@ grid on
 xlabel('Y Dist (km)')
 ylabel('X Dist (km)')
 
+%% Hold 3: Vbar
 
-%% Hold 3:
-
-%% Hold 4:
-
-Rchaser_LVLH = [0; 0.02; 0]; %LVLH km
+Rchaser_LVLH = [0; 300; 0]; %LVLH km
 Vchaser_LVLH_postBurn = [0;	0;	0]; % km/s
 
 tspan = [0, P];
@@ -110,3 +107,42 @@ plot(0, 0, '*')
 grid on
 xlabel('Y Dist (km)')
 ylabel('X Dist (km)')
+
+%% 2nd Football:
+
+a = 0.02;
+syms dvx
+eq1 = a == 2*(dvx/n);
+sol = solve(eq1,dvx);
+dvx = double(sol);
+
+Rchaser_LVLH = [0; 0.02; 0]; %LVLH km
+Vchaser_LVLH_postBurn = [dvx;	0;	0]; % km/s
+
+tspan = [0, P];
+state = [Rtarget_ECI; Vtarget_ECI; Rchaser_LVLH; Vchaser_LVLH_postBurn]; 
+options = odeset('RelTol',1e-8,'AbsTol',1e-8);
+
+[~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+
+RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
+VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
+
+VCnorm = vecnorm(VC, 2, 2);
+
+figure('Name','Relative Distance')
+plot(RC(:,2),RC(:,1))
+hold on
+plot(0, 0, '*')
+grid on
+xlabel('Y Dist (km)')
+ylabel('X Dist (km)')
+
+
+
+
+
+
+
+
+
