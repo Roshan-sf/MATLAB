@@ -140,18 +140,17 @@ grid on
 xlabel('Y Dist (km)')
 ylabel('X Dist (km)')
 
-%%
+%% Vbar Approach
 
-vc = 40/P;
-
-Rchaser_LVLH = [0; 300; 0]; %LVLH km
+vc = 40/P; %km/s
+Rchaser_LVLH = [0; 40; 0]; %LVLH km
 Vchaser_LVLH_postBurn = [0;	vc;	0]; % km/s
 
 tspan = [0, P];
 state = [Rtarget_ECI; Vtarget_ECI; Rchaser_LVLH; Vchaser_LVLH_postBurn]; 
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 
-[~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+[~,relativeOrbits] = ode45(@vbarapp,tspan,state,options,mu);
 
 RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
 VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
@@ -167,7 +166,6 @@ xlabel('Y Dist (km)')
 ylabel('X Dist (km)')
 
 
-
 %% Functions
 
 function dstate = vbarapp(time,state,mu) 
@@ -175,7 +173,8 @@ function dstate = vbarapp(time,state,mu)
 %INPUTS: first 6 rows: [x y z dx dy dz...] in ECI, target properties
 %CONTD: second 6 rows: [...x y z dx dy dz] in LVLH, relative to target
 %OUTPUT: follows same convention
-
+    
+    global vc n
     %unpack for clarity (t for target c for chaser):
     tx0 = state(1); %pos
     ty0 = state(2);
@@ -207,7 +206,7 @@ function dstate = vbarapp(time,state,mu)
 
     %chaser
     cddx0 = ((2*mu/rc^3)+(hc^2/rc^4))*cx0 - 2*(dot(vvect,rvect))*(hc/rc^4)*cy0+((2*hc)/(rc^2))*cdy0;
-    cddx = (-2*vc*n) + cddx0;
+    cddx = cddx0 + (-2*n*vc);
     cddy = ((-mu/rc^3)+(hc^2/rc^4))*cy0 + 2*(dot(vvect,rvect))*(hc/rc^4)*cx0-2*(hc/rc^2)*cdx0;
     cddz = -(mu/rc^3)*cz0;
 
@@ -216,5 +215,4 @@ function dstate = vbarapp(time,state,mu)
     dstate = [dstate_t; dstate_c];
 
 end
-
 
