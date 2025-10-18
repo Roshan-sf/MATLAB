@@ -646,13 +646,20 @@ zdot0 = double(sol);
 v_start_hold4_chaser_lvlh = v_start_hold4_chaser_lvlh + [0; 0; zdot0];
 
 tspan = [0, T_GEO];
-state = [r_initial_GEO_eci; v_initial_GEO_eci; r_start_hold4_chaser_lvlh; v_start_hold4_chaser_lvlh]; 
+state = [r_start_hold4_chaser_lvlh; v_start_hold4_chaser_lvlh; r_initial_GEO_eci; v_initial_GEO_eci]; 
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 
-[~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+[~,relativeOrbits] = ode45(@mod_linearized_rendezvous,tspan,state,options,mu,n);
 
-RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
-VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
+RC = [relativeOrbits(:,1),relativeOrbits(:,2),relativeOrbits(:,3)];
+VC = [relativeOrbits(:,4),relativeOrbits(:,5),relativeOrbits(:,6)];
+% state = [r_initial_GEO_eci; v_initial_GEO_eci; r_start_hold4_chaser_lvlh; v_start_hold4_chaser_lvlh]; 
+% options = odeset('RelTol',1e-8,'AbsTol',1e-8);
+% 
+% [~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+% 
+% RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
+% VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
 
 figure('Name','Relative Distance - Oscillation Hold')
 plot3(RC(:,2),RC(:,1),RC(:,3))
@@ -799,7 +806,7 @@ stateGEO_fa = new_state(:,7:9);
 
 % figure
 % %addEarth();
-% hold on
+% hold on2.362145712016150e+03
 % plot3(stateGEO_fa(:,1),stateGEO_fa(:,2),stateGEO_fa(:,3),"--","LineWidth",1.5);
 % xlabel("x [km]")
 % ylabel("y [km]")
