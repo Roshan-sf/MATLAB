@@ -131,10 +131,16 @@ state =  [r_start_hop1_chaser_lvlh;
 
 %plot in LVLH (downrange vs altitude)
 figure('Name','Relative Distance - Hop 1')
-plot(new_state(:,2),new_state(:,1))
+plot(new_state(:,2),new_state(:,1),'b')
+hold on
+grid on
+plot(0,0,'r*')
+plot(new_state(1,2),new_state(1,1), 'bx')
+plot(new_state(end,2),new_state(end,1), 'mx')
 xlabel("downrange -- vbar [km]")
 ylabel("altitude -- rbar [km]")
-title("Hop 1 from initial chaser location to hold 1 start location")
+title("Hop 1 (-100km --> 40km)")
+legend('Chaser Trajectory', 'Target','Chaser Start','Chaser End', Location='best')
 
 % find ending velocity of chaser
 v_end_hop1_chaser_lvlh = new_state(end,4:6); % km/s
@@ -301,9 +307,15 @@ state =  [r_start_hop2_chaser_lvlh;
 % plot in LVLH (downrange vs altitude)
 figure('Name','Hop 2')
 plot(new_state(:,2),new_state(:,1))
+hold on
+grid on
+plot(0,0,'r*')
+plot(new_state(1,2),new_state(1,1), 'bx')
+plot(new_state(end,2),new_state(end,1), 'mx')
+legend('Chaser Trajectory', 'Target','Chaser Start','Chaser End', Location='best')
 xlabel("downrange -- vbar [km]")
 ylabel("altitude -- rbar [km]")
-title("Hop 2 from initial chaser location to hold 2 start location (40 km --> 1km)")
+title("Hop 2 (40 km --> 1km)")
 
 % find ending velocity of chaser
 v_end_hop2_chaser_lvlh = new_state(end,4:6)'; % km/s
@@ -364,6 +376,8 @@ plot(0, 0, '*')
 grid on
 xlabel('Y Dist (m)')
 ylabel('X Dist (m)')
+legend('Chaser Position', 'Target Position')
+title('Relative Distance - Vbar SK (Circ Assump.)')
 
 new_state_hold2 = new_state;
 
@@ -435,9 +449,15 @@ state =  [r_start_hop3_chaser_lvlh;
 % plot in LVLH (downrange vs altitude)
 figure('Name','Relative Distance - Hop 3')
 plot(new_state(:,2)*1000,new_state(:,1)*1000)
+hold on
+grid on
+plot(0,0,'r*')
+plot(new_state(1,2),new_state(1,1), 'bx')
+plot(new_state(end,2),new_state(end,1), 'mx')
+legend('Chaser Trajectory', 'Target','Chaser Start','Chaser End', Location='best')
 xlabel("downrange -- vbar [m]")
 ylabel("altitude -- rbar [m]")
-title("Hop 3 from -1 km vbar chaser location to hold 3 start location (-1 km --> -300 m)")
+title("Hop 3 (-1 km --> -300 m)")
 
 % find ending velocity of chaser
 v_end_hop3_chaser_lvlh = new_state(end,4:6)'; % km/s
@@ -457,21 +477,21 @@ timespan = [0 T_GEO]; %secs, multiplication to get it into seconds
 state = [r_start_hop3_chaser_eci; v_start_hop3_chaser_eci];
 [~,state_hop3_chaser_eci] = ode45(@twobodymotion,timespan,state,options,muearth);
 
-% figure
-% %addEarth();
-% hold on
-% plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),"LineWidth",1.5);
-% xlabel("x [km]")
-% ylabel("y [km]")
-% zlabel("z [km]")
-% title("Hop 3 in ECI (-1 km --> -300 m)")
-% plot3(state_hop3_chaser_eci(:,1),state_hop3_chaser_eci(:,2),state_hop3_chaser_eci(:,3),"LineWidth",1.5)
-% plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
-% plot3(state_hop3_chaser_eci(1,1), state_hop3_chaser_eci(1,2), state_hop3_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
-% plot3(state_hop3_chaser_eci(end,1), state_hop3_chaser_eci(end,2), state_hop3_chaser_eci(end,3), '*', 'MarkerSize', 14, 'Color', 'b')
-% legend(" ","Target Trajectory","Chaser Trajectory","Starting Position of Target","Starting position of Chaser","Ending Position of Chaser")
-% axis equal 
-% grid on
+figure
+%addEarth();
+hold on
+plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),'--',"LineWidth",1.5);
+xlabel("x [km]")
+ylabel("y [km]")
+zlabel("z [km]")
+title("Hop 3 in ECI (-1 km --> -300 m)")
+plot3(state_hop3_chaser_eci(:,1),state_hop3_chaser_eci(:,2),state_hop3_chaser_eci(:,3),'-',"LineWidth",1.5)
+plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
+plot3(state_hop3_chaser_eci(1,1), state_hop3_chaser_eci(1,2), state_hop3_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
+plot3(state_hop3_chaser_eci(end,1), state_hop3_chaser_eci(end,2), state_hop3_chaser_eci(end,3), '*', 'MarkerSize', 14, 'Color', 'b')
+legend("Target Trajectory","Chaser Trajectory","End Target Position","Starting Position of Chaser","Ending position of Chaser","Ending Position of Chaser")
+axis equal 
+grid on
 
 %% Hold 3: V-bar Station Keeping
 
@@ -496,6 +516,8 @@ plot(0, 0, '*')
 grid on
 xlabel('Y Dist (m)')
 ylabel('X Dist (m)')
+legend('Chaser Position', 'Target Position')
+title('Relative Distance - Vbar SK (Non-Circ Assump.)')
 
 new_state_hold3 = new_state;
 
@@ -510,21 +532,21 @@ timespan = [0 T_GEO]; %secs, multiplication to get it into seconds
 state = [r_start_hold3_chaser_eci; v_start_hold3_chaser_eci];
 [~,state_hold3_chaser_eci] = ode45(@twobodymotion,timespan,state,options,muearth);
 
-% figure
-% %addEarth();
-% hold on
-% plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),"--","LineWidth",1.5);
-% xlabel("x [km]")
-% ylabel("y [km]")
-% zlabel("z [km]")
-% title("Hold 3 in ECI - V-Bar Station Keeping at -300 m relative to Targt")
-% plot3(state_hold3_chaser_eci(:,1),state_hold3_chaser_eci(:,2),state_hold3_chaser_eci(:,3),"LineWidth",1)
-% plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
-% plot3(state_hold3_chaser_eci(1,1), state_hold3_chaser_eci(1,2), state_hold3_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
-% plot3(state_hold3_chaser_eci(end,1), state_hold3_chaser_eci(end,2), state_hold3_chaser_eci(end,3), '.', 'MarkerSize', 14, 'Color', 'g')
-% legend(" ","Target Trajectory","Chaser Trajectory","Starting Position of Target","Starting position of Chaser","Ending Position of Chaser")
-% axis equal 
-% grid on
+figure
+%addEarth();
+hold on
+plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),"--","LineWidth",1.5);
+xlabel("x [km]")
+ylabel("y [km]")
+zlabel("z [km]")
+title("Hold 3 in ECI - V-Bar Station Keeping at -300 m relative to Targt")
+plot3(state_hold3_chaser_eci(:,1),state_hold3_chaser_eci(:,2),state_hold3_chaser_eci(:,3),"LineWidth",1)
+plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
+plot3(state_hold3_chaser_eci(1,1), state_hold3_chaser_eci(1,2), state_hold3_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
+plot3(state_hold3_chaser_eci(end,1), state_hold3_chaser_eci(end,2), state_hold3_chaser_eci(end,3), '.', 'MarkerSize', 14, 'Color', 'g')
+legend(" ","Target Trajectory","Chaser Trajectory","Starting Position of Target","Starting position of Chaser","Ending Position of Chaser")
+axis equal 
+grid on
 
 %% Maneuver 4: Hop
 
@@ -568,9 +590,10 @@ state =  [r_start_hop4_chaser_lvlh;
 % plot in LVLH (downrange vs altitude)
 figure('Name','Relative Distance - Hop 4')
 plot(new_state(:,2)*1000,new_state(:,1)*1000)
+grid on
 xlabel("downrange -- vbar [m]")
 ylabel("altitude -- rbar [m]")
-title("Hop 4 from -300 m vbar chaser location to hold 4 start location (-300 m --> -20 m)")
+title("Hop 4 (-300 m --> -20 m)")
 
 % find ending velocity of chaser
 v_end_hop4_chaser_lvlh = new_state(end,4:6)'; % km/s
@@ -590,25 +613,25 @@ timespan = [0 T_GEO]; %secs, multiplication to get it into seconds
 state = [r_start_hop4_chaser_eci; v_start_hop4_chaser_eci];
 [~,state_hop4_chaser_eci] = ode45(@twobodymotion,timespan,state,options,muearth);
 
-% figure
-% %addEarth();
-% hold on
-% plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),"--","LineWidth",1.5);
-% xlabel("x [km]")
-% ylabel("y [km]")
-% zlabel("z [km]")
-% title("Hop 4 in ECI (-300 m --> -20 m)")
-% plot3(state_hop4_chaser_eci(:,1),state_hop4_chaser_eci(:,2),state_hop4_chaser_eci(:,3),"LineWidth",1)
-% plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
-% plot3(state_hop4_chaser_eci(1,1), state_hop4_chaser_eci(1,2), state_hop4_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
-% plot3(state_hop4_chaser_eci(end,1), state_hop4_chaser_eci(end,2), state_hop4_chaser_eci(end,3), '*', 'MarkerSize', 14, 'Color', 'b')
-% legend(" ","Target Trajectory","Chaser Trajectory","Starting Position of Target","Starting position of Chaser","Ending Position of Chaser")
-% axis equal 
-% grid on
+figure
+%addEarth();
+hold on
+plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),"--","LineWidth",1.5);
+xlabel("x [km]")
+ylabel("y [km]")
+zlabel("z [km]")
+title("Hop 4 in ECI (-300 m --> -20 m)")
+plot3(state_hop4_chaser_eci(:,1),state_hop4_chaser_eci(:,2),state_hop4_chaser_eci(:,3),"LineWidth",1)
+plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
+plot3(state_hop4_chaser_eci(1,1), state_hop4_chaser_eci(1,2), state_hop4_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
+plot3(state_hop4_chaser_eci(end,1), state_hop4_chaser_eci(end,2), state_hop4_chaser_eci(end,3), '*', 'MarkerSize', 14, 'Color', 'b')
+legend(" ","Target Trajectory","Chaser Trajectory","Starting Position of Target","Starting position of Chaser","Ending Position of Chaser")
+axis equal 
+grid on
 
-%% Hold 2 - Oscillatory
+%% Hold 4 - Oscillatory
 
-r_start_hold4_chaser_lvlh = r_end_hop2_chaser_lvlh; %LVLH km
+r_start_hold4_chaser_lvlh = r_end_hop4_chaser_lvlh; %LVLH km
 v_start_hold4_chaser_lvlh = v_end_hop2_chaser_lvlh + [0;-v_end_hop2_chaser_lvlh(2);0];
 v_start_hold4_chaser_lvlh = [0;0;0];
 deltaV_counterhop = -v_end_hop2_chaser_lvlh(2);
@@ -652,21 +675,21 @@ timespan = [0 T_GEO]; %secs, multiplication to get it into seconds
 state = [r_start_hold4_chaser_eci; v_start_hold4_chaser_eci];
 [~,state_hold2_chaser_eci] = ode45(@twobodymotion,timespan,state,options,muearth);
 
-% figure
-% %addEarth();
-% hold on
-% plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),"LineWidth",1.5);
-% xlabel("x [km]")
-% ylabel("y [km]")
-% zlabel("z [km]")
-% title("Hold 2 in ECI - Oscillatory")
-% plot3(state_hold2_chaser_eci(:,1),state_hold2_chaser_eci(:,2),state_hold2_chaser_eci(:,3),"LineWidth",1.5)
-% plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
-% plot3(state_hold2_chaser_eci(1,1), state_hold2_chaser_eci(1,2), state_hold2_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
-% plot3(state_hold2_chaser_eci(end,1), state_hold2_chaser_eci(end,2), state_hold2_chaser_eci(end,3), '.', 'MarkerSize', 14, 'Color', 'g')
-% legend(" ","Target Trajectory","Chaser Trajectory","Starting Position of Target","Starting position of Chaser","Ending Position of Chaser")
-% axis equal 
-% grid on
+figure
+%addEarth();
+hold on
+plot3(stateGEO_initial(:,1),stateGEO_initial(:,2),stateGEO_initial(:,3),"LineWidth",1.5);
+xlabel("x [km]")
+ylabel("y [km]")
+zlabel("z [km]")
+title("Hold 2 in ECI - Oscillatory")
+plot3(state_hold2_chaser_eci(:,1),state_hold2_chaser_eci(:,2),state_hold2_chaser_eci(:,3),"LineWidth",1.5)
+plot3(r_initial_GEO(1,1), r_initial_GEO(2,1), r_initial_GEO(3,1), 'o', 'MarkerSize', 8, 'MarkerFaceColor', 'k')
+plot3(state_hold2_chaser_eci(1,1), state_hold2_chaser_eci(1,2), state_hold2_chaser_eci(1,3), '*', 'MarkerSize', 14, 'Color', 'm')
+plot3(state_hold2_chaser_eci(end,1), state_hold2_chaser_eci(end,2), state_hold2_chaser_eci(end,3), '.', 'MarkerSize', 14, 'Color', 'g')
+legend(" ","Target Trajectory","Chaser Trajectory","Starting Position of Target","Starting position of Chaser","Ending Position of Chaser")
+axis equal 
+grid on
 
 %% Hold 4: Football (depreciated)
 
