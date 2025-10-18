@@ -11,12 +11,27 @@ clc;            %Clears Command Window
 %% PART 1:
 
 global vc n
+addpath("EmilyCode\")
+
+%% SDO - Solar Dynamics Observatory
+% Take TLE and convert to r and v
+inc_tle = 34.1015; %degrees
+ecc_tle = 0.0001437;
+RAAN_tle = 90.3064; %degrees
+w_tle = 125.9101; %degree
+Me_tle = 216.3067; %degrees, Mean Anomaly
+n_tle = 1.00274146/24/60/60; % rev/sec, mean motion
+
+[r_ECI, v_ECI, ~, ~, T] = tle2rv(n_tle, ecc_tle, Me_tle, inc_tle, RAAN_tle, w_tle);
+T_GEO = T; %s
+r_initial_GEO = r_ECI;
+v_initial_GEO = v_ECI;
 
 Rchaser_LVLH = [0; 40; 0]; %LVLH km
 Vchaser_LVLH = [0;	0;	0]; % km/s
 
-Rtarget_ECI = [3.4537e+04; -2.3865e+04; 3.9923e+03]; %ECI km
-Vtarget_ECI = [-1.4726; -2.3526; -1.3222]; %km/s
+Rtarget_ECI = r_initial_GEO; %[3.4537e+04; -2.3865e+04; 3.9923e+03]; %ECI km
+Vtarget_ECI = v_initial_GEO; %[-1.4726; -2.3526; -1.3222]; %km/s
 
 mu = 398600;   % km^3/s^2 (Earth)
 
@@ -26,6 +41,7 @@ v = norm(Vtarget_ECI);
 a = 1 / ( 2/r - v^2/mu );      % km, vis-viva
 n = sqrt(mu/a^3);              % rad/s (works well for near-circular & short arcs)
 P = 2*pi/n;                    % s, one chief orbit
+n2 = 2*pi/T_GEO; % rad/s, mean motion of target
 
 %% Hold One: Football
 
@@ -61,7 +77,7 @@ ylabel('X Dist (km)')
 Rchaser_LVLH = [0; 1; 0]; %LVLH km
 Vchaser_LVLH_postBurn = [0;	0;	0]; % km/s
 
-t = P/4;
+t = T_GEO/4;
 z = 1; %km
 syms zdot0
 eq2 = z == (zdot0/n)*sin(n*t);
@@ -88,22 +104,20 @@ ylabel('X Dist (km)')
 
 %% Hold 3: Vbar
 
-Rchaser_LVLH = [0; 0.300; 0]; %LVLH km
+Rchaser_LVLH = [0; 1; 0]; %LVLH km
 Vchaser_LVLH_postBurn = [0;	0;	0]; % km/s
 
 tspan = [0, P];
-state = [Rtarget_ECI; Vtarget_ECI; Rchaser_LVLH; Vchaser_LVLH_postBurn]; 
+state = [Rchaser_LVLH; Vchaser_LVLH_postBurn; Rtarget_ECI; Vtarget_ECI]; 
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 
-[~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+[~,relativeOrbits] = ode45(@mod_linearized_rendezvous,tspan,state,options,mu,n2);
 
-RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
+RC = [relativeOrbits(:,1),relativeOrbits(:,2),relativeOrbits(:,3)];
 VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
 
-VCnorm = vecnorm(VC, 2, 2);
-
 figure('Name','Relative Distance')
-plot(RC(:,2),RC(:,1))
+plot(RC(end,2),RC(end,1), 'kx')
 hold on
 plot(0, 0, '*')
 grid on
@@ -144,14 +158,14 @@ ylabel('X Dist (km)')
 
 vc = 40/P;
 
-Rchaser_LVLH = [0; 300; 0]; %LVLH km
+Rchaser_LVLH = [0; -40; 0]; %LVLH km
 Vchaser_LVLH_postBurn = [0;	vc;	0]; % km/s
 
 tspan = [0, P];
 state = [Rtarget_ECI; Vtarget_ECI; Rchaser_LVLH; Vchaser_LVLH_postBurn]; 
 options = odeset('RelTol',1e-8,'AbsTol',1e-8);
 
-[~,relativeOrbits] = ode45(@relativeMotion,tspan,state,options,mu);
+[~,relativeOrbits] = ode45(@vbarapp,tspan,state,options,mu);
 
 RC = [relativeOrbits(:,7),relativeOrbits(:,8),relativeOrbits(:,9)];
 VC = [relativeOrbits(:,10),relativeOrbits(:,11),relativeOrbits(:,12)];
@@ -176,6 +190,7 @@ function dstate = vbarapp(time,state,mu)
 %CONTD: second 6 rows: [...x y z dx dy dz] in LVLH, relative to target
 %OUTPUT: follows same convention
 
+    global vc n
     %unpack for clarity (t for target c for chaser):
     tx0 = state(1); %pos
     ty0 = state(2);

@@ -37,7 +37,7 @@ function dstate = relativeMotion(time,state,mu)
     cddx = ((2*mu/rc^3)+(hc^2/rc^4))*cx0 - 2*(dot(vvect,rvect))*(hc/rc^4)*cy0+((2*hc)/(rc^2))*cdy0; 
     cddy = ((-mu/rc^3)+(hc^2/rc^4))*cy0 + 2*(dot(vvect,rvect))*(hc/rc^4)*cx0-2*(hc/rc^2)*cdx0;
     cddz = -(mu/rc^3)*cz0;
-
+    % these are lineareized and have non circular assumption
     dstate_c = [cdx0; cdy0; cdz0; cddx; cddy; cddz];
 
     dstate = [dstate_t; dstate_c];
