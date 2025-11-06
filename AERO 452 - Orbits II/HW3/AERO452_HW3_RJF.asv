@@ -1,0 +1,431 @@
+%% Roshan Jaiswal-Ferri
+%Aero 452 Homework 3: 11/4/25
+
+%% Workspace Prep
+
+format long     %Allows for more accurate decimals
+close all;      %Clears all
+clear all;      %Clears Workspace
+clc;            %Clears Command Window
+
+%% PART 1: 
+
+mu = 398600;
+Re = 6378; %km
+
+Cd = 2.2; %assumption from in class
+mass = 100; %kg
+area = pi*(1e-3/2)^2; %km^2
+
+zp = 215; % km;
+za = 939; % km;
+rp = Re + zp;
+ra = Re + za;
+a0 = (ra+rp)/2;
+e0 = (ra-rp)/(ra+rp);
+
+raan0 = 340; % degs
+inc0 = 65.2; % degs
+omega0 = 58; % degs
+theta0 = 332; % degs
+
+[R0, V0] = coes2rvd(a0,e0,inc0,raan0,omega0,theta0,mu);
+Rsc = R0;
+Vsc = V0;
+
+we = 72.9211e-6; %rad/s for the angular velocity of the earth
+wE = [0; 0; 7.2921159e-5];
+
+totalTime = 120*86400; %120 days in seconds
+tspan = [0, totalTime]; 
+state = [Rsc; Vsc]; 
+
+%% Simple 2-Body
+
+% options = odeset('RelTol',1e-12,'AbsTol',1e-12);
+% [time2End,twobody] = ode45(@twobodymotion,tspan,state,options,mu);
+% 
+% Rbody = [twobody(:,1),twobody(:,2),twobody(:,3)];
+% Vbody = [twobody(:,4),twobody(:,5),twobody(:,6)];
+% 
+% for i = 1:length(Rbody) %takes 19 seconds
+%     R = Rbody(i,:);
+%     V = Vbody(i,:);
+%     [~,~,~,~,inc2(i),RAAN2(i),w2(i),~,~,~,Ra2(i),Rp2(i)] = rv2coes(R,V,mu,Re);
+%     inc2 = rad2deg(inc2);
+%     RAAN2 = rad2deg(RAAN2);
+%     w2 = rad2deg(w2);
+% end
+
+
+%% Cowell
+
+options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
+
+%[timeCend,cowellMotion] = ode45(@cowell,tspan,state,options,mu,mass,area,Cd); %takes 59 seconds to run
+load("cowellData.mat")
+
+% R & V vectors for target and chaser
+Rcowell = [cowellMotion(:,1),cowellMotion(:,2),cowellMotion(:,3)];
+Vcowell = [cowellMotion(:,4),cowellMotion(:,5),cowellMotion(:,6)];
+
+
+% for i = 1:length(Rcowell) %takes 19 seconds
+%     R = Rcowell(i,:);
+%     V = Vcowell(i,:);
+%     [~,~,~,~,incC(i),RAANC(i),wC(i),~,~,~,RaC(i),RpC(i)] = rv2coes(R,V,mu,Re);
+%     incC = rad2deg(incC);
+%     RAANC = rad2deg(RAANC);
+%     wC = rad2deg(wC);
+% end
+
+time_days = timeCend / 86400;
+
+% figure
+% plot3(Rcowell(:,1),Rcowell(:,2),Rcowell(:,3))
+% hold on
+% grid on
+% plot3(Rcowell(1,1),Rcowell(1,2),Rcowell(1,3),'*')
+% %plot3(Rbody(:,1),Rbody(:,2),Rbody(:,3))
+
+figure('Name','Orbital Element Evolution','NumberTitle','off');
+subplot(4,1,1);
+plot(time_days, RaC, 'b', 'LineWidth', 1.5); hold on;
+plot(time_days, RpC, 'r', 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('Radius [km]');
+title('Apogee and Perigee Evolution');
+legend('Apogee (Ra)','Perigee (Rp)','Location','best');
+
+subplot(4,1,2);
+plot(time_days, RAANC - raan0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\DeltaRAAN [deg]');
+title('RAAN Change from Initial');
+
+subplot(4,1,3);
+plot(time_days, incC - inc0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Deltai [deg]');
+title('Inclination Change from Initial');
+
+subplot(4,1,4);
+plot(time_days, wC - omega0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Delta\omega [deg]');
+title('Argument of Perigee Change from Initial');
+
+sgtitle('Orbital Path and Element Changes over Time');
+
+%% Encke
+aream = pi*(0.5)^2;
+dt = 60;
+tic
+[timeEend, ~, Rencke, Vencke] = encke2(R0, V0, dt, totalTime, Cd, mass, aream);
+toc
+figure
+plot3(Rencke(:,1),Rencke(:,2),Rencke(:,3))
+hold on
+grid on
+plot3(Rencke(1,1),Rencke(1,2),Rencke(1,3),'*')
+%plot3(Rbody(:,1),Rbody(:,2),Rbody(:,3))
+
+%% VoP
+
+
+%% Functions
+
+function [time, dstate, Rencke, Vencke] = encke2(R0,V0,dt,t,Cd,mass,area)
+    Re = 6378;
+    mu = 398600;
+    wE = [0; 0; 7.2921159e-5]; %rotation of the earth
+    rt = R0; %setting true condition to initial condition for first run
+    vt = V0;
+    Rosc = rt;
+    Vosc = vt;
+    
+    dr = [0; 0; 0];
+    dv = [0; 0; 0];
+    dr0 = dr;
+    dv0 = dv;
+
+    i = 1;
+    
+    while (norm(rt(1:3)) - Re) >= 100
+        
+        vrel = (vt - cross(wE, rt))*1000;
+        vrel_norm = norm(vrel);
+        h = norm(rt(1:3)) - Re;
+        rho = ExponDensModData(h); %*1e9; %1e9 to kg/km^3
+        ap = -0.5 * Cd * area/mass * rho * (vrel_norm^2) * (vrel / vrel_norm);
+        ap = ap/1000;
+        
+        % q = (dot(dr, ((2*rt) - dr)))/norm(rt)^2; 
+        % Fq = ( ((q^2)-(3*q)+3)/(1+(1-q)^(3/2)) ) * q;
+    
+        Fq = (norm(Rosc)/norm(rt))^3 - 1;
+    
+        da = ap - (mu/norm(Rosc)^3) * (dr - Fq*rt);
+        dv = da*dt; % + dv0;
+        dr = (0.5*da*dt^2); %+dv*dt; %(0.5*da*dt^2) + dv0*dt + dr;
+        % dv0 = dv;
+        % dr0 = dr;
+    
+        [Rosc, Vosc] = UniVarRV(rt,vt,dt,mu);
+    
+        rt = Rosc + dr;
+        vt = Vosc + dv;
+
+        dr = [0; 0; 0]; %rectify
+        dv = [0; 0; 0];
+    
+        Rencke(i,1:3) = rt';
+        Vencke(i,1:3) = vt';
+    
+        time(i) = dt*i;
+        i = i + 1;
+
+        Rosc = rt;
+        Vosc = vt;
+
+        %disp(norm(h))
+
+        if dt*i >= t
+            error('Propogation time not long enough / no deorbit found')
+        end
+    
+    end
+
+    dstate = [Rencke,Vencke];
+
+end
+
+function [time, dstate, Rencke, Vencke] = encke(R0,V0,dt,t,Cd,mass,area)
+    Re = 6378;
+    mu = 398600;
+    wE = [0; 0; 7.2921159e-5]; %rotation of the earth
+    rt = R0; %setting true condition to initial condition for first run
+    vt = V0;
+
+    time = 1;
+
+    Rosc = rt;
+    Vosc = vt;
+
+    dr = [0; 0; 0];
+    dv = [0; 0; 0];
+
+    vrel = (Vosc - cross(wE, rt))*1000;
+    vrel_norm = norm(vrel);
+    
+
+    alt = norm(Rosc) - Re;
+    rho = ExponDensModData(alt); %*1e9; %1e9 to kg/km^3
+
+    i = 1;
+
+    Rencke(i,1:3) = rt';
+    Vencke(i,1:3) = vt';
+    nr = (norm(rt));
+
+    while ((nr - Re) - 100) >= 0
+        % rt = Rosc + dr;
+        % vt = Vosc + dv;
+
+        F = norm(Rosc)/norm(rt)^3 - 1;
+
+        ap = -0.5 * Cd * area/mass * rho * (vrel_norm^2) * (vrel / vrel_norm);
+        ap = ap/1000;
+        na = norm(ap);
+
+        da = ap - (mu/norm(Rosc)^3) * (dr + F*Rosc);
+        dv = da * dt;
+        dr = 0.5 * da * dt^2;
+
+        [Rosc, Vosc] = UniVarRV(rt,vt,dt,mu);
+        
+        rt = Rosc + dr;
+        vt = Vosc + dv;
+    
+        Rencke(i,1:3) = rt';
+        Vencke(i,1:3) = vt';
+    
+        time(i) = dt*i;
+
+        dr = [0; 0; 0]; %rectify
+        dv = [0; 0; 0];
+        Rosc = rt;
+        Vosc = vt;
+
+
+        vrel = (Vosc - cross(wE, Rosc))*1000;
+        vrel_norm = norm(vrel);
+
+        alt = norm(Rosc) - Re;
+        rho = ExponDensModData(alt); %*1e9; %1e9 to kg/km^3
+        disp(alt)
+        %disp(rt)
+        
+        % if norm(rt) >= (100 + Re)
+        %     break
+        % end
+        
+        i = i + 1;
+
+        time(i) = dt*i;
+
+
+    end
+
+
+    dstate = [Rencke,Vencke];
+
+
+end
+
+
+
+
+
+% function dstate = VoP(time,state,mu,mass,area,Cd) %dstate is derivitve of state
+% %FUNCTION put in descrip    %tspan state options rest
+%     wE = [0; 0; 7.2921159e-5]; %this is earth's angular velocity of the earth
+%     %define vars
+%     x = state(1);
+%     y = state(2);
+%     z = state(3);
+%     dx = state(4); %vel
+%     dy = state(5); %vel
+%     dz = state(6); %vel
+% 
+%     %mag of pos vector
+%     r = norm([x y z]);
+%     rvec = [x;y;z];
+%     vvec = [dx;dy;dz];
+% 
+%     % Radius and altitude (km)
+%     Re = 6378; % km
+%     h  = r - Re; % geometric altitude above mean radius
+% 
+%     % Relative velocity wrt atmosphere (km/s)
+%     vrel = vvec - cross(wE, rvec);
+%     vrel_norm = norm(vrel);
+% 
+%     %Vrel = Vsc - cross(wE,Rsc);
+%     rho = ExponDensModData(h)*1e9; %1e9 to kg/km^3
+%     %adrag = -0.5*((Cd*area)/mass)*rho*(Vrel.^2).*(Vrel/norm(Vrel));
+% 
+%     adrag = -0.5 * Cd * area/mass * rho * (vrel_norm^2) * (vrel / vrel_norm);
+% 
+%     %accel: !!eqs of motion!!
+%     ddx = -mu*x/r^3 + adrag(1);
+%     ddy = -mu*y/r^3 + adrag(2);
+%     ddz = -mu*z/r^3 + adrag(3);
+% 
+%     dstate = [dx; dy; dz; ddx; ddy; ddz];
+% 
+% end
+
+function dstate = cowell(time,state,mu,mass,area,Cd) %dstate is derivitve of state
+%FUNCTION put in descrip    %tspan state options rest
+    wE = [0; 0; 7.2921159e-5]; %this is earth's angular velocity of the earth
+    %define vars
+    x = state(1);
+    y = state(2);
+    z = state(3);
+    dx = state(4); %vel
+    dy = state(5); %vel
+    dz = state(6); %vel
+    
+    %mag of pos vector
+    r = norm([x y z]);
+    rvec = [x;y;z];
+    vvec = [dx;dy;dz];
+
+    % Radius and altitude (km)
+    Re = 6378; % km
+    h  = r - Re; % geometric altitude above mean radius
+
+    % Relative velocity wrt atmosphere (km/s)
+    vrel = vvec - cross(wE, rvec);
+    vrel_norm = norm(vrel);
+    
+
+
+    %Vrel = Vsc - cross(wE,Rsc);
+    rho = ExponDensModData(h)*1e9; %1e9 to kg/km^3
+    %adrag = -0.5*((Cd*area)/mass)*rho*(Vrel.^2).*(Vrel/norm(Vrel));
+
+    adrag = -0.5 * Cd * area/mass * rho * (vrel_norm^2) * (vrel / vrel_norm);
+
+    %accel: !!eqs of motion!!
+    ddx = -mu*x/r^3 + adrag(1);
+    ddy = -mu*y/r^3 + adrag(2);
+    ddz = -mu*z/r^3 + adrag(3);
+    
+    dstate = [dx; dy; dz; ddx; ddy; ddz];
+
+end
+
+function [value,isterminal,direction] = reentryEvent(t,state,varargin)
+    Re = 6378; % km
+    h = norm(state(1:3)) - Re; % km
+    value = h - 100; % stop when h = 100 km
+    isterminal = 1; % terminate integration
+    direction = -1; % detect decreasing through zero
+end
+
+% Exp Density Calculation
+function density = ExponDensModData(z)
+    
+% Courtesey of Dr. A
+% ATMOSPHERE calculates density for altitudes from sea level
+% through 1000 km using exponential interpolation.
+%~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    
+%...Geometric altitudes (km):
+h = ...
+[  0  25  30  40  50  60   70 ...
+  80  90 100 110 120 130  140 ...
+ 150 180 200 250 300 350  400 ...
+ 450 500 600 700 800 900 1000];
+
+%...Corresponding densities (kg/m^3) from USSA76:  
+r = ...
+[1.225     3.899e-2  1.774e-2  3.972e-3  1.057e-3  3.206e-4  8.770e-5 ...
+ 1.905e-5  3.396e-6  5.297e-7  9.661e-8  2.438e-8  8.484e-9  3.845e-9 ...
+ 2.070e-9  5.464e-10 2.789e-10 7.248e-11 1.916e-11 9.518e-12 3.725e-12 ...
+ 1.585e-12 6.967e-13 1.454e-13 3.614e-14 1.170e-14 5.245e-15 3.019e-15];     
+  
+%...Scale heights (km):
+H = ...
+[ 7.249  6.349  6.682   7.554   8.382   7.714   6.549 ...
+  5.799  5.382  5.877   7.263   9.473  12.636  16.149 ...
+ 22.523 29.740 37.105  45.546  53.628  58.515  60.828 ...
+ 63.822 71.835 88.667 124.64 181.05 268.00]; 
+
+%...Handle altitudes outside of the range:
+if z > 1000
+    z = 1000;
+elseif z < 0
+    z = 0;
+end
+ 
+%...Determine the interpolation interval:
+for j = 1:27
+    if z >= h(j) && z < h(j+1)
+        i = j;
+    end
+end
+if z == 1000
+    i = 27;
+end
+
+%...Exponential interpolation:
+density = r(i)*exp(-(z - h(i))/H(i));
+
+end  %atmopshere
