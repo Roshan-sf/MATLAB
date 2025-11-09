@@ -66,7 +66,7 @@ options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
 %[timeCend,cowellMotion] = ode45(@cowell,tspan,state,options,mu,mass,area,Cd); %takes 59 seconds to run
 load("cowellData.mat")
 
-% R & V vectors for target and chaser
+% R & V vectors
 Rcowell = [cowellMotion(:,1),cowellMotion(:,2),cowellMotion(:,3)];
 Vcowell = [cowellMotion(:,4),cowellMotion(:,5),cowellMotion(:,6)];
 
@@ -277,7 +277,7 @@ options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
 
 %load("cowellData.mat")
 
-% R & V vectors for target and chaser
+% R & V vectors 
 RJ2 = [J2Motion(:,1),J2Motion(:,2),J2Motion(:,3)];
 VJ2 = [J2Motion(:,4),J2Motion(:,5),J2Motion(:,6)];
 
@@ -356,169 +356,148 @@ sgtitle('Orbital Path and Element Changes over Time');
 
 %You need a date for problem 3 so use 11/5/25 at 00:00:00 UT.
 
-% options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
-% disp('started')
-% tic
-% [timeend,MSISEMotion] = ode45(@cowellMSISE,tspan,state,options,mu,mass,area,Cd); 
-% toc
-
 epochUTC = datetime(2025,11,5,0,0,0,'TimeZone','UTC');  % 11/5/25 00:00:00 UT
 
 options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
+totalTime = 140*86400; %140 days in seconds
+tspan = [0, totalTime]; 
 
 disp('started')
 tic
-[tend, MSISEMotion] = ode45( ...
-    @(t,x) cowellMSISE(t, x, mu, mass, area, Cd, epochUTC), ...
+[timeMend, MSISEMotion] = ode45( ...
+    @(t,x) cowellMSISE(t, x, mu, mass, area, Cd, epochUTC), ... % 2121.395287 seconds
     tspan, state, options);
 toc
 
-% R & V vectors for target and chaser
+% R & V vectors
 Rm = [MSISEMotion(:,1),MSISEMotion(:,2),MSISEMotion(:,3)];
 Vm = [MSISEMotion(:,4),MSISEMotion(:,5),MSISEMotion(:,6)];
 
-figure
-plot3(Rm(:,1),Rm(:,2),Rm(:,3))
-hold on
-grid on
-plot3(Rm(1,1),Rm(1,2),Rm(1,3),'*')
+% figure
+% plot3(Rm(:,1),Rm(:,2),Rm(:,3))
+% hold on
+% grid on
+% plot3(Rm(1,1),Rm(1,2),Rm(1,3),'*')
+
+for i = 1:length(Rm)
+    [~,~,~,~,incM(i),RAANM(i),wM(i),~,~,~,RaM(i),RpM(i)] = rv2coes(Rm(i,:),Vm(i,:),mu,Re);
+end
+
+incM = rad2deg(incM);
+RAANM = rad2deg(RAANM);
+wM = rad2deg(wM);
+
+time_daysM = timeMend / 86400;
+
+figure('Name','Orbital Elements (MSISE)','NumberTitle','off');
+subplot(4,1,1);
+plot(time_daysM, RaM, 'b', 'LineWidth', 1.5); hold on;
+plot(time_daysM, RpM, 'r', 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('Radius [km]');
+title('Apogee and Perigee Evolution');
+legend('Apogee (Ra)','Perigee (Rp)','Location','best');
+
+subplot(4,1,2);
+plot(time_daysM, RAANM - raan0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\DeltaRAAN [deg]');
+title('RAAN Change from Initial');
+
+subplot(4,1,3);
+plot(time_daysM, incM - inc0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Deltai [deg]');
+title('Inclination Change from Initial');
+
+subplot(4,1,4);
+plot(time_daysM, wM - omega0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Delta\omega [deg]');
+title('Argument of Perigee Change from Initial');
+
+sgtitle('Orbital Path and Element Changes over Time');
+
 
 %% Functions
 
 function dstate = cowellMSISE(t, state, mu, mass, area, Cd, epochUTC)
-% State: km, km/s. epochUTC: datetime('TimeZone','UTC')
-    % Constants
+%FUNCTION put in descrip    %tspan state options rest
+% State vec is: km, km/s. epochUTC: datetime('TimeZone','UTC')
     Re = 6378;
     wE = [0;0;7.2921159e-5];
 
-    % Unpack
+    %define vars
     r_eci = state(1:3);
     v_eci = state(4:6);
     r = norm(r_eci);
-
-    % Time at this step (you said time isn't done yet—this line is the only dependency)
+    
+    %timing
     thisUTC = epochUTC + seconds(t);
-
-    % ECI -> ECEF (for geodetic)
     [r_ecef_km, ~] = eci2ecef_iau(thisUTC, r_eci, v_eci);
-
-    % Geodetic (deg, deg, km)
     [lat_deg, lon_deg, alt_km] = ecef2lla_km(r_ecef_km);
 
-    % Atmos density from NRLMSISE-00
+    % Atmos density
     yr  = year(thisUTC);
     doy = day(thisUTC,'dayofyear');
     sec = hour(thisUTC)*3600 + minute(thisUTC)*60 + second(thisUTC);
-
     [~, rho_SI] = atmosnrlmsise00(alt_km*1000, lat_deg, lon_deg, yr, doy, sec); % kg/m^3
     rho = rho_SI(6) * 1e9;   % -> kg/km^3
 
-    % Relative wind (ECI)
+    % Relative speed (ECI)
     vrel = v_eci - cross(wE, r_eci);
     vrel_norm = norm(vrel);
+    adrag = -0.5 * Cd * (area/mass) * rho * (vrel_norm * vrel); %km/s^2
 
-    % Drag accel (km/s^2)
-    adrag = -0.5 * Cd * (area/mass) * rho * (vrel_norm * vrel);
-
-    % Two-body + drag
+    %accel: !!eqs of motion!!
     acc = -mu * r_eci / r^3 + adrag;
 
-    % Return derivative
     dstate = [v_eci; acc];
 end
 
 function [r_ecef_km, v_ecef_kmps] = eci2ecef_iau(dtUTC, r_eci_km, v_eci_kmps)
-% ECI (GCRF-like) to ECEF using GMST. Positions in km, velocities in km/s.
-% dtUTC: MATLAB datetime (timezone = 'UTC')
+% dtUTC is MATLAB datetime (timezone = 'UTC')
     omegaE = 7.2921159e-5; % rad/s
-    theta  = gmst_rad(dtUTC);  % Greenwich Mean Sidereal Time [rad]
+    theta = gmst_rad(dtUTC);  % Greenwich Mean Sidereal Time [rad]
     R3 = [ cos(theta)  sin(theta)  0;
           -sin(theta)  cos(theta)  0;
                 0            0     1];
-    r_ecef_km     = R3 * r_eci_km;
-    v_ecef_kmps   = R3 * (v_eci_kmps - cross([0;0;omegaE], r_eci_km));
+    r_ecef_km = R3 * r_eci_km;
+    v_ecef_kmps = R3 * (v_eci_kmps - cross([0;0;omegaE], r_eci_km));
 end
 
 function theta = gmst_rad(dtUTC)
-% GMST (simplified; good for LEO drag). If you have IAU-2006/2000A, use it.
-    jd  = juliandate(dtUTC);               % MATLAB builtin
-    T   = (jd - 2451545.0)/36525;          % centuries since J2000
+    jd = juliandate(dtUTC);
+    T = (jd - 2451545.0)/36525; % centuries since J2000
     theta = deg2rad(280.46061837 + 360.98564736629*(jd-2451545) ...
             + 0.000387933*T.^2 - (T.^3)/38710000);
     theta = mod(theta, 2*pi);
 end
 
 function [lat_deg, lon_deg, alt_km] = ecef2lla_km(r_ecef_km)
-% WGS-84 geodetic from ECEF (km). Robust for space altitudes.
     x = r_ecef_km(1); y = r_ecef_km(2); z = r_ecef_km(3);
-    a = 6378.137;              % km
+    a = 6378.137; % km
     f = 1/298.257223563;
     e2 = f*(2-f);
     lon = atan2(y,x);
 
     p = hypot(x,y);
-    lat = atan2(z, p*(1-e2));  % Bowring iterate once
+    lat = atan2(z, p*(1-e2));
     for k=1:3
         N = a / sqrt(1 - e2*sin(lat)^2);
         alt = p/cos(lat) - N;
         lat = atan2(z, p*(1 - e2*N/(N+alt)));
     end
-    N   = a / sqrt(1 - e2*sin(lat)^2);
+    N = a / sqrt(1 - e2*sin(lat)^2);
     alt = p/cos(lat) - N;
 
     lat_deg = rad2deg(lat);
     lon_deg = rad2deg(wrapToPi(lon));
-    alt_km  = alt;
-end
-
-
-
-%%
-
-function dstate = cowellMSISE2(time,state,mu,mass,area,Cd) %dstate is derivitve of state
-%FUNCTION put in descrip    %tspan state options rest
-    wE = [0; 0; 7.2921159e-5]; %this is earth's angular velocity of the earth
-    %define vars
-    x = state(1);
-    y = state(2);
-    z = state(3);
-    dx = state(4); %vel
-    dy = state(5); %vel
-    dz = state(6); %vel
-    
-    %mag of pos vector
-    r = norm([x y z]);
-    rvec = [x;y;z];
-    vvec = [dx;dy;dz];
-    rvecm = rvec*1000; %m
-    vvecm = vvec*1000; %m/s
-
-    % Radius and altitude (km)
-    Re = 6378; % km
-    h  = r - Re; % geometric altitude above mean radius
-
-    % Relative velocity wrt atmosphere (km/s)
-    vrel = vvec - cross(wE, rvec);
-    vrel_norm = norm(vrel);
-    
-    % Atmospheric Density
-    [r_ecef] = eci2ecef(utc,rvecm,vvecm); %inputs in meters
-    lla = ecef2lla(r_ecef);
-    latitude = lla(1);
-    longitude = lla(2);
-    altitude = lla(3);
-    [~, rho] = atmosnrlmsise00(altitude,latitude,longitude,year,dayOfYear,UTseconds); 
-    rho = rho*e9; %1e9 to kg/km^3
-
-    adrag = -0.5 * Cd * area/mass * rho * (vrel_norm^2) * (vrel / vrel_norm);
-
-    %accel: !!eqs of motion!!
-    ddx = -mu*x/r^3 + adrag(1);
-    ddy = -mu*y/r^3 + adrag(2);
-    ddz = -mu*z/r^3 + adrag(3);
-    
-    dstate = [dx; dy; dz; ddx; ddy; ddz];
-
+    alt_km = alt;
 end
 
 function dstate = J3(time,state,mu) %dstate is derivitve of state
