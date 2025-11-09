@@ -209,7 +209,6 @@ thetaV = coes(:,6);
 % tic
 % for k = 1:length(coes)
 %     [R,V] = coes2rv(hV(k), eccV(k), incV(k), raanV(k), wV(k), thetaV(k), mu);
-%     % use h,e for a (numerically stabler than energy near reentry):
 %     a  = hV(k)^2 / (mu*(1 - eccV(k)^2));
 %     RaV(k) = a*(1 + eccV(k)) - Re;
 %     RpV(k) = a*(1 - eccV(k)) - Re;
@@ -253,13 +252,114 @@ sgtitle('Orbital Path and Element Changes over Time');
 
 %% Question 2 (J2 & J3):
 
+zp2 = 300; % km;
+za2 = 3092; %km;
+raan2 = 45; % degs
+inc2 = 28; % degs
+omega2 = 30; % degs
+theta2 = 40; % degs
 
+rp2 = Re + zp2;
+ra2 = Re + za2;
+a2 = (ra2+rp2)/2;
+e2 = (ra2-rp2)/(ra2+rp2);
+
+[R2, V2] = coes2rvd(a2,e2,inc2,raan2,omega2,theta2,mu);
+
+tspan2 = [0, 48*3600]; 
+state2 = [R2; V2]; 
+
+options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
+
+[timeJ2end,J2Motion] = ode45(@J2,tspan2,state2,options,mu); %takes x seconds to run
+[timeJ3end,J3Motion] = ode45(@J3,tspan2,state2,options,mu); %takes x seconds to run
+
+%load("cowellData.mat")
+
+% R & V vectors for target and chaser
+RJ2 = [J2Motion(:,1),J2Motion(:,2),J2Motion(:,3)];
+VJ2 = [J2Motion(:,4),J2Motion(:,5),J2Motion(:,6)];
+
+RJ3 = [J3Motion(:,1),J3Motion(:,2),J3Motion(:,3)];
+VJ3 = [J3Motion(:,4),J3Motion(:,5),J3Motion(:,6)];
+
+% figure
+% plot3(RJ2(:,1),RJ2(:,2),RJ2(:,3))
+% hold on
+% grid on
+% plot3(RJ2(1,1),RJ2(1,2),RJ2(1,3),'*')
+tic
+for i = 1:length(RJ2)
+    [~,~,~,~,incJ2(i),RAANJ2(i),wJ2(i),~,~,~,RaJ2(i),RpJ2(i)] = rv2coes(RJ2(i,:),VJ2(i,:),mu,Re);
+end
+toc
+tic
+for i = 1:length(RJ3)
+    [~,~,~,~,incJ3(i),RAANJ3(i),wJ3(i),~,~,~,RaJ3(i),RpJ3(i)] = rv2coes(RJ3(i,:),VJ3(i,:),mu,Re);
+end
+toc
+incJ2 = rad2deg(incJ2);
+RAANJ2 = rad2deg(RAANJ2);
+wJ2 = rad2deg(wJ2);
+
+incJ3 = rad2deg(incJ3);
+RAANJ3 = rad2deg(RAANJ3);
+wJ3 = rad2deg(wJ3);
+
+time_daysJ2 = timeJ2end / 86400;
+time_daysJ3 = timeJ2end / 86400;
+
+figure('Name','Orbital Elements (J2 & J3)','NumberTitle','off');
+subplot(4,1,1);
+plot(time_daysJ2, RaJ2, 'b', 'LineWidth', 1.5); hold on;
+plot(time_daysJ2, RpJ2, 'b', 'LineWidth', 1.5);
+plot(time_daysJ3, RaJ3, 'r', 'LineWidth', 1.5);
+plot(time_daysJ3, RpJ3, 'r', 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('Radius [km]');
+title('Apogee and Perigee Evolution');
+legend('Apogee J2 (Ra)','Perigee J2 (Rp)','Apogee J3 (Ra)','Perigee J3 (Rp)','Location','best');
+
+subplot(4,1,2);
+plot(time_daysJ2, RAANJ2 - raan2, 'LineWidth', 1.5); hold on;
+plot(time_daysJ3, RAANJ3 - raan2, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\DeltaRAAN [deg]');
+title('RAAN Change from Initial');
+legend('RAAN J2','RAAN J2 & J3','Location','best');
+
+
+subplot(4,1,3);
+plot(time_daysJ2, incJ2 - inc2, 'LineWidth', 1.5); hold on;
+plot(time_daysJ3, incJ3 - inc2, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Deltai [deg]');
+title('Inclination Change from Initial');
+legend('Inc J2','Inc J2 & J3','Location','best');
+
+subplot(4,1,4);
+plot(time_daysJ2, wJ2 - omega2, 'LineWidth', 1.5); hold on;
+plot(time_daysJ3, wJ3 - omega2, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Delta\omega [deg]');
+title('Argument of Perigee Change from Initial');
+legend('\omega J2','\omega J2 & J3','Location','best');
+
+sgtitle('Orbital Path and Element Changes over Time');
+
+%% Question 3 (NRLMSISE)
+
+%You need a date for problem 3 so use 11/5/25 at 00:00:00 UT.
 
 %% Functions
 
-function dstate = zonalharmonics(time,state,mu) %dstate is derivitve of state
-%FUNCTION put in descrip    
-
+function dstate = cowellMSISE(time,state,mu,mass,area,Cd) %dstate is derivitve of state
+%FUNCTION put in descrip    %tspan state options rest
+    wE = [0; 0; 7.2921159e-5]; %this is earth's angular velocity of the earth
     %define vars
     x = state(1);
     y = state(2);
@@ -270,6 +370,86 @@ function dstate = zonalharmonics(time,state,mu) %dstate is derivitve of state
     
     %mag of pos vector
     r = norm([x y z]);
+    rvec = [x;y;z];
+    vvec = [dx;dy;dz];
+
+    % Radius and altitude (km)
+    Re = 6378; % km
+    h  = r - Re; % geometric altitude above mean radius
+
+    % Relative velocity wrt atmosphere (km/s)
+    vrel = vvec - cross(wE, rvec);
+    vrel_norm = norm(vrel);
+    
+    % Atmospheric Density
+    [r_ecef, v_ecef] = eci2ecef(utc,rvec,vvec);
+    lla = ecef2lla(r_ecef, v_ecef);
+    latitude = lla(1);
+    lo
+    altitude = lla(3);
+    [~, rho] = atmosnrlmsise00(altitude,latitude,longitude,year,dayOfYear,UTseconds); 
+    rho = rho*e9; %1e9 to kg/km^3
+
+    adrag = -0.5 * Cd * area/mass * rho * (vrel_norm^2) * (vrel / vrel_norm);
+
+    %accel: !!eqs of motion!!
+    ddx = -mu*x/r^3 + adrag(1);
+    ddy = -mu*y/r^3 + adrag(2);
+    ddz = -mu*z/r^3 + adrag(3);
+    
+    dstate = [dx; dy; dz; ddx; ddy; ddz];
+
+end
+
+function dstate = J3(time,state,mu) %dstate is derivitve of state
+%FUNCTION put in descrip    
+    Re = 6378; %km
+
+    %define vars
+    x = state(1);
+    y = state(2);
+    z = state(3);
+    dx = state(4); %vel
+    dy = state(5); %vel
+    dz = state(6); %vel
+    
+    %mag of pos vector
+    rmag = norm([x y z]);
+
+    J_2= 1.08263e-3;
+    J2x = ((-3*J_2*mu*(Re^2)*x)/(2*rmag^5))*(1-((5*z^2)/rmag^2)); %x
+    J2y = ((-3*J_2*mu*(Re^2)*y)/(2*rmag^5))*(1-((5*z^2)/rmag^2)); %y
+    J2z = ((-3*J_2*mu*(Re^2)*z)/(2*rmag^5))*(3-((5*z^2)/rmag^2)); %z
+
+    J_3 = 2.535656e-6;
+    J3x = ((-5*J_3*mu*(Re^2)*x)/(2*rmag^7))*(3*z-((7*z^3)/rmag^2));
+    J3y = ((-5*J_3*mu*(Re^2)*y)/(2*rmag^7))*(3*z-((7*z^3)/rmag^2));
+    J3z = ((-5*J_3*mu*(Re^2))/...
+    (2*rmag^7))*(6*z^2-((7*z^4)/rmag^2)-(3*rmag^2)/5);
+
+    %accel: !!eqs of motion!!
+    ddx = (-mu*x/rmag^3) + J2x + J3x;
+    ddy = (-mu*y/rmag^3) + J2y + J3y;
+    ddz = (-mu*z/rmag^3) + J2z + J3z;
+    
+    dstate = [dx; dy; dz; ddx; ddy; ddz];
+
+end
+
+function dstate = J2(time,state,mu) %dstate is derivitve of state
+%FUNCTION put in descrip    
+    Re = 6378; %km
+
+    %define vars
+    x = state(1);
+    y = state(2);
+    z = state(3);
+    dx = state(4); %vel
+    dy = state(5); %vel
+    dz = state(6); %vel
+    
+    %mag of pos vector
+    rmag = norm([x y z]);
 
     J_2= 1.08263e-3;
     J2x = ((-3*J_2*mu*(Re^2)*x)/(2*rmag^5))*(1-((5*z^2)/rmag^2)); %x
@@ -277,9 +457,9 @@ function dstate = zonalharmonics(time,state,mu) %dstate is derivitve of state
     J2z = ((-3*J_2*mu*(Re^2)*z)/(2*rmag^5))*(3-((5*z^2)/rmag^2)); %z
     
     %accel: !!eqs of motion!!
-    ddx = (-mu*x/r^3);
-    ddy = (-mu*y/r^3;
-    ddz = -mu*z/r^3;
+    ddx = (-mu*x/rmag^3) + J2x;
+    ddy = (-mu*y/rmag^3) + J2y;
+    ddz = (-mu*z/rmag^3) + J2z;
     
     dstate = [dx; dy; dz; ddx; ddy; ddz];
 
