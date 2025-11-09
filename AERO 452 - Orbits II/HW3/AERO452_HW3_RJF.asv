@@ -8,12 +8,10 @@ close all;      %Clears all
 clear all;      %Clears Workspace
 clc;            %Clears Command Window
 
-%% PART 1: 
+%% Question 1 (Cowell, Encke, VoP): 
 
 mu = 398600;
 Re = 6378; %km
-
-%%
 
 Cd = 2.2; %assumption from in class
 mass = 100; %kg
@@ -189,37 +187,34 @@ sgtitle('Orbital Path and Element Changes over Time');
 
 %% VoP
 
-options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
-[h,~,ecc,theta,i,RAAN,w] = rv2coes(R0,V0,mu,Re);
-state = [h,ecc,RAAN,i,w,theta];
-tic
-[timeVend,VoPMotion] = ode45(@VoP,tspan,state,options,mu,mass,aream,Cd); %takes 59 seconds to run
-toc
-%load("cowellData.mat")
-
-% R & V
-coes = [VoPMotion(:,1),VoPMotion(:,2),VoPMotion(:,3),VoPMotion(:,4),...
-    VoPMotion(:,5),VoPMotion(:,6)];
-
+% options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEventCoes);
+% [h,~,ecc,theta,i,RAAN,w] = rv2coes(R0,V0,mu,Re);
+% state = [h,ecc,RAAN,i,w,theta];
+% tic
+% [timeVend,VoPMotion] = ode45(@VoP,tspan,state,options,mu,mass,aream,Cd); %takes 59 seconds to run
+% toc
+load("VoPData.mat")
+% 
+% % R & V
+% coes = [VoPMotion(:,1),VoPMotion(:,2),VoPMotion(:,3),VoPMotion(:,4),...
+%     VoPMotion(:,5),VoPMotion(:,6)];
+% 
 hV = coes(:,1);
 eccV = coes(:,2);
 raanV = coes(:,3);
 incV = coes(:,4);
 wV = coes(:,5);
 thetaV = coes(:,6);
-tic
-for i = 1:length(coes)
-    [R,V] = coes2rv((h + hV(i)),eccV(i),incV(i),raanV(i),wV(i),thetaV(i),mu);
-    VM = norm(V);
-    RM = norm(R);
-
-    ep = ((VM^2)/2)-((mu)/RM); %Calculating Epsilon (specific mechanical energy) in J/kg
-    a = -((mu)/(2*ep)); %in km
-
-    RaV(i) = a*(1+eccV(i))-Re;
-    RpV(i) = a*(1-eccV(i))-Re;
-end
-toc
+% 
+% tic
+% for k = 1:length(coes)
+%     [R,V] = coes2rv(hV(k), eccV(k), incV(k), raanV(k), wV(k), thetaV(k), mu);
+%     % use h,e for a (numerically stabler than energy near reentry):
+%     a  = hV(k)^2 / (mu*(1 - eccV(k)^2));
+%     RaV(k) = a*(1 + eccV(k)) - Re;
+%     RpV(k) = a*(1 - eccV(k)) - Re;
+% end
+% toc
 
 time_daysv = timeVend / 86400;
 
@@ -234,21 +229,21 @@ title('Apogee and Perigee Evolution');
 legend('Apogee (Ra)','Perigee (Rp)','Location','best');
 
 subplot(4,1,2);
-plot(time_daysv, raanV, 'LineWidth', 1.5);
+plot(time_daysv, rad2deg(raanV) - raan0, 'LineWidth', 1.5);
 grid on;
 xlabel('Time [days]');
 ylabel('\DeltaRAAN [deg]');
 title('RAAN Change from Initial');
 
 subplot(4,1,3);
-plot(time_daysv, incV, 'LineWidth', 1.5);
+plot(time_daysv, rad2deg(incV) - inc0, 'LineWidth', 1.5);
 grid on;
 xlabel('Time [days]');
 ylabel('\Deltai [deg]');
 title('Inclination Change from Initial');
 
 subplot(4,1,4);
-plot(time_daysv, wV, 'LineWidth', 1.5);
+plot(time_daysv, rad2deg(wV) - omega0, 'LineWidth', 1.5);
 grid on;
 xlabel('Time [days]');
 ylabel('\Delta\omega [deg]');
@@ -256,7 +251,39 @@ title('Argument of Perigee Change from Initial');
 
 sgtitle('Orbital Path and Element Changes over Time');
 
+%% Question 2 (J2 & J3):
+
+
+
 %% Functions
+
+function dstate = zonalharmonics(time,state,mu) %dstate is derivitve of state
+%FUNCTION put in descrip    
+
+    %define vars
+    x = state(1);
+    y = state(2);
+    z = state(3);
+    dx = state(4); %vel
+    dy = state(5); %vel
+    dz = state(6); %vel
+    
+    %mag of pos vector
+    r = norm([x y z]);
+
+    J_2= 1.08263e-3;
+    J2x = ((-3*J_2*mu*(Re^2)*x)/(2*rmag^5))*(1-((5*z^2)/rmag^2)); %x
+    J2y = ((-3*J_2*mu*(Re^2)*y)/(2*rmag^5))*(1-((5*z^2)/rmag^2)); %y
+    J2z = ((-3*J_2*mu*(Re^2)*z)/(2*rmag^5))*(3-((5*z^2)/rmag^2)); %z
+    
+    %accel: !!eqs of motion!!
+    ddx = (-mu*x/r^3);
+    ddy = (-mu*y/r^3;
+    ddz = -mu*z/r^3;
+    
+    dstate = [dx; dy; dz; ddx; ddy; ddz];
+
+end
 
 function dstate = VoP(time, state, mu, mass, area, Cd)
     Re = 6378;
@@ -443,6 +470,23 @@ end
 function [value,isterminal,direction] = reentryEvent(t,state,varargin)
     Re = 6378; % km
     h = norm(state(1:3)) - Re; % km
+    value = h - 100; % stop when h = 100 km
+    isterminal = 1; % terminate integration
+    direction = -1; % detect decreasing through zero
+end
+
+function [value,isterminal,direction] = reentryEventCoes(t,state,varargin)
+    Re = 6378; % km
+    mu = 398600;
+    h = state(1);
+    ecc = state(2);
+    raan = state(3);
+    inc = state(4);
+    w = state(5);
+    theta = state(6);
+    
+    [r] = coes2rv(h,ecc,inc,raan,w,theta,mu);
+    h = norm(r) - Re; % km
     value = h - 100; % stop when h = 100 km
     isterminal = 1; % terminate integration
     direction = -1; % detect decreasing through zero

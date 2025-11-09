@@ -8,12 +8,10 @@ close all;      %Clears all
 clear all;      %Clears Workspace
 clc;            %Clears Command Window
 
-%% PART 1: 
+%% Question 1 (Cowell, Encke, VoP): 
 
 mu = 398600;
 Re = 6378; %km
-
-%%
 
 Cd = 2.2; %assumption from in class
 mass = 100; %kg
@@ -253,7 +251,39 @@ title('Argument of Perigee Change from Initial');
 
 sgtitle('Orbital Path and Element Changes over Time');
 
+%% Question 2 (J2 & J3):
+
+
+
 %% Functions
+
+function dstate = zonalharmonics(time,state,mu) %dstate is derivitve of state
+%FUNCTION put in descrip    
+
+    %define vars
+    x = state(1);
+    y = state(2);
+    z = state(3);
+    dx = state(4); %vel
+    dy = state(5); %vel
+    dz = state(6); %vel
+    
+    %mag of pos vector
+    r = norm([x y z]);
+
+    J_2= 1.08263e-3;
+    J2x = ((-3*J_2*mu*(Re^2)*x)/(2*rmag^5))*(1-((5*z^2)/rmag^2)); %x
+    J2y = ((-3*J_2*mu*(Re^2)*y)/(2*rmag^5))*(1-((5*z^2)/rmag^2)); %y
+    J2z = ((-3*J_2*mu*(Re^2)*z)/(2*rmag^5))*(3-((5*z^2)/rmag^2)); %z
+    
+    %accel: !!eqs of motion!!
+    ddx = (-mu*x/r^3) + J2x;
+    ddy = (-mu*y/r^3) + J2y;
+    ddz = (-mu*z/r^3) + J2z;
+    
+    dstate = [dx; dy; dz; ddx; ddy; ddz];
+
+end
 
 function dstate = VoP(time, state, mu, mass, area, Cd)
     Re = 6378;
