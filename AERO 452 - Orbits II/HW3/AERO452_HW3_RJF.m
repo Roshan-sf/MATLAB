@@ -63,7 +63,7 @@ state = [Rsc; Vsc];
 
 options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
 
-%[timeCend,cowellMotion] = ode45(@cowell,tspan,state,options,mu,mass,area,Cd); %takes 59 seconds to run
+%[timeCend,cowellMotion] = ode45(@cowell,tspan,state,options,mu,mass,area,Cd); %takes 29 seconds to run
 load("cowellData.mat")
 
 % R & V vectors
@@ -121,14 +121,14 @@ xlabel('Time [days]');
 ylabel('\Delta\omega [deg]');
 title('Argument of Perigee Change from Initial');
 
-sgtitle('Orbital Path and Element Changes over Time');
+sgtitle('Orbital Elements (Cowell)');
 
 %% Encke
 aream = pi*(0.5)^2;
 dt = 60;
 
 % tic
-% [timeEend, ~, Rencke, Vencke] = encke(R0, V0, dt, totalTime, Cd, mass, aream); %takes 21 seconds
+% [timeEend, ~, Rencke, Vencke] = encke(R0, V0, dt, totalTime, Cd, mass, aream); %takes 27.9 seconds
 % toc
 load("enckeData.mat")
 
@@ -183,7 +183,7 @@ xlabel('Time [days]');
 ylabel('\Delta\omega [deg]');
 title('Argument of Perigee Change from Initial');
 
-sgtitle('Orbital Path and Element Changes over Time');
+sgtitle('Orbital Elements (Encke)');
 
 
 %% VoP
@@ -192,7 +192,7 @@ sgtitle('Orbital Path and Element Changes over Time');
 % [h,~,ecc,theta,i,RAAN,w] = rv2coes(R0,V0,mu,Re);
 % state = [h,ecc,RAAN,i,w,theta];
 % tic
-% [timeVend,VoPMotion] = ode45(@VoP,tspan,state,options,mu,mass,aream,Cd); %takes 59 seconds to run
+% [timeVend,VoPMotion] = ode45(@VoP,tspan,state,options,mu,mass,aream,Cd); %takes 22.7 seconds to run
 % toc
 load("VoPData.mat")
 % 
@@ -249,7 +249,7 @@ xlabel('Time [days]');
 ylabel('\Delta\omega [deg]');
 title('Argument of Perigee Change from Initial');
 
-sgtitle('Orbital Path and Element Changes over Time');
+sgtitle('Orbital Elements (VoP)');
 
 %% Question 2 (J2 & J3):
 
@@ -289,16 +289,15 @@ VJ3 = [J3Motion(:,4),J3Motion(:,5),J3Motion(:,6)];
 % hold on
 % grid on
 % plot3(RJ2(1,1),RJ2(1,2),RJ2(1,3),'*')
-tic
+
 for i = 1:length(RJ2)
     [~,~,~,~,incJ2(i),RAANJ2(i),wJ2(i),~,~,~,RaJ2(i),RpJ2(i)] = rv2coes(RJ2(i,:),VJ2(i,:),mu,Re);
 end
-toc
-tic
+
 for i = 1:length(RJ3)
     [~,~,~,~,incJ3(i),RAANJ3(i),wJ3(i),~,~,~,RaJ3(i),RpJ3(i)] = rv2coes(RJ3(i,:),VJ3(i,:),mu,Re);
 end
-toc
+
 incJ2 = rad2deg(incJ2);
 RAANJ2 = rad2deg(RAANJ2);
 wJ2 = rad2deg(wJ2);
@@ -350,7 +349,7 @@ ylabel('\Delta\omega [deg]');
 title('Argument of Perigee Change from Initial');
 legend('\omega J2','\omega J2 & J3','Location','best');
 
-sgtitle('Orbital Path and Element Changes over Time');
+sgtitle('Orbital Elements (J2 & J3)');
 
 %% Question 3 (NRLMSISE)
 
@@ -358,21 +357,21 @@ sgtitle('Orbital Path and Element Changes over Time');
 
 epochUTC = datetime(2025,11,5,0,0,0,'TimeZone','UTC');  % 11/5/25 00:00:00 UT
 
-options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
-totalTime = 140*86400; %140 days in seconds
-tspan = [0, totalTime]; 
-
-disp('started')
-tic
-[timeMend, MSISEMotion] = ode45( ...
-    @(t,x) cowellMSISE(t, x, mu, mass, area, Cd, epochUTC), ... % 2121.395287 seconds
-    tspan, state, options);
-toc
-
-% R & V vectors
-Rm = [MSISEMotion(:,1),MSISEMotion(:,2),MSISEMotion(:,3)];
-Vm = [MSISEMotion(:,4),MSISEMotion(:,5),MSISEMotion(:,6)];
-
+% options = odeset('RelTol',1e-12,'AbsTol',1e-12,'Events',@reentryEvent);
+% totalTime = 140*86400; %140 days in seconds
+% tspan = [0, totalTime]; 
+% 
+% disp('started')
+% tic
+% [timeMend, MSISEMotion] = ode45( ...
+%     @(t,x) cowellMSISE(t, x, mu, mass, area, Cd, epochUTC), ... % 2121.395287 seconds
+%     tspan, state, options);
+% toc
+% 
+% % R & V vectors
+% Rm = [MSISEMotion(:,1),MSISEMotion(:,2),MSISEMotion(:,3)];
+% Vm = [MSISEMotion(:,4),MSISEMotion(:,5),MSISEMotion(:,6)];
+load("MSISEdata.mat")
 % figure
 % plot3(Rm(:,1),Rm(:,2),Rm(:,3))
 % hold on
@@ -420,8 +419,63 @@ xlabel('Time [days]');
 ylabel('\Delta\omega [deg]');
 title('Argument of Perigee Change from Initial');
 
-sgtitle('Orbital Path and Element Changes over Time');
+sgtitle('Orbital Elements (MSISE)');
 
+figure('Name','Orbital Elements (MSISE vs Exponential w/ Cowell)','NumberTitle','off');
+subplot(4,1,1);
+plot(time_daysM, RaM, 'b', 'LineWidth', 1.5); hold on;
+plot(time_daysM, RpM, 'b', 'LineWidth', 1.5);
+plot(time_daysc, RaC, 'r', 'LineWidth', 1.5);
+plot(time_daysc, RpC, 'r', 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('Radius [km]');
+title('Apogee and Perigee Evolution');
+legend('Apogee MSISE (Ra)','Perigee MSISE (Rp)','Apogee Exp (Ra)','Perigee Exp (Rp)','Location','best');
+
+subplot(4,1,2);
+plot(time_daysM, RAANM - raan0, 'LineWidth', 1.5); hold on;
+plot(time_daysc, RAANC - raan0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\DeltaRAAN [deg]');
+title('RAAN Change from Initial');
+legend('RAAN MSISE','RAAN Exp','Location','best');
+
+
+subplot(4,1,3);
+plot(time_daysM, incM - inc0, 'LineWidth', 1.5); hold on;
+plot(time_daysc, incC - inc0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Deltai [deg]');
+title('Inclination Change from Initial');
+legend('Inc MSISE','Inc Exp','Location','best');
+
+subplot(4,1,4);
+plot(time_daysM, wM - omega0, 'LineWidth', 1.5); hold on;
+plot(time_daysc, wC - omega0, 'LineWidth', 1.5);
+grid on;
+xlabel('Time [days]');
+ylabel('\Delta\omega [deg]');
+title('Argument of Perigee Change from Initial');
+legend('\omega MSISE','\omega Exp','Location','best');
+
+sgtitle('Orbital Elements (MSISE vs Exponential w/ Cowell)');
+
+%% Discussion
+
+fprintf(['The time differences reported here may not be super accurate as \n' ...
+    'they are much longer than expected, but the general trends should still appear \n' ...
+    'Cowells method took 29 seconds with the exponential model, and 35 minutes \n' ...
+    'with the MSISE model. Enckes method took 27.9 seconds, and VoP took 22.7 seconds. \n' ...
+    'VoP looks to be fastest because it has relatively cheaper math and  is \n' ...
+    'calculating the slowly changing coes directly instead of R & V. \n' ...
+    'Enckes is a little slower because of the repitition of the two body problem \n' ...
+    'with the UV, but is faster than cowell because of the time stepping being constant. \n' ...
+    'Also a heart check for J2/J3 is that it does change at about 5 degrees per day. \n' ...
+    'The MSISE model shows slightly less atmospheric drag than the exponential model \n' ...
+    'which is seen in the slightly longer deorbit time. \n'])
 
 %% Functions
 
